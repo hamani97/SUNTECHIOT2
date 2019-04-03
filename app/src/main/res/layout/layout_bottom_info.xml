@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="MACHINE INFO"
+                    android:textSize="26sp"
+                    android:textColor="@color/colorTextWhite"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="factory"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_factory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Room"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_room"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Line"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_line"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Number"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_mc_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Model"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_mc_model"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="OPERATOR INFO"
+                    android:textSize="26sp"
+                    android:textColor="@color/colorTextWhite"
+                    android:textStyle="bold"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Employee Number"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_employee_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="Name"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorTextWhite"/>
+            <TextView
+                    android:id="@+id/tv_employee_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+            <TextView
+                    android:id="@+id/tv_shift"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="-"
+                    android:textSize="20sp"
+                    android:textColor="@color/colorBottomText"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

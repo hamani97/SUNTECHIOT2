@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SUNTECH IoT</string>
+
+    <!-- 메세지 -->
+    <string name="msg_no_operator">Operator not found</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <!-- common text color -->
+    <color name="colorTextWhite">#ffffff</color>
+    <color name="colorTextOrange">#f8ad13</color>
+    <color name="colorBottomText">#f8ad13</color>
+
+    <!-- common -->
+    <color name="transparent">#00ff0000</color>
+    <color name="colorBackground">#1c2c39</color>
+    <color name="colorBackgroundTop">#192533</color>
+    <color name="colorBackgroundSide">#192533</color>
+
+    <color name="colorReadonly">#4d4d4d</color>
+    <color name="colorSelector">#8d4dab</color>
+    <color name="colorEditor1">#87c947</color>
+    <color name="colorEditor2">#333E4D</color>
+
+    <color name="colorButtonDefault">#2f3f51</color>
+    <color name="colorButtonDefaultFocus">#333E4D</color>
+    <color name="colorButtonOrange">#ffc000</color>
+    <color name="colorButtonOrangeFocus">#ba8e00</color>
+    <color name="colorButtonGreen">#87c947</color>
+    <color name="colorButtonGreenFocus">#70A042</color>
+
+</resources>
