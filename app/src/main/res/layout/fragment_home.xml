@@ -16,7 +16,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:background="#1c2c39">
+                android:background="@color/colorBackground">
 
             <LinearLayout
                     android:id="@+id/ll_main_menu"
@@ -47,7 +47,7 @@
                             android:layout_marginLeft="30dp"
                             android:text="."
                             android:textSize="24sp"
-                            android:textColor="#fff"/>
+                            android:textColor="@color/colorWhite"/>
 
                 </LinearLayout>
 
@@ -67,7 +67,7 @@
                             android:stateListAnimator="@null"
                             android:text="COUNT VIEW"
                             android:textSize="38sp"
-                            android:textColor="#fff"
+                            android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
                     <Button
@@ -78,7 +78,7 @@
                             android:background="#f8ad13"
                             android:stateListAnimator="@null"
                             android:text="COMPONENT INFO"
-                            android:textColor="#fff"
+                            android:textColor="@color/colorWhite"
                             android:textSize="38sp"
                             android:textStyle="bold" />
 
@@ -99,7 +99,7 @@
                             android:stateListAnimator="@null"
                             android:text="WORK INFO"
                             android:textSize="38sp"
-                            android:textColor="#fff"
+                            android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
                     <Button
@@ -111,7 +111,7 @@
                             android:stateListAnimator="@null"
                             android:text="SETTING"
                             android:textSize="38sp"
-                            android:textColor="#fff"
+                            android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
                 </LinearLayout>

@@ -10,7 +10,7 @@
             android:paddingRight="70dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:background="@color/transparent">
+            android:background="@color/colorBackgroundTop">
 
         <ImageView
                 android:layout_width="148dp"
@@ -33,7 +33,7 @@
                     android:gravity="center"
                     android:text="INFO"
                     android:textSize="40sp"
-                    android:textColor="@color/colorTextWhite"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"
                     android:background="@color/transparent" />
         </LinearLayout>
