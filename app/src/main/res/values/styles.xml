@@ -146,4 +146,20 @@
         <item name="android:singleLine">true</item>
     </style>
     <!-- Table end -->
+
+    <!-- Grid start -->
+    <style name="grid_header">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">#304053</item>
+    </style>
+    <style name="grid_header_text">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/colorWhite2</item>
+    </style>
+    <!-- Grid end -->
 </resources>

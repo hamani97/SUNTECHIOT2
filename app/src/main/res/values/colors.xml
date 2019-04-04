@@ -7,6 +7,7 @@
     <!-- common text color -->
     <color name="colorDefault">#2f3f51</color>
     <color name="colorWhite">#ffffff</color>
+    <color name="colorWhite2">#d0efff</color>
     <color name="colorGray">#888888</color>
     <color name="colorOrange">#f8ad13</color>
 
@@ -24,8 +25,8 @@
 
     <color name="colorButtonDefault">#2f3f51</color>
     <color name="colorButtonDefaultFocus">#333E4D</color>
-    <color name="colorButtonOrange">#ffc000</color>
-    <color name="colorButtonOrangeFocus">#ba8e00</color>
+    <color name="colorButtonOrange">#FF9900</color>
+    <color name="colorButtonOrangeFocus">#eaae40</color>
     <color name="colorButtonGreen">#87c947</color>
     <color name="colorButtonGreenFocus">#70A042</color>
     <color name="colorButtonBlue">#0079BA</color>

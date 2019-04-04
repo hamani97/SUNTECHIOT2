@@ -26,6 +26,9 @@
 
     <!-- 타이틀 -->
     <string name="title_select_component">SELECT COMPONENT</string>
+    <string name="title_available_info">AVAILABLE INFO</string>
+    <string name="title_operator_info">OPERATOR INFO</string>
+    <string name="title_last_worker">LAST_WORKER</string>
     <string name="title_setting">SETTING</string>
     <string name="title_counter_device_info">COUNTER DEVICE INFO</string>
     <string name="title_server_info">SERVER INFO</string>
@@ -39,6 +42,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="check">Check</string>
+    <string name="search">Search</string>
 
     <string name="list_item_wos">WOS</string>
     <string name="list_item_model">Model</string>
@@ -46,6 +50,14 @@
     <string name="list_item_balance">Balance</string>
     <string name="list_item_target">Target</string>
     <string name="list_item_actual">Actual</string>
+
+    <string name="list_item_shift">Shift</string>
+    <string name="list_item_work_time">Work Time</string>
+    <string name="list_item_planned_time1">Planned Time1</string>
+    <string name="list_item_planned_time2">Planned Time2</string>
+
+    <string name="list_item_employee_number">Employee Number</string>
+    <string name="list_item_name">Name</string>
 
     <!-- Message -->
     <string name="msg_no_operator">Operator not found</string>

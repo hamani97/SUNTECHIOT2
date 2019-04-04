@@ -21,8 +21,12 @@ class HomeFragment : BaseFragment() {
         tv_app_version.text = "v "+ activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
 
         btn_count_view.setOnClickListener {
-            (activity as MainActivity).countViewType = 1
-            clickCountView()
+            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
+                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+            } else {
+                (activity as MainActivity).countViewType = 1
+                (activity as MainActivity).changeFragment(1)
+            }
         }
         btn_component_info.setOnClickListener {
             val intent = Intent(activity, ComponentInfoActivity::class.java)
@@ -33,7 +37,13 @@ class HomeFragment : BaseFragment() {
                 }
             })
         }
-        btn_work_info.setOnClickListener { clickWorkInfo() }
+        btn_work_info.setOnClickListener {
+            if (AppGlobal.instance.get_factory() == "" || AppGlobal.instance.get_room() == "" || AppGlobal.instance.get_line() == "") {
+                Toast.makeText(activity, getString(R.string.msg_no_setting), Toast.LENGTH_SHORT).show()
+            } else {
+                startActivity(Intent(activity, WorkInfoActivity::class.java))
+            }
+        }
         btn_setting_view.setOnClickListener { startActivity(Intent(activity, SettingActivity::class.java)) }
         updateView()
     }
@@ -50,16 +60,11 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun clickCountView() {
-        val no = AppGlobal.instance.get_worker_no()
-        val name = AppGlobal.instance.get_worker_name()
-        if (no=="" || name=="") {
+        if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
             Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
             return
         }
         (activity as MainActivity).changeFragment(1)
     }
 
-    private fun clickWorkInfo() {
-
-    }
 }
