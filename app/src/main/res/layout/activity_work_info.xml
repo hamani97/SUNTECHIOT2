@@ -743,7 +743,7 @@
                                     style="@style/table_row_title"
                                     android:text="@string/search" />
                             <EditText
-                                    android:id="@+id/et_setting_server_ip"
+                                    android:id="@+id/et_searcg_text"
                                     style="@style/table_row_data_editor1"
                                     android:text="" />
                         </LinearLayout>

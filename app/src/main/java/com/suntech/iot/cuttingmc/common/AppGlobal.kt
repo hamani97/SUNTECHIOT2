@@ -5,6 +5,7 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.util.Log
+import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import org.joda.time.DateTime
@@ -98,6 +99,69 @@ class AppGlobal private constructor() {
     fun set_worker_name(name: String) { UtilLocalStorage.setString(instance._context!!, "current_worker_name", name) }
     fun get_worker_name() : String { return UtilLocalStorage.getString(instance._context!!, "current_worker_name") }
 
+    fun get_last_workers() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "last_workers") }
+    fun push_last_worker(no: String, name: String) {
+        remove_last_worker(no)
+
+        var list = AppGlobal.instance.get_last_workers()
+        var json = JSONObject()
+        json.put("number", no)
+        json.put("name", name)
+        list.put(json)
+
+        if (list.length() > 4) list.remove(0)
+
+        UtilLocalStorage.setJSONArray(instance._context!!, "last_workers", list)
+    }
+    fun remove_last_worker(no:String) {
+        var list = AppGlobal.instance.get_last_workers()
+
+        for (i in 0..(list.length() - 1)) {
+            val item = list.getJSONObject(i)
+            val item_no = item.getString("number")
+            if (item_no==no) {
+                list.remove(i)
+                break
+            }
+        }
+        UtilLocalStorage.setJSONArray(instance._context!!, "last_workers", list)
+    }
+
+
+    // 작업 프로덕트 고유값 설정
+    fun reset_product_idx() {
+        UtilLocalStorage.setString(instance._context!!, "work_idx", "")
+    }
+    fun set_product_idx() {
+        var product_idx = get_product_idx()
+        if (product_idx == "" ) product_idx = "1000"
+        val new_product_idx = product_idx.toInt() + 1
+        UtilLocalStorage.setString(instance._context!!, "work_idx", new_product_idx.toString())
+    }
+    fun get_product_idx() : String {
+        return UtilLocalStorage.getString(instance._context!!, "work_idx")
+    }
+
+
+    // 디자인 정보 설정
+    fun set_design_info_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_design_info_idx", idx) }
+    fun get_design_info_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_design_info_idx") }
+    fun set_design_info(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "design_info", data) }
+    fun get_design_info() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "design_info") }
+
+    fun set_cycle_time(idx: Int) { UtilLocalStorage.setInt(instance._context!!, "current_cycle_time", idx) }
+    fun get_cycle_time() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_cycle_time") }
+
+
+    // 다운 타임
+    fun set_downtime_sec(value: String) { UtilLocalStorage.setString(instance._context!!, "current_downtime_sec", value) }
+    fun get_downtime_sec() : String { return UtilLocalStorage.getString(instance._context!!, "current_downtime_sec") }
+
+
+    // 기타
+    fun set_color_code(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "color_code", data) }
+    fun get_color_code() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "color_code") }
+
 
     // Layer정보 = pair 수
     fun set_layer_pairs(layer_no: String, pair: String) { UtilLocalStorage.setString(instance._context!!, "current_layer_" + layer_no, pair) }
@@ -122,7 +186,7 @@ class AppGlobal private constructor() {
     }
     fun get_current_shift_time_idx() : Int {
         val list = get_current_work_time()
-        if (list.length() == 0 ) return -1
+        if (list.length() == 0) return -1
         val now = DateTime()
         var current_shift_idx = -1
 
@@ -130,7 +194,7 @@ class AppGlobal private constructor() {
             val item = list.getJSONObject(i)
             var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
 
-            if (now.millis <= shift_etime.millis) {
+            if (shift_etime.millis <= now.millis &&  now.millis < shift_etime.millis) {
                 current_shift_idx = i
                 break
             }
@@ -145,9 +209,9 @@ class AppGlobal private constructor() {
         return list.getJSONObject(idx)
     }
 
-    fun set_today_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_work_time", data) }
+    fun set_today_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_work_time", data) }      // 오늘의 shift 정보
     fun get_today_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_work_time") }
-    fun set_prev_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_prev_work_time", data) }
+    fun set_prev_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_prev_work_time", data) }  // 어제의 shift 정보
     fun get_prev_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_prev_work_time") }
 
     // 어제시간과 오늘시간 중에 지나지 않은 날짜를 선택해서 반환
@@ -208,6 +272,124 @@ class AppGlobal private constructor() {
             Log.e("Error", ex.toString())
         }
         return ""
+    }
+
+
+    // 현재 프로덕트의 누적 시간을 구함
+    fun get_current_product_accumulated_time(with_no_constraint:Boolean = true) : Int {
+        val product_idx = get_product_idx()
+
+        var db = SimpleDatabaseHelper(_context!!)
+        val row = db.get(product_idx)
+
+        var product_stime = OEEUtil.parseDateTime(row!!["start_dt"].toString())
+        var now = DateTime()
+
+        if (with_no_constraint) {
+            // 현재 작업이 처음 작업인 경우,
+            // 쉬프트 시작시간으로 설정, 이후부터는 프로덕트 시작시간 기준으로 계산
+            val list = db.gets()
+            if (list?.size==1) {
+                var item = get_current_shift_time()
+                if (item!=null)
+                    product_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+            }
+        }
+        return compute_work_time(product_stime, now)
+    }
+
+
+    // 두시간(기간)에서 겹치는 시간을 계산
+    fun compute_time(src_dt_s:DateTime, src_dt_e:DateTime, dst_dt_s:DateTime, dst_dt_e:DateTime) : Int {
+        var dst_dt_s_cpy = dst_dt_s
+        var dst_dt_e_cpy = dst_dt_e
+        if (src_dt_s.millis > dst_dt_s_cpy.millis ) dst_dt_s_cpy = src_dt_s
+        if (src_dt_e.millis < dst_dt_e_cpy.millis ) dst_dt_e_cpy = src_dt_e
+
+        var src_diff = ( src_dt_e.millis - src_dt_s.millis)
+        var dst_diff = ( dst_dt_e_cpy.millis - dst_dt_s_cpy.millis)
+
+        if (dst_dt_s_cpy.millis >= src_dt_s.millis && dst_dt_s_cpy.millis <= src_dt_e.millis &&
+            dst_dt_e_cpy.millis >= src_dt_s.millis && dst_dt_e_cpy.millis <= src_dt_e.millis) {
+            return (dst_diff / 1000 ).toInt()
+        }
+        return 0
+    }
+
+    // 특정시간(기간)안에 휴식시간과 다운타임시간을 뺀 시간을 계산
+    fun compute_work_time(stime:DateTime, etime:DateTime, is_downtime:Boolean = true, is_total:Boolean = true) : Int {
+        var item = get_current_shift_time()
+        if (item==null) return 0
+
+        var shift_etime = etime
+        var shift_stime = stime
+
+        // 작업시간내에서만 계산
+        var shift_stime_src = OEEUtil.parseDateTime(item["work_stime"].toString())
+        var shift_etime_src = OEEUtil.parseDateTime(item["work_etime"].toString())
+
+        if (shift_stime.millis < shift_stime_src.millis ) shift_stime = shift_stime_src
+        if (shift_etime.millis < shift_stime_src.millis ) return 0
+        if (shift_stime.millis > shift_etime_src.millis ) return 0
+
+        if (is_total) {
+            var now = DateTime()
+            if (now.millis < shift_etime.millis ) shift_etime = now // 작업종료시간보다 넘은경우, 현재시간은 종료시간으로 고정
+            if (now.millis < shift_stime.millis ) shift_stime = now  // 작업시작시간보다 빠른경우, 현재시간은 시작시간으로 고정
+        }
+
+        var dif = (shift_etime.millis - shift_stime.millis)/1000
+
+        //Log.e("test", "shift_stime = "+ shift_stime.toString())
+        //Log.e("test", "shift_etime = "+ shift_etime.toString())
+
+        // 휴식 시간 계산
+
+        var planned1_stime = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString())
+        var planned1_etime = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString())
+        var planned2_stime = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString())
+        var planned2_etime = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
+
+        val d1 = compute_time(shift_stime, shift_etime, planned1_stime, planned1_etime)
+        val d2 = compute_time(shift_stime, shift_etime, planned2_stime, planned2_etime)
+
+        dif = dif - d1 - d2
+        //Log.e("test", "dif1 = "+ dif.toString())
+
+        if (is_downtime==false) return dif.toInt()
+/*
+        // 다운타임 시간 계산
+        var db = DBHelperForDownTime(_context!!)
+        var list = db.gets() ?: null
+
+        list?.forEach { item ->
+            var end_dt = item["end_dt"].toString()
+            if (end_dt=="null") end_dt = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
+
+            val downtime_s = OEEUtil.parseDateTime(item["start_dt"].toString())
+            val downtime_e = OEEUtil.parseDateTime(end_dt)
+            val df = compute_time(shift_stime, shift_etime, downtime_s, downtime_e)
+            dif -= df
+
+            // 휴식시간과 다운타임시간 중복 계산
+            if (planned1_stime.millis < shift_stime.millis ) planned1_stime = shift_stime
+            if (planned1_etime.millis > shift_etime.millis ) planned1_etime = shift_etime
+
+            if (planned1_etime.millis-planned1_stime.millis >0) {
+                val p1_dw = compute_time(planned1_stime, planned1_etime, downtime_s, downtime_e)
+                dif += p1_dw
+            }
+
+            if (planned2_stime.millis < shift_stime.millis ) planned2_stime = shift_stime
+            if (planned2_etime.millis > shift_etime.millis ) planned2_etime = shift_etime
+            if (planned2_etime.millis-planned2_stime.millis >0) {
+                val p2_dw = compute_time(planned2_stime, planned2_etime, downtime_s, downtime_e)
+                dif += p2_dw
+            }
+        }
+        //Log.e("test", "dif2 = "+ dif.toString())
+*/
+        return dif.toInt()
     }
 
     // Network & Wifi check
