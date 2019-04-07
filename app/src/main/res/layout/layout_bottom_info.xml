@@ -21,7 +21,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="MACHINE INFO"
+                    android:text="@string/bottom_label_machine_info"
                     android:textSize="26sp"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
@@ -30,7 +30,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="factory"
+                    android:text="@string/bottom_label_factory"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -45,7 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Room"
+                    android:text="@string/bottom_label_room"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -60,7 +60,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Line"
+                    android:text="@string/bottom_label_line"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -75,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Number"
+                    android:text="@string/bottom_label_number"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -90,7 +90,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Model"
+                    android:text="@string/bottom_label_mc_model"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -111,7 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="OPERATOR INFO"
+                    android:text="@string/bottom_label_operator_info"
                     android:textSize="26sp"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
@@ -120,7 +120,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Employee Number"
+                    android:text="@string/bottom_label_employee_number"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
@@ -135,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="30dp"
-                    android:text="Name"
+                    android:text="@string/bottom_label_employee_name"
                     android:textSize="20sp"
                     android:textColor="@color/colorWhite"/>
             <TextView

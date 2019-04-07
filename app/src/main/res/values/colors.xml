@@ -35,5 +35,6 @@
     <color name="list_item_bg_color">#090c0f</color>
     <color name="list_item_text_color">#fff</color>
     <color name="list_item_highlight_text_color">#f00</color>
-    <color name="list_item_filtering_text_color">#0079BA</color>
+    <color name="list_item_filtering_text_color">#1397DF</color>
+    <color name="list_item_complete_text_color">#f8ad13</color>
 </resources>

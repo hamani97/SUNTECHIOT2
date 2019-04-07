@@ -1,6 +1,10 @@
 package com.suntech.iot.cuttingmc
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.text.Editable
@@ -17,6 +21,8 @@ import com.suntech.iot.cuttingmc.util.OEEUtil
 import kotlinx.android.synthetic.main.activity_work_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import org.json.JSONArray
+import org.json.JSONObject
+import java.util.*
 
 class WorkInfoActivity : BaseActivity() {
 
@@ -35,12 +41,51 @@ class WorkInfoActivity : BaseActivity() {
     private var list_for_last_worker_adapter: ListOperatorAdapter? = null
     private var _list_for_last_worker: ArrayList<HashMap<String, String>> = arrayListOf()
 
+    private val _broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+                if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)){
+                    btn_wifi_state.isSelected = true
+                } else {
+                    btn_wifi_state.isSelected = false
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_work_info)
         initView()
         fetchShiftData()
         fetchOperatorData()
+        initLastWorkers()
+        start_timer()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
+        updateView()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        unregisterReceiver(_broadcastReceiver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel_timer()
+    }
+
+    private fun updateView() {
+        if (AppGlobal.instance._server_state) btn_server_state.isSelected = true
+        else btn_server_state.isSelected = false
+
+        if (AppGlobal.instance.isOnline(this)) btn_wifi_state.isSelected = true
+        else btn_wifi_state.isSelected = false
     }
 
     private fun initView() {
@@ -64,7 +109,7 @@ class WorkInfoActivity : BaseActivity() {
         lv_last_worker.adapter = list_for_last_worker_adapter
 
         lv_last_worker.setOnItemClickListener { adapterView, view, i, l ->
-            et_searcg_text.setText("")
+            et_search_text.setText("")
 
             list_for_last_worker_adapter?.select(i)
             list_for_last_worker_adapter?.notifyDataSetChanged()
@@ -84,7 +129,7 @@ class WorkInfoActivity : BaseActivity() {
             }
         }
 
-        et_searcg_text.addTextChangedListener(object : TextWatcher {
+        et_search_text.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 if (s != "") {
                     filterOperatorData()
@@ -98,7 +143,90 @@ class WorkInfoActivity : BaseActivity() {
         btn_work_info_server.setOnClickListener { tabChange(1) }
         btn_work_info_manual.setOnClickListener { tabChange(2) }
 
+        // Command button click
+        btn_setting_confirm.setOnClickListener {
+            val selected_index = list_for_operator_adapter?.getSelected() ?:-1
+            if (selected_index < 0) {
+                val last_no = AppGlobal.instance.get_worker_no()
+                val last_name = AppGlobal.instance.get_worker_name()
+                if (last_no == "" && last_name == "") {
+                    Toast.makeText(this, getString(R.string.msg_has_notselected), Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+            }
+            if (_filtered_list_for_operator != null && selected_index >= 0) {
+                val no = _filtered_list_for_operator[selected_index]["number"]!!
+                val name = _filtered_list_for_operator[selected_index]["name"]!!
+                AppGlobal.instance.set_worker_no(no)
+                AppGlobal.instance.set_worker_name(name)
+                AppGlobal.instance.push_last_worker(no, name)
+            }
+            saveWorkTime()
+        }
         btn_setting_cancel.setOnClickListener { finish() }
+    }
+
+    private fun saveWorkTime() {
+
+        var shift3 = JSONObject()
+
+        // Work time
+        var start_hour = et_setting_s_3_s_h.text.toString().trim()
+        var start_min = et_setting_s_3_s_m.text.toString().trim()
+        var end_hour = et_setting_s_3_e_h.text.toString().trim()
+        var end_min = et_setting_s_3_e_m.text.toString().trim()
+
+        if (start_hour<"0" || start_hour>"23" || end_hour<"0" || end_hour>"23") {
+            Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (start_min<"0" || start_min>"59" || end_min<"0" || end_min>"59") {
+            Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (start_hour=="" && start_min=="" && end_hour=="" && end_min=="") {
+            shift3.put("available_stime", "")
+            shift3.put("available_etime", "")
+        } else {
+            if (start_hour.length==2 && start_min.length==2 && end_hour.length==2 && end_min.length==2) {
+                shift3.put("available_stime", start_hour + ":" + start_min)
+                shift3.put("available_etime", end_hour + ":" + end_min)
+            } else {
+                Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
+        // Planned time
+        start_hour = et_setting_p_3_s_h.text.toString().trim()
+        start_min = et_setting_p_3_s_m.text.toString().trim()
+        end_hour = et_setting_p_3_e_h.text.toString().trim()
+        end_min = et_setting_p_3_e_m.text.toString().trim()
+
+        if (start_hour<"0" || start_hour>"23" || end_hour<"0" || end_hour>"23") {
+            Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (start_min<"0" || start_min>"59" || end_min<"0" || end_min>"59") {
+            Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (start_hour=="" && start_min=="" && end_hour=="" && end_min=="") {
+            shift3.put("planned1_stime", "")
+            shift3.put("planned1_etime", "")
+        } else {
+            if (start_hour.length==2 && start_min.length==2 && end_hour.length==2 && end_min.length==2) {
+                shift3.put("planned1_stime", start_hour + ":" + start_min)
+                shift3.put("planned1_etime", end_hour + ":" + end_min)
+            } else {
+                Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+        AppGlobal.instance.set_work_time_manual(shift3)
+        finish()
     }
 
     private fun fetchShiftData() {
@@ -131,13 +259,89 @@ class WorkInfoActivity : BaseActivity() {
             _list.add(map)
         }
         list_adapter?.notifyDataSetChanged()
+
+        initViewManual()
+    }
+
+    private fun initViewManual() {
+        // shift-1, shift-2는 서버에서 내려온 작업시간
+        if (_list.size >= 1 && _list[0].get("shift_idx") == "1") {
+            val work_stime = OEEUtil.parseDateTime(_list[0]["work_stime"].toString())
+            val work_etime = OEEUtil.parseDateTime(_list[0]["work_etime"].toString())
+
+            et_setting_s_1_s_h.text = work_stime.toString("HH")
+            et_setting_s_1_s_m.text = work_stime.toString("mm")
+            et_setting_s_1_e_h.text = work_etime.toString("HH")
+            et_setting_s_1_e_m.text = work_etime.toString("mm")
+
+            if (_list[0]["planned1_stime"]!=null && _list[0]["planned1_stime"]!="") {
+                val planned1_stime = OEEUtil.parseTime2(_list[0]["planned1_stime"].toString())
+                et_setting_p_1_s_h.text = planned1_stime.toString("HH")
+                et_setting_p_1_s_m.text = planned1_stime.toString("mm")
+            }
+            if (_list[1]["planned1_etime"]!=null && _list[1]["planned1_etime"]!="") {
+                val planned1_etime = OEEUtil.parseTime2(_list[0]["planned1_etime"].toString())
+                et_setting_p_1_e_h.text = planned1_etime.toString("HH")
+                et_setting_p_1_e_m.text = planned1_etime.toString("mm")
+            }
+        }
+        if (_list.size >= 2 && _list[1].get("shift_idx") == "2") {
+            val work_stime = OEEUtil.parseDateTime(_list[1]["work_stime"].toString())
+            val work_etime = OEEUtil.parseDateTime(_list[1]["work_etime"].toString())
+
+            et_setting_s_2_s_h.text = work_stime.toString("HH")
+            et_setting_s_2_s_m.text = work_stime.toString("mm")
+            et_setting_s_2_e_h.text = work_etime.toString("HH")
+            et_setting_s_2_e_m.text = work_etime.toString("mm")
+
+            if (_list[1]["planned1_stime"]!=null && _list[1]["planned1_stime"]!="") {
+                val planned2_stime = OEEUtil.parseTime2(_list[1]["planned1_stime"].toString())
+                et_setting_p_2_s_h.text = planned2_stime.toString("HH")
+                et_setting_p_2_s_m.text = planned2_stime.toString("mm")
+            }
+            if (_list[1]["planned1_etime"]!=null && _list[1]["planned1_etime"]!="") {
+                val planned2_etime = OEEUtil.parseTime2(_list[1]["planned1_etime"].toString())
+                et_setting_p_2_e_h.text = planned2_etime.toString("HH")
+                et_setting_p_2_e_m.text = planned2_etime.toString("mm")
+            }
+        }
+
+        val shift3 = AppGlobal.instance.get_work_time_manual()
+
+        if (shift3 != null) {
+            val available_stime = shift3.getString("available_stime")
+            val available_etime = shift3.getString("available_etime")
+            val planned1_stime = shift3.getString("planned1_stime")
+            val planned1_etime = shift3.getString("planned1_etime")
+
+            if (available_stime != null && available_stime != "") {
+                val time = OEEUtil.parseTime2(available_stime)
+                et_setting_s_3_s_h.setText(time.toString("HH"))
+                et_setting_s_3_s_m.setText(time.toString("mm"))
+            }
+            if (available_etime != null && available_etime != "") {
+                val time = OEEUtil.parseTime2(available_etime)
+                et_setting_s_3_e_h.setText(time.toString("HH"))
+                et_setting_s_3_e_m.setText(time.toString("mm"))
+            }
+            if (planned1_stime != null && planned1_stime != "") {
+                val time = OEEUtil.parseTime2(planned1_stime)
+                et_setting_p_3_s_h.setText(time.toString("HH"))
+                et_setting_p_3_s_m.setText(time.toString("mm"))
+            }
+            if (planned1_etime != null && planned1_etime != "") {
+                val time = OEEUtil.parseTime2(planned1_etime)
+                et_setting_p_3_e_h.setText(time.toString("HH"))
+                et_setting_p_3_e_m.setText(time.toString("mm"))
+            }
+        }
     }
 
     private fun filterOperatorData() {
         _filtered_list_for_operator.removeAll(_filtered_list_for_operator)
         list_for_operator_adapter?.select(-1)
 
-        val filter_text = et_searcg_text.text.toString()
+        val filter_text = et_search_text.text.toString()
 
         for (i in 0..(_list_for_operator.size-1)) {
 
@@ -181,6 +385,52 @@ class WorkInfoActivity : BaseActivity() {
             }
         })
         filterOperatorData()
+    }
+
+    private fun initLastWorkers() {
+        _list_for_last_worker.removeAll(_list_for_last_worker)
+        var list = AppGlobal.instance.get_last_workers()
+
+        for (i in 0..(list.length() - 1)) {
+            val item = list.getJSONObject(list.length() - 1 - i)
+            var worker = hashMapOf("number" to item.getString("number"), "name" to item.getString("name"))
+            _list_for_last_worker.add(worker)
+        }
+        list_for_last_worker_adapter?.notifyDataSetChanged()
+    }
+
+    private fun sendPing() {
+        if (AppGlobal.instance.get_server_ip() == "") return
+        val uri = "/ping.php"
+        request(this, uri, false, false, null, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                btn_server_state.isSelected = true
+                AppGlobal.instance._server_state = true
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        }, {
+            btn_server_state.isSelected = false
+        })
+    }
+
+    /////// 쓰레드
+    private val _timer_task1 = Timer()          // 서버 접속 체크 ping test.
+
+    private fun start_timer() {
+        val task1 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    sendPing()
+                }
+            }
+        }
+        _timer_task1.schedule(task1, 5000, 10000)
+    }
+    private fun cancel_timer () {
+        _timer_task1.cancel()
     }
 
     private class ListAdapter(context: Context, list: ArrayList<HashMap<String, String>>) : BaseAdapter() {

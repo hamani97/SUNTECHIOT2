@@ -58,13 +58,13 @@
                         android:orientation="horizontal">
                     <TextView
                             style="@style/tab_btn_orange"
-                            android:layout_width="450dp"
+                            android:layout_width="440dp"
                             android:layout_marginLeft="140dp"
                             android:text="Work Time" />
                     <TextView
                             style="@style/tab_btn_on"
-                            android:layout_width="450dp"
-                            android:layout_marginLeft="40dp"
+                            android:layout_width="440dp"
+                            android:layout_marginLeft="30dp"
                             android:text="Planned Time" />
                 </LinearLayout>
                 <LinearLayout
@@ -74,13 +74,14 @@
                         android:orientation="horizontal">
                     <LinearLayout
                             android:layout_width="450dp"
-                            android:layout_marginLeft="140dp"
+                            android:layout_marginLeft="130dp"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
                         <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:paddingRight="30dp"
                                 android:gravity="center"
                                 android:text="Start"
                                 android:textColor="@color/colorWhite"
@@ -89,6 +90,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:paddingLeft="10dp"
                                 android:gravity="center"
                                 android:text="End"
                                 android:textColor="@color/colorWhite"
@@ -103,6 +105,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:paddingRight="30dp"
                                 android:gravity="center"
                                 android:text="Start"
                                 android:textColor="@color/colorWhite"
@@ -111,6 +114,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:paddingLeft="10dp"
                                 android:gravity="center"
                                 android:text="End"
                                 android:textColor="@color/colorWhite"
@@ -128,7 +132,7 @@
                             android:layout_width="140dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="1 SHIFT"
+                            android:text="SHIFT 1"
                             android:textColor="@color/colorWhite"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -136,152 +140,26 @@
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_s_1_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_1_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_1_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_1_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <TextView android:id="@+id/et_setting_s_1_s_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_s_1_s_m" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <TextView android:id="@+id/et_setting_s_1_e_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_s_1_e_m" style="@style/work_info_manual_text" />
                     </LinearLayout>
                     <LinearLayout
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:layout_marginLeft="40dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_p_1_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_1_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_1_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_1_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <TextView android:id="@+id/et_setting_p_1_s_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_p_1_s_m" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <TextView android:id="@+id/et_setting_p_1_e_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_p_1_e_m" style="@style/work_info_manual_text" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -295,7 +173,7 @@
                             android:layout_width="140dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="2 SHIFT"
+                            android:text="SHIFT 2"
                             android:textColor="@color/colorWhite"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -303,152 +181,26 @@
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_s_2_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_2_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_2_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_2_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <TextView android:id="@+id/et_setting_s_2_s_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_s_2_s_m" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <TextView android:id="@+id/et_setting_s_2_e_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_s_2_e_m" style="@style/work_info_manual_text" />
                     </LinearLayout>
                     <LinearLayout
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:layout_marginLeft="40dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_p_2_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_2_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_2_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_2_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <TextView android:id="@+id/et_setting_p_2_s_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_p_2_s_m" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <TextView android:id="@+id/et_setting_p_2_e_h" style="@style/work_info_manual_text" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <TextView android:id="@+id/et_setting_p_2_e_m" style="@style/work_info_manual_text" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -462,7 +214,7 @@
                             android:layout_width="140dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
-                            android:text="3 SHIFT"
+                            android:text="SHIFT 3"
                             android:textColor="@color/colorWhite"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -470,153 +222,26 @@
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_s_3_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_3_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_3_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_s_3_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <EditText android:id="@+id/et_setting_s_3_s_h" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <EditText android:id="@+id/et_setting_s_3_s_m" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <EditText android:id="@+id/et_setting_s_3_e_h" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <EditText android:id="@+id/et_setting_s_3_e_m" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
                     </LinearLayout>
                     <LinearLayout
                             android:layout_width="450dp"
                             android:layout_height="50dp"
                             android:layout_marginLeft="40dp"
                             android:orientation="horizontal">
-                        <EditText
-                                android:id="@+id/et_setting_p_3_s_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_3_s_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text="~"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-
-                        <EditText
-                                android:id="@+id/et_setting_p_3_e_h"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:background="@color/colorEditor2"
-                                android:gravity="center"
-                                android:singleLine="true"
-                                android:text=""
-                                android:textColor="@color/colorWhite"
-                                android:textSize="21sp" />
-                        <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:layout_marginLeft="20dp"
-                                android:gravity="center"
-                                android:text=":"
-                                android:textSize="25sp"
-                                android:textColor="@color/colorWhite"
-                                android:textStyle="bold"/>
-                        <EditText
-                                android:id="@+id/et_setting_p_3_e_m"
-                                android:layout_width="70dp"
-                                android:layout_height="match_parent"
-                                android:singleLine="true"
-                                android:gravity="center"
-                                android:text=""
-                                android:textSize="21sp"
-                                android:textColor="@color/colorWhite"
-                                android:background="@color/colorEditor2"
-                                android:layout_marginLeft="20dp" />
+                        <EditText android:id="@+id/et_setting_p_3_s_h" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <EditText android:id="@+id/et_setting_p_3_s_m" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text="~" />
+                        <EditText android:id="@+id/et_setting_p_3_e_h" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
+                        <TextView style="@style/work_info_manual_symbol" android:text=":" />
+                        <EditText android:id="@+id/et_setting_p_3_e_m" style="@style/work_info_manual_edit" android:inputType="number" android:maxLength="2" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -743,7 +368,7 @@
                                     style="@style/table_row_title"
                                     android:text="@string/search" />
                             <EditText
-                                    android:id="@+id/et_searcg_text"
+                                    android:id="@+id/et_search_text"
                                     style="@style/table_row_data_editor1"
                                     android:text="" />
                         </LinearLayout>

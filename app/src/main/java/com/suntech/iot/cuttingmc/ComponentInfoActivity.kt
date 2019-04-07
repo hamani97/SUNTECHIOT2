@@ -1,7 +1,10 @@
 package com.suntech.iot.cuttingmc
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
@@ -13,9 +16,10 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import kotlinx.android.synthetic.main.activity_component_info.*
+import kotlinx.android.synthetic.main.layout_bottom_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
-import java.util.ArrayList
-import java.util.HashMap
+import org.json.JSONObject
+import java.util.*
 
 class ComponentInfoActivity : BaseActivity() {
 
@@ -29,18 +33,63 @@ class ComponentInfoActivity : BaseActivity() {
 
     private var _list_for_wos_adapter: ListWosAdapter? = null
     private var _list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()
+    private var _filtered_list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()
 
     var _selected_wos_index = -1
+
+    private val _broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+                if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)){
+                    btn_wifi_state.isSelected = true
+                } else {
+                    btn_wifi_state.isSelected = false
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_component_info)
         initView()
         fetchWosAll()
+        start_timer()
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
+        updateView()
+    }
+
+    public override fun onPause() {
+        super.onPause()
+        unregisterReceiver(_broadcastReceiver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel_timer()
+    }
+
+    private fun updateView() {
+        if (AppGlobal.instance._server_state) btn_server_state.isSelected = true
+        else btn_server_state.isSelected = false
+
+        if (AppGlobal.instance.isOnline(this)) btn_wifi_state.isSelected = true
+        else btn_wifi_state.isSelected = false
     }
 
     private fun initView() {
-        tv_title.setText("1 Shift 07:00 - 16:00")
+        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+        if (item == null) {
+            tv_title.setText("No shift")
+        } else {
+            tv_title.setText(item["shift_name"].toString() + "   " +
+                    item["available_stime"].toString() + " - " + item["available_etime"].toString())
+        }
 
         tv_compo_wos.text = AppGlobal.instance.get_compo_wos()
         tv_compo_model.text = AppGlobal.instance.get_compo_model()
@@ -65,7 +114,7 @@ class ComponentInfoActivity : BaseActivity() {
         }
         btn_setting_cancel.setOnClickListener { finish() }
 
-        _list_for_wos_adapter = ListWosAdapter(this, _list_for_wos)
+        _list_for_wos_adapter = ListWosAdapter(this, _filtered_list_for_wos)
         lv_wos_info.adapter = _list_for_wos_adapter
 
         lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
@@ -97,10 +146,51 @@ class ComponentInfoActivity : BaseActivity() {
         AppGlobal.instance.set_compo_size_idx(_selected_size_idx)
 
         if (_selected_wos_index > -1) {
-            finish(true, 1, "ok", _list_for_wos[_selected_wos_index])
+            finish(true, 1, "ok", _filtered_list_for_wos[_selected_wos_index])
         } else {
             finish()
         }
+    }
+
+//    var wos = tv_compo_wos.text.toString()
+//    var size = tv_compo_size.text.toString()
+//    var target = tv_compo_target.text.toString()
+//
+//    if (wos == "" || size == "" || target == "") return
+//
+//    for (j in 0..(_list_for_wos.size-1)) {
+//        val item = _list_for_wos[j]
+//        val wos2 = item["wosno"] ?: ""
+//        val size2 = item["size"] ?: ""
+//        val target2 = item["target"] ?: ""
+//        if (wos == wos2 && size == size2 && target == target2) {
+//            _selected_wos_index = j
+//            _list_for_wos_adapter?.select(j)
+//            _list_for_wos_adapter?.notifyDataSetChanged()
+//            lv_wos_info.smoothScrollToPosition(j)
+//            break
+//        }
+//    }
+
+    private fun filterWosData() {
+        _filtered_list_for_wos.removeAll(_filtered_list_for_wos)
+        _list_for_wos_adapter?.select(-1)
+
+        val wosno = tv_compo_wos.text.toString()
+
+        if (wosno == "") {
+            _filtered_list_for_wos = _list_for_wos
+        } else {
+            for (i in 0..(_list_for_wos.size-1)) {
+                val item = _list_for_wos[i]
+                val item_wosno = item["wosno"] ?: ""
+                if (wosno == item_wosno) {
+                    _filtered_list_for_wos.add(item)
+                }
+            }
+        }
+        _list_for_wos_adapter?.notifyDataSetChanged()
+        selectWosData()
     }
 
     private fun fetchWosAll() {
@@ -114,21 +204,23 @@ class ComponentInfoActivity : BaseActivity() {
                 var list = result.getJSONArray("item")
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
+                    val actual = "0"
                     var map = hashMapOf(
                         "wosno" to item.getString("wosno"),
                         "styleno" to item.getString("styleno"),
                         "model" to item.getString("model"),
                         "size" to item.getString("size"),
-                        "target" to item.getString("target")
+                        "target" to item.getString("target"),
+                        "actual" to actual
                     )
                     _list_for_wos.add(map)
                 }
-                _list_for_wos_adapter?.notifyDataSetChanged()
                 filterWosData()
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         })
+        filterWosData()
     }
 
     private fun fetchWosData() {
@@ -164,6 +256,8 @@ class ComponentInfoActivity : BaseActivity() {
                         tv_compo_component.text = ""
                         tv_compo_size.text = ""
                         tv_compo_target.text = ""
+
+                        filterWosData()
                     }
                 })
             } else {
@@ -248,7 +342,7 @@ class ComponentInfoActivity : BaseActivity() {
                         _selected_size_idx = lists[c]["idx"] ?: ""
                         tv_compo_size.text = lists[c]["s_name"] ?: ""
                         tv_compo_target.text = lists[c]["s_target"] ?: ""
-                        filterWosData()
+                        selectWosData()
                     }
                 })
             } else {
@@ -257,15 +351,15 @@ class ComponentInfoActivity : BaseActivity() {
         })
     }
 
-    private fun filterWosData() {
+    private fun selectWosData() {
         var wos = tv_compo_wos.text.toString()
         var size = tv_compo_size.text.toString()
         var target = tv_compo_target.text.toString()
 
         if (wos == "" || size == "" || target == "") return
 
-        for (j in 0..(_list_for_wos.size-1)) {
-            val item = _list_for_wos[j]
+        for (j in 0..(_filtered_list_for_wos.size-1)) {
+            val item = _filtered_list_for_wos[j]
             val wos2 = item["wosno"] ?: ""
             val size2 = item["size"] ?: ""
             val target2 = item["target"] ?: ""
@@ -274,6 +368,8 @@ class ComponentInfoActivity : BaseActivity() {
                 _list_for_wos_adapter?.select(j)
                 _list_for_wos_adapter?.notifyDataSetChanged()
                 lv_wos_info.smoothScrollToPosition(j)
+
+                tv_compo_actual.setText(item["actual"] ?: "-")
                 break
             }
         }
@@ -319,6 +415,40 @@ class ComponentInfoActivity : BaseActivity() {
         })
     }
 
+    private fun sendPing() {
+        if (AppGlobal.instance.get_server_ip() == "") return
+        val uri = "/ping.php"
+        request(this, uri, false, false, null, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                btn_server_state.isSelected = true
+                AppGlobal.instance._server_state = true
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        }, {
+            btn_server_state.isSelected = false
+        })
+    }
+
+    /////// 쓰레드
+    private val _timer_task1 = Timer()          // 서버 접속 체크 ping test.
+
+    private fun start_timer() {
+        val task1 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    sendPing()
+                }
+            }
+        }
+        _timer_task1.schedule(task1, 5000, 10000)
+    }
+    private fun cancel_timer () {
+        _timer_task1.cancel()
+    }
+
     private class ListWosAdapter(context: Context, list: ArrayList<HashMap<String, String>>) : BaseAdapter() {
 
         private var _list: ArrayList<HashMap<String, String>>
@@ -351,20 +481,29 @@ class ComponentInfoActivity : BaseActivity() {
                 vh = view.tag as ViewHolder
             }
 
+            val balance = Integer.parseInt(_list[position]["target"]) - Integer.parseInt(_list[position]["actual"])
+
             vh.tv_item_wosno.text = _list[position]["wosno"]
             vh.tv_item_model.text = _list[position]["model"]
             vh.tv_item_size.text = _list[position]["size"]
             vh.tv_item_target.text = _list[position]["target"]
-            vh.tv_item_actual.text = "0"
-            vh.tv_item_balance.text = _list[position]["target"]
+            vh.tv_item_actual.text = _list[position]["actual"]
+            vh.tv_item_balance.text = balance.toString()
 
-            if (_selected_index==position) {
+            if (_selected_index == position) {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_balance.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
+            } else if (balance <= 0) {
+                vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_balance.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
             } else {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))

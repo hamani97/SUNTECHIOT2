@@ -12,7 +12,7 @@
             android:orientation="vertical"
             android:background="@color/colorBackground">
 
-        <include layout="@layout/layout_top_menu_2"
+        <include layout="@layout/layout_top_menu_component"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content"/>
 

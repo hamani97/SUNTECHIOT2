@@ -145,6 +145,30 @@
         <item name="android:background">@color/colorEditor2</item>
         <item name="android:singleLine">true</item>
     </style>
+
+    <style name="work_info_manual_text">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:text"></item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:background">@color/colorReadonly</item>
+    </style>
+    <style name="work_info_manual_edit" parent="work_info_manual_text">
+        <item name="android:background">@color/colorEditor1</item>
+    </style>
+    <style name="work_info_manual_symbol">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginRight">20dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">25sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
     <!-- Table end -->
 
     <!-- Grid start -->

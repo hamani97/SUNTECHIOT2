@@ -18,7 +18,7 @@ class HomeFragment : BaseFragment() {
     }
 
     override fun initViews() {
-        tv_app_version.text = "v "+ activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
+        tv_app_version.text = "v " + activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
 
         btn_count_view.setOnClickListener {
             if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
@@ -29,13 +29,17 @@ class HomeFragment : BaseFragment() {
             }
         }
         btn_component_info.setOnClickListener {
-            val intent = Intent(activity, ComponentInfoActivity::class.java)
-            getBaseActivity().startActivity(intent, { r, c, m, d ->
-                if (r && d != null) {
-                    (activity as MainActivity).countViewType = 2
-                    clickCountView()
-                }
-            })
+            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
+                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = Intent(activity, ComponentInfoActivity::class.java)
+                getBaseActivity().startActivity(intent, { r, c, m, d ->
+                    if (r && d != null) {
+                        (activity as MainActivity).countViewType = 2
+                        (activity as MainActivity).changeFragment(1)
+                    }
+                })
+            }
         }
         btn_work_info.setOnClickListener {
             if (AppGlobal.instance.get_factory() == "" || AppGlobal.instance.get_room() == "" || AppGlobal.instance.get_line() == "") {
@@ -45,6 +49,15 @@ class HomeFragment : BaseFragment() {
             }
         }
         btn_setting_view.setOnClickListener { startActivity(Intent(activity, SettingActivity::class.java)) }
+        updateView()
+    }
+
+    override fun onSelected() {
+        updateView()
+    }
+
+    override fun onResume() {
+        super.onResume()
         updateView()
     }
 
@@ -58,13 +71,4 @@ class HomeFragment : BaseFragment() {
         tv_employee_name.text = AppGlobal.instance.get_worker_name()
         tv_shift.text = AppGlobal.instance.get_current_shift_name()
     }
-
-    private fun clickCountView() {
-        if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
-            Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
-            return
-        }
-        (activity as MainActivity).changeFragment(1)
-    }
-
 }

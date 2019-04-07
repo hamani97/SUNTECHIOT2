@@ -37,6 +37,8 @@ class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
+    private var _doubleBackToExitPressedOnce = false
+
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
@@ -116,6 +118,20 @@ class MainActivity : BaseActivity() {
         unregisterReceiver(_broadcastReceiver)
     }
 
+    override fun onBackPressed() {
+        if (vp_fragments.currentItem != 0) {
+            changeFragment(0)
+            return
+        }
+        if (_doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
+        }
+        this._doubleBackToExitPressedOnce = true
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        Handler().postDelayed({ _doubleBackToExitPressedOnce = false }, 2000)
+    }
+
     private fun updateView() {
         if (AppGlobal.instance.isOnline(this)) btn_wifi_state.isSelected = true
         else btn_wifi_state.isSelected = false
@@ -133,12 +149,49 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun fetchMaualShift(): JSONObject? {
+        // manual 데이터가 있으면 가져온다.
+        val manual = AppGlobal.instance.get_work_time_manual()
+        if (manual != null) {
+            val available_stime = manual.getString("available_stime")
+            val available_etime = manual.getString("available_etime")
+            var planned1_stime = manual.getString("planned1_stime")
+            var planned1_etime = manual.getString("planned1_etime")
+            if (available_stime != null && available_stime != "" && available_etime != null && available_etime != "") {
+                if (planned1_stime == null || planned1_stime == "" || planned1_etime == null || planned1_etime == "") {
+                    planned1_stime = "00:00"
+                    planned1_etime = "00:00"
+                }
+                var shift3 = JSONObject()
+                shift3.put("idx", "0")
+//                shift3.put("date", dt.toString("yyyy-MM-dd"))
+                shift3.put("available_stime", available_stime)
+                shift3.put("available_etime", available_etime)
+                shift3.put("planned1_stime", planned1_stime)
+                shift3.put("planned1_etime", planned1_etime)
+                shift3.put("planned2_stime", "")
+                shift3.put("planned2_etime", "")
+                shift3.put("planned3_stime", "")
+                shift3.put("planned3_etime", "")
+                shift3.put("over_time", "0")
+//                shift3.put("line_idx", "0")
+//                shift3.put("line_name", "")
+                shift3.put("shift_idx", "3")
+                shift3.put("shift_name", "SHIFT 3")
+                return shift3
+            }
+        }
+        return null
+    }
+
     /*
      *  당일 작업시간 가져오기. 새벽이 지난 시간은 1일을 더한다.
      *  전일 작업이 끝나지 않았을수 있기 때문에 전일 데이터도 가져온다.
      */
     private fun fetchWorkData() {
         var dt = DateTime()
+        val shift3: JSONObject? = fetchMaualShift()      // manual 데이터가 있으면 가져온다.
+
         val uri = "/getlist1.php"
         var params = listOf(
             "code" to "work_time",
@@ -146,15 +199,32 @@ class MainActivity : BaseActivity() {
             "factory_idx" to AppGlobal.instance.get_room_idx(),
             "line_idx" to AppGlobal.instance.get_line_idx(),
             "date" to dt.toString("yyyy-MM-dd"))
-Log.e("params", ""+params)
+Log.e("params", "" + params)
 
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
             var msg = result.getString("msg")
             if (code == "00") {
-                var list = result.getJSONArray("item")
-                list = handleWorkData(list)
-                AppGlobal.instance.set_today_work_time(list)
+                var list1 = result.getJSONArray("item")
+                if (shift3 != null) {
+                    var today_shift = shift3
+                    if (list1.length()>0) {
+                        val item = list1.getJSONObject(0)
+                        today_shift.put("date", item["date"])
+                        today_shift.put("line_idx", item["line_idx"])
+                        today_shift.put("line_name", item["line_name"])
+                    } else {
+                        today_shift.put("date", dt.toString("yyyy-MM-dd"))
+                        today_shift.put("line_idx", "0")
+                        today_shift.put("line_name", "Manual")
+                    }
+                    list1.put(today_shift)
+                }
+//                Log.e("today work list-1", "" + list1.toString())
+                list1 = handleWorkData(list1)
+//                Log.e("today work list-2", "" + list1.toString())
+
+                AppGlobal.instance.set_today_work_time(list1)
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -172,9 +242,26 @@ Log.e("params", ""+params)
             var code = result.getString("code")
             var msg = result.getString("msg")
             if (code == "00") {
-                var list = result.getJSONArray("item")
-                list = handleWorkData(list)
-                AppGlobal.instance.set_prev_work_time(list)
+                var list2 = result.getJSONArray("item")
+                if (shift3 != null) {
+                    var yester_shift = shift3
+                    if (list2.length()>0) {
+                        val item = list2.getJSONObject(0)
+                        yester_shift.put("date", item["date"])
+                        yester_shift.put("line_idx", item["line_idx"])
+                        yester_shift.put("line_name", item["line_name"])
+                    } else {
+                        yester_shift.put("date", dt.minusDays(1).toString("yyyy-MM-dd"))
+                        yester_shift.put("line_idx", "0")
+                        yester_shift.put("line_name", "Manual")
+                    }
+                    list2.put(yester_shift)
+                }
+//                Log.e("yester work list-1", "" + list2.toString())
+                list2 = handleWorkData(list2)
+//                Log.e("yester work list-2", "" + list2.toString())
+
+                AppGlobal.instance.set_prev_work_time(list2)
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -235,32 +322,34 @@ Log.e("params", ""+params)
         for (i in 0..(list.length() - 1)) {
             var item = list.getJSONObject(i)
 
-            val over_time = item["over_time"]
-            val date = item["date"].toString()
+            val over_time = item["over_time"]   // 0
+            val date = item["date"].toString()  // 2019-04-05
             if (i==0) { // 첫시간 기준
-                shift_stime = OEEUtil.parseDateTime(date + " " + item["available_stime"] + ":00")
+                shift_stime = OEEUtil.parseDateTime(date + " " + item["available_stime"] + ":00")   // 2019-04-05 06:01:00  (available_stime = 06:01)
             }
 
-            var work_stime = OEEUtil.parseDateTime(date + " " + item["available_stime"] + ":00")
-            var work_etime = OEEUtil.parseDateTime(date + " " + item["available_etime"] + ":00")
+            var work_stime = OEEUtil.parseDateTime(date + " " + item["available_stime"] + ":00")    // 2019-04-05 06:01:00
+            var work_etime = OEEUtil.parseDateTime(date + " " + item["available_etime"] + ":00")    // 2019-04-05 14:00:00
             work_etime = work_etime.plusHours(over_time.toString().toInt())
 
-            val planned1_stime_txt = date + " " + if (item["planned1_stime"] == "") "00:00:00" else item["planned1_stime"].toString() + ":00"
-            val planned1_etime_txt = date + " " + if (item["planned1_etime"] == "") "00:00:00" else item["planned1_etime"].toString() + ":00"
-            val planned2_stime_txt = date + " " + if (item["planned2_stime"] == "") "00:00:00" else item["planned2_stime"].toString() + ":00"
-            val planned2_etime_txt = date + " " + if (item["planned2_etime"] == "") "00:00:00" else item["planned2_etime"].toString() + ":00"
+            val planned1_stime_txt = date + " " + if (item["planned1_stime"] == "") "00:00:00" else item["planned1_stime"].toString() + ":00"   // 2019-04-05 11:30:00
+            val planned1_etime_txt = date + " " + if (item["planned1_etime"] == "") "00:00:00" else item["planned1_etime"].toString() + ":00"   // 2019-04-05 13:00:00
+            val planned2_stime_txt = date + " " + if (item["planned2_stime"] == "") "00:00:00" else item["planned2_stime"].toString() + ":00"   // 2019-04-05 00:00:00
+            val planned2_etime_txt = date + " " + if (item["planned2_etime"] == "") "00:00:00" else item["planned2_etime"].toString() + ":00"   // 2019-04-05 00:00:00
 
             var planned1_stime_dt = OEEUtil.parseDateTime(planned1_stime_txt)
             var planned1_etime_dt = OEEUtil.parseDateTime(planned1_etime_txt)
             var planned2_stime_dt = OEEUtil.parseDateTime(planned2_stime_txt)
             var planned2_etime_dt = OEEUtil.parseDateTime(planned2_etime_txt)
 
+            // 첫 시작시간 보다 작은 값이면 하루가 지난 날짜임
+            // 종료 시간이 시작 시간보다 작은 경우도 하루가 지난 날짜로 처리
             if (shift_stime.secondOfDay > work_stime.secondOfDay) work_stime = work_stime.plusDays(1)
-            if (shift_stime.secondOfDay > work_etime.secondOfDay) work_etime = work_etime.plusDays(1)
+            if (shift_stime.secondOfDay > work_etime.secondOfDay || work_stime.secondOfDay > work_etime.secondOfDay) work_etime = work_etime.plusDays(1)
             if (shift_stime.secondOfDay > planned1_stime_dt.secondOfDay) planned1_stime_dt = planned1_stime_dt.plusDays(1)
-            if (shift_stime.secondOfDay > planned1_etime_dt.secondOfDay) planned1_etime_dt = planned1_etime_dt.plusDays(1)
+            if (shift_stime.secondOfDay > planned1_etime_dt.secondOfDay || planned1_stime_dt.secondOfDay > planned1_etime_dt.secondOfDay) planned1_etime_dt = planned1_etime_dt.plusDays(1)
             if (shift_stime.secondOfDay > planned2_stime_dt.secondOfDay) planned2_stime_dt = planned2_stime_dt.plusDays(1)
-            if (shift_stime.secondOfDay > planned2_etime_dt.secondOfDay) planned2_etime_dt = planned2_etime_dt.plusDays(1)
+            if (shift_stime.secondOfDay > planned2_etime_dt.secondOfDay || planned2_stime_dt.secondOfDay > planned2_etime_dt.secondOfDay) planned2_etime_dt = planned2_etime_dt.plusDays(1)
 
             item.put("work_stime", work_stime.toString("yyyy-MM-dd HH:mm:ss"))
             item.put("work_etime", work_etime.toString("yyyy-MM-dd HH:mm:ss"))
