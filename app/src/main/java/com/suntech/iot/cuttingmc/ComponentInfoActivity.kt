@@ -16,7 +16,6 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import kotlinx.android.synthetic.main.activity_component_info.*
-import kotlinx.android.synthetic.main.layout_bottom_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import org.json.JSONObject
 import java.util.*
@@ -152,26 +151,6 @@ class ComponentInfoActivity : BaseActivity() {
         }
     }
 
-//    var wos = tv_compo_wos.text.toString()
-//    var size = tv_compo_size.text.toString()
-//    var target = tv_compo_target.text.toString()
-//
-//    if (wos == "" || size == "" || target == "") return
-//
-//    for (j in 0..(_list_for_wos.size-1)) {
-//        val item = _list_for_wos[j]
-//        val wos2 = item["wosno"] ?: ""
-//        val size2 = item["size"] ?: ""
-//        val target2 = item["target"] ?: ""
-//        if (wos == wos2 && size == size2 && target == target2) {
-//            _selected_wos_index = j
-//            _list_for_wos_adapter?.select(j)
-//            _list_for_wos_adapter?.notifyDataSetChanged()
-//            lv_wos_info.smoothScrollToPosition(j)
-//            break
-//        }
-//    }
-
     private fun filterWosData() {
         _filtered_list_for_wos.removeAll(_filtered_list_for_wos)
         _list_for_wos_adapter?.select(-1)
@@ -179,7 +158,9 @@ class ComponentInfoActivity : BaseActivity() {
         val wosno = tv_compo_wos.text.toString()
 
         if (wosno == "") {
-            _filtered_list_for_wos = _list_for_wos
+            for (i in 0..(_list_for_wos.size-1)) {
+                _filtered_list_for_wos.add(_list_for_wos[i])
+            }
         } else {
             for (i in 0..(_list_for_wos.size-1)) {
                 val item = _list_for_wos[i]

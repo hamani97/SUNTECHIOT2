@@ -2,19 +2,17 @@ package com.suntech.iot.cuttingmc
 
 import android.app.AlertDialog
 import android.content.*
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import kotlinx.android.synthetic.main.fragment_count_view.*
-import kotlinx.android.synthetic.main.layout_bottom_info_2.*
 import org.joda.time.DateTime
 
 class CountViewFragment : BaseFragment() {
@@ -44,6 +42,7 @@ class CountViewFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.e("count view", "resume " + (activity as MainActivity).countViewType.toString())
         activity.registerReceiver(_need_to_refresh, IntentFilter("need.refresh"))
         is_loop=true
         updateView()
@@ -58,6 +57,7 @@ class CountViewFragment : BaseFragment() {
     }
 
     override fun onSelected() {
+        Log.e("count view", "selected " + (activity as MainActivity).countViewType.toString())
         if ((activity as MainActivity).countViewType == 1) {
             ll_total_count.visibility = View.VISIBLE
             ll_component_count.visibility = View.GONE
@@ -146,15 +146,6 @@ class CountViewFragment : BaseFragment() {
         }
     }
 
-    private fun updateView() {
-
-        if ((activity as MainActivity).countViewType == 1) {
-            tv_current_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
-        } else {
-            tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
-        }
-    }
-
     private fun countTarget() {
 
         val now_time = DateTime()
@@ -168,13 +159,31 @@ class CountViewFragment : BaseFragment() {
 
     }
 
+    private fun updateView() {
+
+        if ((activity as MainActivity).countViewType == 1) {
+            tv_current_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
+        } else {
+            tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
+        }
+    }
+
     private fun fetchServerTarget() {
 
     }
 
+    fun startHandler () {
+        val handler = Handler()
+        handler.postDelayed({
+            if (is_loop) {
+                updateView()
+                startHandler()
+            }
+        }, 1000)
+    }
+
     // Get Color code
     private fun fetchColorData() {
-
         var list = AppGlobal.instance.get_color_code()
 
         for (i in 0..(list.length() - 1)) {
@@ -188,15 +197,5 @@ class CountViewFragment : BaseFragment() {
             )
             _list.add(map)
         }
-    }
-
-    fun startHandler () {
-        val handler = Handler()
-        handler.postDelayed({
-            if (is_loop) {
-                updateView()
-                startHandler()
-            }
-        }, 1000)
     }
 }

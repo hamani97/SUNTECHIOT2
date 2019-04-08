@@ -1,6 +1,21 @@
 <resources>
     <string name="app_name">SUNTECH IoT</string>
 
+    <!-- 타이틀 -->
+    <string name="title_select_component">SELECT COMPONENT</string>
+    <string name="title_available_info">AVAILABLE INFO</string>
+    <string name="title_operator_info">OPERATOR INFO</string>
+    <string name="title_last_worker">LAST WORKER</string>
+    <string name="title_setting">SETTING</string>
+    <string name="title_counter_device_info">COUNTER DEVICE INFO</string>
+    <string name="title_server_info">SERVER INFO</string>
+    <string name="title_etc">ETC</string>
+    <string name="title_count_info">COUNT INFO</string>
+    <string name="title_target_type">TARGET TYPE</string>
+    <string name="title_design_info">DESIGN INFO</string>
+
+    <string name="title_push_info">Push Info</string>
+
     <!-- 카운트화면 -->
     <string name="label_c_target">C.TARGET</string>
     <string name="label_c_actual">C.ACTUAL</string>
@@ -38,6 +53,16 @@
     <string name="label_target">TARGET</string>
     <string name="label_actual">ACTUAL</string>
 
+    <!-- 액츄얼카운트화면 -->
+    <string name="title_actual_count_edit">Actual Count Edit</string>
+    <string name="title_actual_count_edit_input">Actual Edit Count Input</string>
+    <string name="label_actual_count_edit_input">Actual Count Edit</string>
+    <string name="guide_actual_count_edit_input">Administrator Approval Required</string>
+    <string name="label_actual_count_edit_input_list">Actual Count Edit List</string>
+
+    <!-- 제품목록화면 -->
+    <string name="title_product_list">Product List</string>
+
     <!-- 홈화면 -->
     <string name="bottom_label_machine_info">MACHINE INFO</string>
     <string name="bottom_label_operator_info">OPERATOR INFO</string>
@@ -48,19 +73,6 @@
     <string name="bottom_label_line">Line : \u0020</string>
     <string name="bottom_label_number">Number : \u0020</string>
     <string name="bottom_label_mc_model">Model : \u0020</string>
-
-    <!-- 타이틀 -->
-    <string name="title_select_component">SELECT COMPONENT</string>
-    <string name="title_available_info">AVAILABLE INFO</string>
-    <string name="title_operator_info">OPERATOR INFO</string>
-    <string name="title_last_worker">LAST WORKER</string>
-    <string name="title_setting">SETTING</string>
-    <string name="title_counter_device_info">COUNTER DEVICE INFO</string>
-    <string name="title_server_info">SERVER INFO</string>
-    <string name="title_etc">ETC</string>
-    <string name="title_count_info">COUNT INFO</string>
-    <string name="title_target_type">TARGET TYPE</string>
-    <string name="title_design_info">DESIGN INFO</string>
 
     <!-- Common -->
     <string name="server">SERVER</string>
@@ -87,6 +99,11 @@
     <string name="list_item_employee_number">Employee Number</string>
     <string name="list_item_name">Name</string>
 
+    <string name="list_item_design_idx">Design IDX</string>
+    <string name="list_item_product_rate">Product Rate</string>
+    <string name="list_item_defective">Defective</string>
+    <string name="list_item_qualti_rate">Quality Rate</string>
+
     <!-- Message -->
     <string name="msg_no_operator">Operator not found</string>
     <string name="msg_require_info">Info not complete</string>
@@ -96,5 +113,6 @@
     <string name="msg_has_notselected">Nothing Selected</string>
     <string name="msg_not_start_work">Checking Working Time</string>
     <string name="msg_exit_shift">Do you want to exit?</string>
+    <string name="msg_has_not_server_info">Cannot find server</string>
 
 </resources>

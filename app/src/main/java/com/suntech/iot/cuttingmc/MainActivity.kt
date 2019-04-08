@@ -20,6 +20,8 @@ import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
+import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
+import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import kotlinx.android.synthetic.main.activity_main.*
@@ -63,12 +65,12 @@ class MainActivity : BaseActivity() {
         // button click event
         if (AppGlobal.instance.get_long_touch()) {
             btn_home.setOnLongClickListener { changeFragment(0); true }
-//            btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
-//            btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
+            btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
+            btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
-//            btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
-//            btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
+            btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
+            btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
         }
 
         // fragment & swipe
@@ -152,13 +154,14 @@ class MainActivity : BaseActivity() {
     private fun fetchMaualShift(): JSONObject? {
         // manual 데이터가 있으면 가져온다.
         val manual = AppGlobal.instance.get_work_time_manual()
-        if (manual != null) {
-            val available_stime = manual.getString("available_stime")
-            val available_etime = manual.getString("available_etime")
-            var planned1_stime = manual.getString("planned1_stime")
-            var planned1_etime = manual.getString("planned1_etime")
-            if (available_stime != null && available_stime != "" && available_etime != null && available_etime != "") {
-                if (planned1_stime == null || planned1_stime == "" || planned1_etime == null || planned1_etime == "") {
+        if (manual != null && manual.length()>0) {
+            val available_stime = manual.getString("available_stime") ?: ""
+            val available_etime = manual.getString("available_etime") ?: ""
+            var planned1_stime = manual.getString("planned1_stime") ?: ""
+            var planned1_etime = manual.getString("planned1_etime") ?: ""
+
+            if (available_stime != "" && available_etime != "") {
+                if (planned1_stime == "" || planned1_etime == "") {
                     planned1_stime = "00:00"
                     planned1_etime = "00:00"
                 }

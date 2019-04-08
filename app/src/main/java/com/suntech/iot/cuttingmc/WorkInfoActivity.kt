@@ -176,56 +176,39 @@ class WorkInfoActivity : BaseActivity() {
         var end_hour = et_setting_s_3_e_h.text.toString().trim()
         var end_min = et_setting_s_3_e_m.text.toString().trim()
 
-        if (start_hour<"0" || start_hour>"23" || end_hour<"0" || end_hour>"23") {
-            Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (start_min<"0" || start_min>"59" || end_min<"0" || end_min>"59") {
-            Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (start_hour=="" && start_min=="" && end_hour=="" && end_min=="") {
-            shift3.put("available_stime", "")
-            shift3.put("available_etime", "")
-        } else {
-            if (start_hour.length==2 && start_min.length==2 && end_hour.length==2 && end_min.length==2) {
-                shift3.put("available_stime", start_hour + ":" + start_min)
-                shift3.put("available_etime", end_hour + ":" + end_min)
-            } else {
+        if (start_hour!="" || start_min!="" || end_hour!="" || end_min!="") {
+            if (start_hour.length != 2 || start_min.length != 2 || end_hour.length != 2 || end_min.length != 2 ||
+                start_hour < "00" || start_hour > "23" || end_hour < "00" || end_hour > "23" ||
+                start_min < "00" || start_min > "59" || end_min < "00" || end_min > "59") {
                 Toast.makeText(this, "The time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
                 return
             }
-        }
 
-        // Planned time
-        start_hour = et_setting_p_3_s_h.text.toString().trim()
-        start_min = et_setting_p_3_s_m.text.toString().trim()
-        end_hour = et_setting_p_3_e_h.text.toString().trim()
-        end_min = et_setting_p_3_e_m.text.toString().trim()
+            shift3.put("available_stime", start_hour + ":" + start_min)
+            shift3.put("available_etime", end_hour + ":" + end_min)
 
-        if (start_hour<"0" || start_hour>"23" || end_hour<"0" || end_hour>"23") {
-            Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (start_min<"0" || start_min>"59" || end_min<"0" || end_min>"59") {
-            Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
-            return
-        }
+            // Planned time
+            start_hour = et_setting_p_3_s_h.text.toString().trim()
+            start_min = et_setting_p_3_s_m.text.toString().trim()
+            end_hour = et_setting_p_3_e_h.text.toString().trim()
+            end_min = et_setting_p_3_e_m.text.toString().trim()
 
-        if (start_hour=="" && start_min=="" && end_hour=="" && end_min=="") {
-            shift3.put("planned1_stime", "")
-            shift3.put("planned1_etime", "")
-        } else {
-            if (start_hour.length==2 && start_min.length==2 && end_hour.length==2 && end_min.length==2) {
+            if (start_hour!="" || start_min!="" || end_hour!="" || end_min!="") {
+                if (start_hour.length != 2 || start_min.length != 2 || end_hour.length != 2 || end_min.length != 2 ||
+                    start_hour < "00" || start_hour > "23" || end_hour < "00" || end_hour > "23" ||
+                    start_min < "00" || start_min > "59" || end_min < "00" || end_min > "59") {
+                    Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
+                    return
+                }
                 shift3.put("planned1_stime", start_hour + ":" + start_min)
                 shift3.put("planned1_etime", end_hour + ":" + end_min)
             } else {
-                Toast.makeText(this, "Planned Time input for shift3 is invalid", Toast.LENGTH_SHORT).show()
-                return
+                shift3.put("planned1_stime", "")
+                shift3.put("planned1_etime", "")
             }
+
+            AppGlobal.instance.set_work_time_manual(shift3)
         }
-        AppGlobal.instance.set_work_time_manual(shift3)
         finish()
     }
 
@@ -308,7 +291,7 @@ class WorkInfoActivity : BaseActivity() {
 
         val shift3 = AppGlobal.instance.get_work_time_manual()
 
-        if (shift3 != null) {
+        if (shift3 != null && shift3.length()>0) {
             val available_stime = shift3.getString("available_stime")
             val available_etime = shift3.getString("available_etime")
             val planned1_stime = shift3.getString("planned1_stime")
