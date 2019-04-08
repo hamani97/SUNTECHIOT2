@@ -40,6 +40,7 @@ class MainActivity : BaseActivity() {
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
     private var _doubleBackToExitPressedOnce = false
+    private var _last_count_received_time = DateTime()
 
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -61,6 +62,8 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         AppGlobal.instance.setContext(this)
+
+        mHandler = MyHandler(this)
 
         // button click event
         if (AppGlobal.instance.get_long_touch()) {
@@ -162,8 +165,8 @@ class MainActivity : BaseActivity() {
 
             if (available_stime != "" && available_etime != "") {
                 if (planned1_stime == "" || planned1_etime == "") {
-                    planned1_stime = "00:00"
-                    planned1_etime = "00:00"
+                    planned1_stime = ""
+                    planned1_etime = ""
                 }
                 var shift3 = JSONObject()
                 shift3.put("idx", "0")
@@ -429,47 +432,51 @@ Log.e("params", "" + params)
         })
     }
 
-    private fun updateCurrentWorkTarget() {
-        val idx = AppGlobal.instance.get_design_info_idx()
-        if (idx == "") return
+    fun endWork() {
 
-        val work_idx = "" + AppGlobal.instance.get_product_idx()
-        if (work_idx == "") return
-
-        var db = SimpleDatabaseHelper(this)
-        val row = db.get(work_idx)
-        if (row == null) return
-
-        val actual = row["actual"].toString().toInt()
-
-        val elapsedTime = AppGlobal.instance.get_current_product_accumulated_time()
-        val elapsedTime_no_constraint = AppGlobal.instance.get_current_product_accumulated_time(true)
-        val cycle_time = AppGlobal.instance.get_cycle_time()
-        var target = (ceil(elapsedTime.toFloat() / cycle_time.toFloat())).toInt()
-        var target_no_contraint = (ceil(elapsedTime_no_constraint.toFloat() / cycle_time.toFloat())).toInt()
-
-        //Log.e("test", "elapsedTime = " + elapsedTime)
-        //Log.e("test", "cycle_time = " + cycle_time)
-        //Log.e("test", "target = " + target)
-        db.updateWorkTarget(work_idx, target, target_no_contraint)
-
-        if (Constants.DEMO_VERSION) {
-            val current_shift_time = AppGlobal.instance.get_current_shift_time()
-            var work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
-            var work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
-
-            var start_dt = OEEUtil.parseDateTime(row["start_dt"].toString())
-            var end_dt = work_etime
-            val list = db.gets()
-
-            if (list == null || list.size <= 1) start_dt = work_stime
-            val t = AppGlobal.instance.compute_work_time(start_dt, end_dt, false, false)
-
-            target = ( t / cycle_time )
-        }
-        // actual 이 0이면 서버로 보내지 않음
-        if (actual > 0) sendTarget(target.toString())
     }
+
+//    private fun updateCurrentWorkTarget() {
+//        val idx = AppGlobal.instance.get_design_info_idx()
+//        if (idx == "") return
+//
+//        val work_idx = "" + AppGlobal.instance.get_product_idx()
+//        if (work_idx == "") return
+//
+//        var db = SimpleDatabaseHelper(this)
+//        val row = db.get(work_idx)
+//        if (row == null) return
+//
+//        val actual = row["actual"].toString().toInt()
+//
+//        val elapsedTime = AppGlobal.instance.get_current_product_accumulated_time()
+//        val elapsedTime_no_constraint = AppGlobal.instance.get_current_product_accumulated_time(true)
+//        val cycle_time = AppGlobal.instance.get_cycle_time()
+//        var target = (ceil(elapsedTime.toFloat() / cycle_time.toFloat())).toInt()
+//        var target_no_contraint = (ceil(elapsedTime_no_constraint.toFloat() / cycle_time.toFloat())).toInt()
+//
+//        //Log.e("test", "elapsedTime = " + elapsedTime)
+//        //Log.e("test", "cycle_time = " + cycle_time)
+//        //Log.e("test", "target = " + target)
+//        db.updateWorkTarget(work_idx, target, target_no_contraint)
+//
+//        if (Constants.DEMO_VERSION) {
+//            val current_shift_time = AppGlobal.instance.get_current_shift_time()
+//            var work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
+//            var work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
+//
+//            var start_dt = OEEUtil.parseDateTime(row["start_dt"].toString())
+//            var end_dt = work_etime
+//            val list = db.gets()
+//
+//            if (list == null || list.size <= 1) start_dt = work_stime
+//            val t = AppGlobal.instance.compute_work_time(start_dt, end_dt, false, false)
+//
+//            target = ( t / cycle_time )
+//        }
+//        // actual 이 0이면 서버로 보내지 않음
+//        if (actual > 0) sendTarget(target.toString())
+//    }
 
     /////// 쓰레드
 //    private val _downtime_timer = Timer()
@@ -492,7 +499,7 @@ Log.e("params", "" + params)
             override fun run() {
                 runOnUiThread {
                     sendPing()
-                    updateCurrentWorkTarget()
+//                    updateCurrentWorkTarget()
                 }
             }
         }
@@ -612,7 +619,48 @@ Log.e("params", "" + params)
         return true
     }
     private fun saveRowData(cmd:String, value: JsonElement) {
+//        var db = SimpleDatabaseHelper(this)
 
+        if (cmd=="count") {
+//            val idx = AppGlobal.instance.get_design_info_idx()
+//            if (idx=="") return
+//
+//            val work_idx = ""+AppGlobal.instance.get_product_idx()
+//            if (work_idx=="") return
+//
+//            // 다운타임이 있으면 완료로 처리
+//            val downtime_idx = AppGlobal.instance.get_downtime_idx()
+//            Log.e("test", "downtime_idx = " + downtime_idx )
+//            if (downtime_idx!="") sendEndDownTimeForce()
+//
+//            val row = db.get(work_idx)
+//            val pieces_info = AppGlobal.instance.get_pieces_info()
+//
+//            val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
+//            if (pieces_info>accumulated_count) {
+//                AppGlobal.instance.set_accumulated_count(accumulated_count)
+//                return
+//            }
+//            AppGlobal.instance.set_accumulated_count(0)
+//
+//            val actual = (row!!["actual"].toString().toInt() + 1)
+//            val defective = row!!["defective"].toString().toInt()
+//            db.update(work_idx, pieces_info, actual, defective)
+
+            AppGlobal.instance.playSound(this)
+
+            _last_count_received_time = DateTime()
+
+            sendCountData(value.toString())
+
+//            _stitch_db.add(work_idx, value.toString())
+        }
+    }
+
+    private fun sendCountData(count:String) {
+        var cnt = AppGlobal.instance.get_current_shift_actual_cnt()
+        cnt++
+        AppGlobal.instance.set_current_shift_actual_cnt(cnt)
     }
 
     private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {

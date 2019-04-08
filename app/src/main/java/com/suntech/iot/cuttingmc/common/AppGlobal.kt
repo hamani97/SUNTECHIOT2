@@ -168,13 +168,14 @@ class AppGlobal private constructor() {
     fun get_layer_pairs(layer_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_layer_" + layer_no) }
 
     // server, manual 방식
-    fun set_target_type(value: Int) { UtilLocalStorage.setInt(instance._context!!, "current_target_type", value) }
-    fun get_target_type() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_target_type") }
-//    fun set_target_type(value: String) { UtilLocalStorage.setString(instance._context!!, "target_type", value) }
-//    fun get_target_type() : String { return UtilLocalStorage.getString(instance._context!!, "target_type") }
+    fun set_target_type(value: String) { UtilLocalStorage.setString(instance._context!!, "target_type", value) }
+    fun get_target_type() : String { return UtilLocalStorage.getString(instance._context!!, "target_type") }
 
     fun set_target_manual_shift(shift_no: String, value: String) { UtilLocalStorage.setString(instance._context!!, "current_target_shift_" + shift_no, value) }
     fun get_target_manual_shift(shift_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_target_shift_" + shift_no) }
+
+    fun set_current_shift_actual_cnt(actual: Int) { UtilLocalStorage.setInt(instance._context!!, "current_shift_actual_cnt", actual) }
+    fun get_current_shift_actual_cnt() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_shift_actual_cnt") }
 
     // Shift info
     fun get_current_shift_idx() : String {
@@ -278,29 +279,29 @@ class AppGlobal private constructor() {
     }
 
 
-    // 현재 프로덕트의 누적 시간을 구함
-    fun get_current_product_accumulated_time(with_no_constraint:Boolean = true) : Int {
-        val product_idx = get_product_idx()
+    // 현재 쉬프트의 누적 시간을 구함
+    fun get_current_shift_accumulated_time() : Int {
 
-        var db = SimpleDatabaseHelper(_context!!)
-        val row = db.get(product_idx)
+        var item = get_current_shift_time()
+        if (item==null) return 0
 
-        var product_stime = OEEUtil.parseDateTime(row!!["start_dt"].toString())
-        var now = DateTime()
+        var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+        var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
 
-        if (with_no_constraint) {
-            // 현재 작업이 처음 작업인 경우,
-            // 쉬프트 시작시간으로 설정, 이후부터는 프로덕트 시작시간 기준으로 계산
-            val list = db.gets()
-            if (list?.size==1) {
-                var item = get_current_shift_time()
-                if (item!=null)
-                    product_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-            }
-        }
-        return compute_work_time(product_stime, now)
+        return compute_work_time(shift_stime, shift_etime, false)
     }
 
+    // 현재 쉬프트의 총 시간을 구함 (쉬프트시작시간,종료시간무시)
+    fun get_current_shift_total_time() : Int {
+
+        var item = get_current_shift_time()
+        if (item==null) return 0
+
+        var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+        var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+
+        return compute_work_time(shift_stime, shift_etime, false, false)
+    }
 
     // 두시간(기간)에서 겹치는 시간을 계산
     fun compute_time(src_dt_s:DateTime, src_dt_e:DateTime, dst_dt_s:DateTime, dst_dt_e:DateTime) : Int {

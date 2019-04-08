@@ -19,8 +19,7 @@ import java.util.HashMap
 class SettingActivity : BaseActivity() {
 
     private var tab_pos: Int = 1
-    private var _selected_target_type: Int = 0  // Server : 11 = Accumulate, 12 = hourly, 13 = shift total
-                                                // Manual : 21 = Accumulate, 22 = hourly, 23 = shift total
+    private var _selected_target_type: String = "server"
 
     private var _selected_factory_idx: String = ""
     private var _selected_room_idx: String = ""
@@ -114,7 +113,7 @@ class SettingActivity : BaseActivity() {
         if (_selected_layer_10 != "") tv_layer_10.text = (_selected_layer_10 + " pair")
 
         // target setting
-        if (AppGlobal.instance.get_target_type() == 0) targetTypeChange(11)
+        if (AppGlobal.instance.get_target_type() == "") targetTypeChange("server_per_accumulate")
         else targetTypeChange(AppGlobal.instance.get_target_type())
 
         tv_shift_1.setText(AppGlobal.instance.get_target_manual_shift("1"))
@@ -143,12 +142,12 @@ class SettingActivity : BaseActivity() {
         tv_layer_10.setOnClickListener { fetchPairData("10") }
 
         // Target setting button listener
-        btn_server_accumulate.setOnClickListener { targetTypeChange(11) }
-        btn_server_hourly.setOnClickListener { targetTypeChange(12) }
-        btn_server_shifttotal.setOnClickListener { targetTypeChange(13) }
-        btn_manual_accumulate.setOnClickListener { targetTypeChange(21) }
-        btn_manual_hourly.setOnClickListener { targetTypeChange(22) }
-        btn_manual_shifttotal.setOnClickListener { targetTypeChange(23) }
+        btn_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
+        btn_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
+        btn_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+        btn_manual_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
+        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+        btn_manual_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
 
         // check server button
         btn_setting_check_server.setOnClickListener {
@@ -165,11 +164,6 @@ class SettingActivity : BaseActivity() {
 
         // Save button click
         btn_setting_confirm.setOnClickListener {
-            if (tv_setting_factory.text.toString() == "" || tv_setting_room.text.toString() == "" ||
-                tv_setting_line.text.toString() == "" || tv_setting_mac.text.toString() == "") {
-                Toast.makeText(this, getString(R.string.msg_require_info), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
             saveSettingData()
         }
 
@@ -208,6 +202,22 @@ class SettingActivity : BaseActivity() {
     }
 
     private fun saveSettingData() {
+        // check value
+        if (_selected_factory_idx == "" || _selected_room_idx == "" || _selected_line_idx == "" || tv_setting_mac.text.toString().trim() == "") {
+            Toast.makeText(this, getString(R.string.msg_require_info), Toast.LENGTH_SHORT).show()
+            return
+        }
+//        if (_selected_layer_1.trim() == "") {
+//            Toast.makeText(this, getString(R.string.msg_select_layer1), Toast.LENGTH_SHORT).show()
+//            return
+//        }
+        if (_selected_target_type.substring(0, 6) == "device") {
+            if (tv_shift_1.text.toString().trim()=="" || tv_shift_2.text.toString().trim()=="" || tv_shift_3.text.toString().trim()=="") {
+                Toast.makeText(this, getString(R.string.msg_require_target_quantity), Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+
         // setting value
         AppGlobal.instance.set_factory_idx(_selected_factory_idx)
         AppGlobal.instance.set_room_idx(_selected_room_idx)
@@ -512,32 +522,32 @@ class SettingActivity : BaseActivity() {
         }
     }
 
-    private fun targetTypeChange(v : Int) {
+    private fun targetTypeChange(v : String) {
         if (_selected_target_type == v) return
         when (_selected_target_type) {
-            11 -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            12 -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            13 -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            21 -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            22 -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            23 -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
         }
-        when (_selected_target_type) {
-            in 11..13 -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
-            in 21..23 -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+        when (_selected_target_type.substring(0, 6)) {
+            "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+            "device" -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
         }
         _selected_target_type = v
         when (_selected_target_type) {
-            11 -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            12 -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            13 -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            21 -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            22 -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            23 -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
         }
-        when (_selected_target_type) {
-            in 11..13 -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            in 21..23 -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+        when (_selected_target_type.substring(0, 6)) {
+            "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "device" -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
         }
     }
 }
