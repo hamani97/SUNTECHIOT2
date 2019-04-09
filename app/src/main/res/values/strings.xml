@@ -27,6 +27,7 @@
     <string name="bottom_label_component">Component : \u0020</string>
 
     <string name="button_total_count_view">Total Count View</string>
+    <string name="button_component_count_view">Component Count View</string>
     <string name="button_select_component">Select Component</string>
 
 
@@ -109,6 +110,7 @@
     <string name="msg_require_info">Info not complete</string>
     <string name="msg_select_layer1">Please select layer1 value</string>
     <string name="msg_require_target_quantity">Please enter a target quantity</string>
+    <string name="msg_layer_not_selected">Layer not selected</string>
     <string name="msg_no_setting">Setting not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>
     <string name="msg_cannot_input_wos">Cannot input wos</string>

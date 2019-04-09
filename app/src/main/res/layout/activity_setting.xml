@@ -279,7 +279,7 @@
                         android:layout_marginTop="10dp"
                         android:orientation="vertical">
 
-                    <LinearLayout style="@style/table_row" android:visibility="gone">
+                    <LinearLayout style="@style/table_row">
                         <TextView
                                 android:id="@+id/tv_setting_target_type_server"
                                 style="@style/table_row_title"
@@ -288,21 +288,20 @@
                                 android:textStyle="bold" />
                     </LinearLayout>
 
-                    <LinearLayout style="@style/tab_block" android:layout_marginTop="8dp"
-                    android:visibility="gone">
+                    <LinearLayout style="@style/tab_block" android:layout_marginTop="8dp">
                         <Button
                                 android:id="@+id/btn_server_accumulate"
-                                style="@style/tab_btn_off"
+                                style="@style/tab_btn_disable"
                                 android:stateListAnimator="@null"
                                 android:text="Accumulate" />
                         <Button
                                 android:id="@+id/btn_server_hourly"
-                                style="@style/tab_btn_off"
+                                style="@style/tab_btn_disable"
                                 android:stateListAnimator="@null"
                                 android:text="Hourly" />
                         <Button
                                 android:id="@+id/btn_server_shifttotal"
-                                style="@style/tab_btn_off"
+                                style="@style/tab_btn_disable"
                                 android:stateListAnimator="@null"
                                 android:text="Shift Total" />
                     </LinearLayout>
@@ -324,10 +323,9 @@
                                 android:text="Accumulate" />
                         <Button
                                 android:id="@+id/btn_manual_hourly"
-                                style="@style/tab_btn_off"
+                                style="@style/tab_btn_disable"
                                 android:stateListAnimator="@null"
-                                android:text="Hourly"
-                                android:visibility="gone" />
+                                android:text="Hourly" />
                         <Button
                                 android:id="@+id/btn_manual_shifttotal"
                                 style="@style/tab_btn_off"

@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
+import com.suntech.iot.cuttingmc.db.DBHelperForComponent
 import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import org.json.JSONObject
@@ -105,7 +106,7 @@ class ComponentInfoActivity : BaseActivity() {
 
         btn_setting_confirm.setOnClickListener {
             if (tv_compo_wos.text.toString() == "" || tv_compo_model.text.toString() == "" ||
-                tv_compo_style.text.toString() == "" || tv_compo_size.text.toString() == "") {
+                tv_compo_style.text.toString() == "" || tv_compo_size.text.toString() == "" || tv_compo_layer.text.toString() == "") {
                 Toast.makeText(this, getString(R.string.msg_require_info), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -116,11 +117,11 @@ class ComponentInfoActivity : BaseActivity() {
         _list_for_wos_adapter = ListWosAdapter(this, _filtered_list_for_wos)
         lv_wos_info.adapter = _list_for_wos_adapter
 
-        lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
-            _selected_wos_index = i
-            _list_for_wos_adapter?.select(i)
-            _list_for_wos_adapter?.notifyDataSetChanged()
-        }
+//        lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
+//            _selected_wos_index = i
+//            _list_for_wos_adapter?.select(i)
+//            _list_for_wos_adapter?.notifyDataSetChanged()
+//        }
 
         // button click
         tv_compo_wos.setOnClickListener { fetchWosData() }
@@ -145,6 +146,10 @@ class ComponentInfoActivity : BaseActivity() {
         AppGlobal.instance.set_compo_size_idx(_selected_size_idx)
 
         if (_selected_wos_index > -1) {
+            // 아이템을 변경한 경우 누적 카운트를 초기화 한다.
+            // 같은 아이템을 선택한 경우 카운트를 유지해야 하는지 확인이 필요함
+            AppGlobal.instance.set_accumulated_count(0)
+
             finish(true, 1, "ok", _filtered_list_for_wos[_selected_wos_index])
         } else {
             finish()
@@ -175,6 +180,8 @@ class ComponentInfoActivity : BaseActivity() {
     }
 
     private fun fetchWosAll() {
+        var db = DBHelperForComponent(this)
+
         val uri = "/wos.php"
         var params = listOf("code" to "wos")
 
@@ -185,7 +192,13 @@ class ComponentInfoActivity : BaseActivity() {
                 var list = result.getJSONArray("item")
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
-                    val actual = "0"
+                    val wosno = item.getString("wosno")
+                    val size = item.getString("size")
+
+                    val row = db.get(wosno, size)
+                    var actual = "0"
+                    if (row != null) actual = row["actual"].toString()
+
                     var map = hashMapOf(
                         "wosno" to item.getString("wosno"),
                         "styleno" to item.getString("styleno"),

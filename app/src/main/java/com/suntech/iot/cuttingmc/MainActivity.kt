@@ -19,6 +19,7 @@ import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
+import com.suntech.iot.cuttingmc.db.DBHelperForComponent
 import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
@@ -33,7 +34,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.util.*
-import kotlin.math.ceil
 
 class MainActivity : BaseActivity() {
 
@@ -619,35 +619,56 @@ Log.e("params", "" + params)
         return true
     }
     private fun saveRowData(cmd:String, value: JsonElement) {
+        var db = DBHelperForComponent(this)
 //        var db = SimpleDatabaseHelper(this)
 
         if (cmd=="count") {
-//            val idx = AppGlobal.instance.get_design_info_idx()
-//            if (idx=="") return
-//
-//            val work_idx = ""+AppGlobal.instance.get_product_idx()
-//            if (work_idx=="") return
-//
-//            // 다운타임이 있으면 완료로 처리
-//            val downtime_idx = AppGlobal.instance.get_downtime_idx()
-//            Log.e("test", "downtime_idx = " + downtime_idx )
-//            if (downtime_idx!="") sendEndDownTimeForce()
-//
-//            val row = db.get(work_idx)
-//            val pieces_info = AppGlobal.instance.get_pieces_info()
-//
-//            val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
-//            if (pieces_info>accumulated_count) {
-//                AppGlobal.instance.set_accumulated_count(accumulated_count)
-//                return
-//            }
-//            AppGlobal.instance.set_accumulated_count(0)
-//
-//            val actual = (row!!["actual"].toString().toInt() + 1)
-//            val defective = row!!["defective"].toString().toInt()
-//            db.update(work_idx, pieces_info, actual, defective)
 
-            AppGlobal.instance.playSound(this)
+//            AppGlobal.instance.playSound(this)
+
+            val layer = AppGlobal.instance.get_compo_layer()
+
+            if (layer == "") {
+                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val layer_value = AppGlobal.instance.get_layer_pairs(layer)
+
+            if (layer_value == "" || layer_value == "") {
+                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            var inc_count = 1
+
+            if (layer_value == "0.5") {
+                val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
+                if (accumulated_count <= 1) {
+                    AppGlobal.instance.set_accumulated_count(1)
+                    return
+                } else {
+                    AppGlobal.instance.set_accumulated_count(0)
+                }
+                inc_count = 1
+            } else {
+                inc_count = layer_value.toInt()
+            }
+
+            // total count
+            var cnt = AppGlobal.instance.get_current_shift_actual_cnt() + inc_count
+            AppGlobal.instance.set_current_shift_actual_cnt(cnt)
+
+            // component total count
+            val work_idx = AppGlobal.instance.get_work_idx()
+            if (work_idx == "") return
+
+            val row = db.get(work_idx)
+            if (row != null) {
+                val actual = (row!!["actual"].toString().toInt() + inc_count)
+                db.updateWorkActual(work_idx, actual)
+            }
+
 
             _last_count_received_time = DateTime()
 
@@ -657,10 +678,40 @@ Log.e("params", "" + params)
         }
     }
 
+    fun startComponent(wosno:String, styleno:String, model:String, size:String, target:String, actual:String) {
+
+        var db = DBHelperForComponent(this)
+
+        val work_info = AppGlobal.instance.get_current_shift_time()
+        val shift_idx = work_info?.getString("shift_idx") ?: ""
+        val shift_name = work_info?.getString("shift_name") ?: ""
+
+        val row = db.get(wosno, size)
+
+        if (row == null) {
+            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0)
+            val row2 = db.get(wosno, size)
+            if (row2 == null) {
+                Log.e("work_idx", "none")
+                AppGlobal.instance.set_work_idx("")
+            } else {
+                AppGlobal.instance.set_work_idx(row2["work_idx"].toString())
+                Log.e("work_idx", row2["work_idx"].toString())
+            }
+        } else {
+            AppGlobal.instance.set_work_idx(row["work_idx"].toString())
+            Log.e("work_idx", row["work_idx"].toString())
+        }
+        val br_intent = Intent("need.refresh")
+        this.sendBroadcast(br_intent)
+    }
+
+    fun startNewProduct(didx:String, piece_info:Int, cycle_time:Int, model:String, article:String, material_way:String, component:String) {
+
+    }
+
     private fun sendCountData(count:String) {
-        var cnt = AppGlobal.instance.get_current_shift_actual_cnt()
-        cnt++
-        AppGlobal.instance.set_current_shift_actual_cnt(cnt)
+
     }
 
     private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {

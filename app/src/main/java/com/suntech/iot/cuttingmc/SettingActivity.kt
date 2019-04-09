@@ -13,13 +13,12 @@ import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
-import java.util.ArrayList
-import java.util.HashMap
+import java.util.*
 
 class SettingActivity : BaseActivity() {
 
     private var tab_pos: Int = 1
-    private var _selected_target_type: String = "server"
+    private var _selected_target_type: String = "device"
 
     private var _selected_factory_idx: String = ""
     private var _selected_room_idx: String = ""
@@ -113,7 +112,7 @@ class SettingActivity : BaseActivity() {
         if (_selected_layer_10 != "") tv_layer_10.text = (_selected_layer_10 + " pair")
 
         // target setting
-        if (AppGlobal.instance.get_target_type() == "") targetTypeChange("server_per_accumulate")
+        if (AppGlobal.instance.get_target_type() == "") targetTypeChange("device_per_accumulate")
         else targetTypeChange(AppGlobal.instance.get_target_type())
 
         tv_shift_1.setText(AppGlobal.instance.get_target_manual_shift("1"))
@@ -142,11 +141,23 @@ class SettingActivity : BaseActivity() {
         tv_layer_10.setOnClickListener { fetchPairData("10") }
 
         // Target setting button listener
-        btn_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
-        btn_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
-        btn_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+//        btn_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
+//        btn_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
+//        btn_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+        btn_server_accumulate.setOnClickListener {
+            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
+        }
+        btn_server_hourly.setOnClickListener {
+            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
+        }
+        btn_server_shifttotal.setOnClickListener {
+            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
+        }
         btn_manual_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
-        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+//        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+        btn_manual_hourly.setOnClickListener {
+            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
+        }
         btn_manual_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
 
         // check server button

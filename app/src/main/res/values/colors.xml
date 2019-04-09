@@ -9,6 +9,7 @@
     <color name="colorWhite">#ffffff</color>
     <color name="colorWhite2">#d0efff</color>
     <color name="colorGray">#888888</color>
+    <color name="colorDarkGray">#444444</color>
     <color name="colorOrange">#f8ad13</color>
 
     <!-- common -->

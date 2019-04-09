@@ -37,6 +37,19 @@ class HomeFragment : BaseFragment() {
                     if (r && d != null) {
                         (activity as MainActivity).countViewType = 2
                         (activity as MainActivity).changeFragment(1)
+
+                        val wosno = d!!["wosno"]!!
+                        val styleno = d["styleno"]!!.toString()
+                        val model = d["model"]!!.toString()
+                        val size = d["size"]!!.toString()
+                        val target = d["target"]!!.toString()
+                        val actual = d["actual"]!!.toString()
+
+//                        val styleno = d["ct"]!!.toInt()
+//                        val pieces_info = AppGlobal.instance.get_pieces_info()
+
+                        (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
+//                        (activity as MainActivity).startNewProduct(idx, pieces_info, cycle_time, model, article, material_way, component)
                     }
                 })
             }

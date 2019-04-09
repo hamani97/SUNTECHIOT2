@@ -5,7 +5,6 @@ import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.util.Log
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import org.joda.time.DateTime
@@ -128,6 +127,10 @@ class AppGlobal private constructor() {
     }
 
 
+    // 작업 워크 고유값 설정
+    fun set_work_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "work_idx", idx) }
+    fun get_work_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
+
     // 작업 프로덕트 고유값 설정
     fun reset_product_idx() {
         UtilLocalStorage.setString(instance._context!!, "work_idx", "")
@@ -176,6 +179,12 @@ class AppGlobal private constructor() {
 
     fun set_current_shift_actual_cnt(actual: Int) { UtilLocalStorage.setInt(instance._context!!, "current_shift_actual_cnt", actual) }
     fun get_current_shift_actual_cnt() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_shift_actual_cnt") }
+
+
+    // 작업 정보
+    fun set_accumulated_count(cnt: Int) { UtilLocalStorage.setInt(instance._context!!, "accumulated_count", cnt) }
+    fun get_accumulated_count() : Int { return UtilLocalStorage.getInt(instance._context!!, "accumulated_count") }
+
 
     // Shift info
     fun get_current_shift_idx() : String {
