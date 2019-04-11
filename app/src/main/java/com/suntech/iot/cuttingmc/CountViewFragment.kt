@@ -54,7 +54,7 @@ class CountViewFragment : BaseFragment() {
         is_loop=true
         updateView()
         if ((activity as MainActivity).countViewType == 2) {
-            fetchWosAll()
+//            fetchWosAll()
         }
         startHandler()
     }
@@ -72,15 +72,15 @@ class CountViewFragment : BaseFragment() {
         } else {
             ll_total_count.visibility = View.GONE
             ll_component_count.visibility = View.VISIBLE
-            fetchWosAll()
+//            fetchWosAll()
         }
 
         // Worker info
         val no = AppGlobal.instance.get_worker_no()
         val name = AppGlobal.instance.get_worker_name()
         if (no== "" || name == "") {
-            Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
-            (activity as MainActivity).changeFragment(0)
+//            Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+//            (activity as MainActivity).changeFragment(0)
         }
 
         updateView()
@@ -108,10 +108,10 @@ class CountViewFragment : BaseFragment() {
         // Total count view
         btn_start.setOnClickListener {
             //            (activity as MainActivity).saveRowData("barcode", value)
-            Toast.makeText(activity, "Not yet available\n", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
         }
         btn_exit.setOnClickListener {
-            Toast.makeText(activity, "Not yet available\n", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
 //            val work_idx = ""+ AppGlobal.instance.get_product_idx()
 //            if (work_idx == "") {
 //                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
@@ -158,6 +158,7 @@ class CountViewFragment : BaseFragment() {
 
 //                        val styleno = d["ct"]!!.toInt()
 //                        val pieces_info = AppGlobal.instance.get_pieces_info()
+                    fetchWosAll()
 
                     (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
 //                        (activity as MainActivity).startNewProduct(idx, pieces_info, cycle_time, model, article, material_way, component)
@@ -168,6 +169,7 @@ class CountViewFragment : BaseFragment() {
         updateView()
         fetchColorData()     // Get Color
         countTarget()
+        fetchWosAll()
     }
 
     private fun countTarget() {

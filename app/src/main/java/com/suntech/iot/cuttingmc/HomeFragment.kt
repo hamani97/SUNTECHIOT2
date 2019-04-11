@@ -21,38 +21,36 @@ class HomeFragment : BaseFragment() {
         tv_app_version.text = "v " + activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
 
         btn_count_view.setOnClickListener {
-            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
-                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
-            } else {
+//            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
+//                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+//            } else {
                 (activity as MainActivity).countViewType = 1
                 (activity as MainActivity).changeFragment(1)
-            }
+//            }
         }
         btn_component_info.setOnClickListener {
-            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
-                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
-            } else {
-                val intent = Intent(activity, ComponentInfoActivity::class.java)
-                getBaseActivity().startActivity(intent, { r, c, m, d ->
-                    if (r && d != null) {
-                        (activity as MainActivity).countViewType = 2
-                        (activity as MainActivity).changeFragment(1)
-
-                        val wosno = d!!["wosno"]!!
-                        val styleno = d["styleno"]!!.toString()
-                        val model = d["model"]!!.toString()
-                        val size = d["size"]!!.toString()
-                        val target = d["target"]!!.toString()
-                        val actual = d["actual"]!!.toString()
-
-//                        val styleno = d["ct"]!!.toInt()
-//                        val pieces_info = AppGlobal.instance.get_pieces_info()
-
-                        (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
-//                        (activity as MainActivity).startNewProduct(idx, pieces_info, cycle_time, model, article, material_way, component)
-                    }
-                })
-            }
+//            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
+//                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+//            } else {
+                (activity as MainActivity).countViewType = 2
+                (activity as MainActivity).changeFragment(1)
+//                val intent = Intent(activity, ComponentInfoActivity::class.java)
+//                getBaseActivity().startActivity(intent, { r, c, m, d ->
+//                    if (r && d != null) {
+//                        (activity as MainActivity).countViewType = 2
+//                        (activity as MainActivity).changeFragment(1)
+//
+//                        val wosno = d!!["wosno"]!!
+//                        val styleno = d["styleno"]!!.toString()
+//                        val model = d["model"]!!.toString()
+//                        val size = d["size"]!!.toString()
+//                        val target = d["target"]!!.toString()
+//                        val actual = d["actual"]!!.toString()
+//
+//                        (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
+//                    }
+//                })
+//            }
         }
         btn_work_info.setOnClickListener {
             if (AppGlobal.instance.get_factory() == "" || AppGlobal.instance.get_room() == "" || AppGlobal.instance.get_line() == "") {

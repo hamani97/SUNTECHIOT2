@@ -234,10 +234,11 @@ class ComponentInfoActivity : BaseActivity() {
                         "idx" to item.getString("idx"),
                         "wosno" to item.getString("wosno"),
                         "styleno" to item.getString("styleno"),
-                        "model" to item.getString("model")
+                        "model" to item.getString("model"),
+                        "planday" to item.getString("planday")
                     )
                     lists.add(map)
-                    arr.add(item.getString("wosno") + " - " + item.getString("model"))
+                    arr.add("[" + item.getString("planday") + "] " + item.getString("wosno") + " - " + item.getString("model"))
                 }
                 val intent = Intent(this, PopupSelectList::class.java)
                 intent.putStringArrayListExtra("list", arr)

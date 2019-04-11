@@ -624,7 +624,7 @@ Log.e("params", "" + params)
 
         if (cmd=="count") {
 
-//            AppGlobal.instance.playSound(this)
+            AppGlobal.instance.playSound(this)
 
             val layer = AppGlobal.instance.get_compo_layer()
 

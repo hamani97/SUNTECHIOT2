@@ -138,6 +138,7 @@
     <style name="table_row_data_selector" parent="table_row_data">
         <item name="android:text">-</item>
         <item name="android:background">@color/colorSelector</item>
+        <item name="android:singleLine">true</item>
     </style>
     <style name="table_row_data_editor1" parent="table_row_data">
         <item name="android:text"></item>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SUNTECH IoT</string>
+    <string name="app_name">SUNTECH IoT-C</string>
 
     <!-- 타이틀 -->
     <string name="title_select_component">SELECT COMPONENT</string>
