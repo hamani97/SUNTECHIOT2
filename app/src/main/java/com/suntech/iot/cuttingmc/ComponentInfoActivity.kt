@@ -33,7 +33,6 @@ class ComponentInfoActivity : BaseActivity() {
 
     private var _list_for_wos_adapter: ListWosAdapter? = null
     private var _list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()
-    private var _filtered_list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()
 
     var _selected_wos_index = -1
 
@@ -54,7 +53,7 @@ class ComponentInfoActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_component_info)
         initView()
-        fetchWosAll()
+        filterWosData()
         start_timer()
     }
 
@@ -87,9 +86,11 @@ class ComponentInfoActivity : BaseActivity() {
         if (item == null) {
             tv_title.setText("No shift")
         } else {
-            tv_title.setText(item["shift_name"].toString() + "   " +
-                    item["available_stime"].toString() + " - " + item["available_etime"].toString())
+            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
         }
+
+        _list_for_wos_adapter = ListWosAdapter(this, _list_for_wos)
+        lv_wos_info.adapter = _list_for_wos_adapter
 
         tv_compo_wos.text = AppGlobal.instance.get_compo_wos()
         tv_compo_model.text = AppGlobal.instance.get_compo_model()
@@ -106,7 +107,8 @@ class ComponentInfoActivity : BaseActivity() {
 
         btn_setting_confirm.setOnClickListener {
             if (tv_compo_wos.text.toString() == "" || tv_compo_model.text.toString() == "" ||
-                tv_compo_style.text.toString() == "" || tv_compo_size.text.toString() == "" || tv_compo_layer.text.toString() == "") {
+                tv_compo_style.text.toString() == "" || tv_compo_component.text.toString() == "" ||
+                tv_compo_size.text.toString() == "" || tv_compo_layer.text.toString() == "") {
                 Toast.makeText(this, getString(R.string.msg_require_info), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -114,8 +116,6 @@ class ComponentInfoActivity : BaseActivity() {
         }
         btn_setting_cancel.setOnClickListener { finish() }
 
-        _list_for_wos_adapter = ListWosAdapter(this, _filtered_list_for_wos)
-        lv_wos_info.adapter = _list_for_wos_adapter
 
 //        lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
 //            _selected_wos_index = i
@@ -150,71 +150,66 @@ class ComponentInfoActivity : BaseActivity() {
             // 같은 아이템을 선택한 경우 카운트를 유지해야 하는지 확인이 필요함
             AppGlobal.instance.set_accumulated_count(0)
 
-            finish(true, 1, "ok", _filtered_list_for_wos[_selected_wos_index])
+            finish(true, 1, "ok", _list_for_wos[_selected_wos_index])
         } else {
             finish()
         }
     }
 
     private fun filterWosData() {
-        _filtered_list_for_wos.removeAll(_filtered_list_for_wos)
+        _list_for_wos.removeAll(_list_for_wos)
+        _selected_wos_index = -1
         _list_for_wos_adapter?.select(-1)
 
         val wosno = tv_compo_wos.text.toString()
+        val size = tv_compo_size.text.toString().trim()
 
-        if (wosno == "") {
-            for (i in 0..(_list_for_wos.size-1)) {
-                _filtered_list_for_wos.add(_list_for_wos[i])
-            }
-        } else {
-            for (i in 0..(_list_for_wos.size-1)) {
-                val item = _list_for_wos[i]
-                val item_wosno = item["wosno"] ?: ""
-                if (wosno == item_wosno) {
-                    _filtered_list_for_wos.add(item)
+        if (wosno != "") {
+            var db = DBHelperForComponent(this)
+
+            val uri = "/wos.php"
+            var params = listOf(
+                "code" to "wos",
+                "wosno" to wosno)
+
+            request(this, uri, false, params, { result ->
+                var code = result.getString("code")
+                var msg = result.getString("msg")
+                if (code == "00") {
+                    var list = result.getJSONArray("item")
+                    for (i in 0..(list.length() - 1)) {
+                        val item = list.getJSONObject(i)
+                        var actual = "0"
+
+                        val row = db.get(wosno, item.getString("size"))
+                        if (row != null) actual = row["actual"].toString()
+
+                        var map = hashMapOf(
+                            "wosno" to item.getString("wosno"),
+                            "styleno" to item.getString("styleno"),
+                            "model" to item.getString("model"),
+                            "size" to item.getString("size"),
+                            "target" to item.getString("target"),
+                            "actual" to actual
+                        )
+                        _list_for_wos.add(map)
+
+                        if (size != "" && size == item.getString("size")) {
+                            _selected_wos_index = i
+                            tv_compo_model.text = item.getString("model")
+                            tv_compo_style.text = item.getString("styleno")
+                            tv_compo_target.text = item.getString("target")
+                            tv_compo_actual.text = actual
+                        }
+                    }
+                    _list_for_wos_adapter?.select(_selected_wos_index)
+                    _list_for_wos_adapter?.notifyDataSetChanged()
+                } else {
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }
-            }
+            })
         }
         _list_for_wos_adapter?.notifyDataSetChanged()
-        selectWosData()
-    }
-
-    private fun fetchWosAll() {
-        var db = DBHelperForComponent(this)
-
-        val uri = "/wos.php"
-        var params = listOf("code" to "wos")
-
-        request(this, uri, false, params, { result ->
-            var code = result.getString("code")
-            var msg = result.getString("msg")
-            if (code == "00") {
-                var list = result.getJSONArray("item")
-                for (i in 0..(list.length() - 1)) {
-                    val item = list.getJSONObject(i)
-                    val wosno = item.getString("wosno")
-                    val size = item.getString("size")
-
-                    val row = db.get(wosno, size)
-                    var actual = "0"
-                    if (row != null) actual = row["actual"].toString()
-
-                    var map = hashMapOf(
-                        "wosno" to item.getString("wosno"),
-                        "styleno" to item.getString("styleno"),
-                        "model" to item.getString("model"),
-                        "size" to item.getString("size"),
-                        "target" to item.getString("target"),
-                        "actual" to actual
-                    )
-                    _list_for_wos.add(map)
-                }
-                filterWosData()
-            } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
-        })
-        filterWosData()
     }
 
     private fun fetchWosData() {
@@ -238,7 +233,7 @@ class ComponentInfoActivity : BaseActivity() {
                         "planday" to item.getString("planday")
                     )
                     lists.add(map)
-                    arr.add("[" + item.getString("planday") + "] " + item.getString("wosno") + " - " + item.getString("model"))
+                    arr.add("[ " + item.getString("planday") + " ]   " + item.getString("wosno") + "  -  " + item.getString("model"))
                 }
                 val intent = Intent(this, PopupSelectList::class.java)
                 intent.putStringArrayListExtra("list", arr)
@@ -353,8 +348,8 @@ class ComponentInfoActivity : BaseActivity() {
 
         if (wos == "" || size == "" || target == "") return
 
-        for (j in 0..(_filtered_list_for_wos.size-1)) {
-            val item = _filtered_list_for_wos[j]
+        for (j in 0..(_list_for_wos.size-1)) {
+            val item = _list_for_wos[j]
             val wos2 = item["wosno"] ?: ""
             val size2 = item["size"] ?: ""
             val target2 = item["target"] ?: ""

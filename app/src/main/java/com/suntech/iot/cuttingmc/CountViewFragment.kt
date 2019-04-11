@@ -53,9 +53,6 @@ class CountViewFragment : BaseFragment() {
         activity.registerReceiver(_need_to_refresh, IntentFilter("need.refresh"))
         is_loop=true
         updateView()
-        if ((activity as MainActivity).countViewType == 2) {
-//            fetchWosAll()
-        }
         startHandler()
     }
 
@@ -72,14 +69,13 @@ class CountViewFragment : BaseFragment() {
         } else {
             ll_total_count.visibility = View.GONE
             ll_component_count.visibility = View.VISIBLE
-//            fetchWosAll()
         }
 
         // Worker info
         val no = AppGlobal.instance.get_worker_no()
         val name = AppGlobal.instance.get_worker_name()
         if (no== "" || name == "") {
-//            Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
 //            (activity as MainActivity).changeFragment(0)
         }
 
@@ -158,7 +154,7 @@ class CountViewFragment : BaseFragment() {
 
 //                        val styleno = d["ct"]!!.toInt()
 //                        val pieces_info = AppGlobal.instance.get_pieces_info()
-                    fetchWosAll()
+                    fetchFilterWos()
 
                     (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
 //                        (activity as MainActivity).startNewProduct(idx, pieces_info, cycle_time, model, article, material_way, component)
@@ -167,9 +163,9 @@ class CountViewFragment : BaseFragment() {
         }
 
         updateView()
-        fetchColorData()     // Get Color
+        fetchColorData()    // Get Color
         countTarget()
-        fetchWosAll()
+        fetchFilterWos()    // 기존 선택된 WOS 가 있으면 로드해서 화면에 표시한다.
     }
 
     private fun countTarget() {
@@ -432,21 +428,19 @@ class CountViewFragment : BaseFragment() {
         }
     }
 
-    private fun fetchWosAll() {
+    private fun fetchFilterWos() {
+
+        val def_wosno = AppGlobal.instance.get_compo_wos().trim()
+        val def_size = AppGlobal.instance.get_compo_size().trim()
+
+        if (def_wosno == "" || def_size == "") return
+
         var db = DBHelperForComponent(activity)
 
         val uri = "/wos.php"
-        var params = listOf("code" to "wos")
-
-        val set_wosno = AppGlobal.instance.get_compo_wos().trim()
-        val set_size = AppGlobal.instance.get_compo_size().trim()
-
-        if (set_wosno != "") {
-            params = listOf(
+        val params = listOf(
                 "code" to "wos",
-                "wosno" to set_wosno
-            )
-        }
+                "wosno" to def_wosno)
 
         getBaseActivity().request(activity, uri, false, params, { result ->
             var code = result.getString("code")
@@ -463,7 +457,7 @@ class CountViewFragment : BaseFragment() {
                     val wosno = item.getString("wosno")
                     val size = item.getString("size")
 
-                    if (wosno == set_wosno && size == set_size) {
+                    if (wosno == def_wosno && size == def_size) {
                         val row = db.get(wosno, size)
                         var actual = "0"
                         if (row != null) actual = row["actual"].toString()
@@ -487,7 +481,7 @@ class CountViewFragment : BaseFragment() {
                     val wosno = item.getString("wosno")
                     val size = item.getString("size")
 
-                    if (wosno != set_wosno || size != set_size) {
+                    if (wosno != def_wosno || size != def_size) {
                         val row = db.get(wosno, size)
                         var actual = "0"
                         if (row != null) actual = row["actual"].toString()

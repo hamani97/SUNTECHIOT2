@@ -28,7 +28,7 @@
 
             <LinearLayout
                     android:layout_width="1080dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical">
 
                 <!-- SELECT COMPONENT -->
@@ -186,7 +186,7 @@
                             android:layout_height="match_parent"
                             android:divider="@color/list_item_bg_color"
                             android:dividerHeight="0dp"
-                            android:background="@color/list_item_bg_color" />
+                            android:background="@color/list_item_bg_color"/>
 
                 </LinearLayout>
 
