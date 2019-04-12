@@ -144,32 +144,32 @@
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="2"
+                            android:layout_weight="4"
                             android:text="@string/list_item_wos" />
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="4"
+                            android:layout_weight="7"
                             android:text="@string/list_item_model" />
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:text="@string/list_item_size" />
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:text="@string/list_item_target" />
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:text="@string/list_item_actual" />
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
+                            android:layout_weight="3"
                             android:text="@string/list_item_balance" />
                 </LinearLayout>
 
@@ -205,7 +205,7 @@
 
             <Button
                     android:id="@+id/btn_setting_cancel"
-                    style="@style/btn_orange"
+                    style="@style/btn_cancel"
                     android:stateListAnimator="@null"
                     android:text="@string/cancel" />
 

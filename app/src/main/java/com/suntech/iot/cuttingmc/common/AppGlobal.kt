@@ -59,6 +59,9 @@ class AppGlobal private constructor() {
     fun set_long_touch(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_long_touch", state) }
     fun get_long_touch() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_long_touch") }
 
+    fun set_sound_at_count(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_sound_count", state) }
+    fun get_sound_at_count() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_sound_count") }
+
     fun set_server_ip(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_server_ip", idx) }
     fun get_server_ip() : String { return UtilLocalStorage.getString(instance._context!!, "current_server_ip") }
     fun set_server_port(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_server_port", idx) }

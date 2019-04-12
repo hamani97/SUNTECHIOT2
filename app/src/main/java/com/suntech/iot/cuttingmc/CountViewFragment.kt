@@ -21,6 +21,7 @@ import com.suntech.iot.cuttingmc.db.DBHelperForComponent
 import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import kotlinx.android.synthetic.main.fragment_count_view.*
 import kotlinx.android.synthetic.main.layout_bottom_info_3.*
+import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
 import org.json.JSONObject
 
@@ -63,6 +64,8 @@ class CountViewFragment : BaseFragment() {
     }
 
     override fun onSelected() {
+        activity.tv_title?.visibility = View.VISIBLE
+
         if ((activity as MainActivity).countViewType == 1) {
             ll_total_count.visibility = View.VISIBLE
             ll_component_count.visibility = View.GONE
@@ -102,10 +105,10 @@ class CountViewFragment : BaseFragment() {
         tv_component_view_ratio.text = "0%"
 
         // Total count view
-        btn_start.setOnClickListener {
-            //            (activity as MainActivity).saveRowData("barcode", value)
-            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
-        }
+//        btn_start.setOnClickListener {
+//            //            (activity as MainActivity).saveRowData("barcode", value)
+//            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
+//        }
         btn_exit.setOnClickListener {
             Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
 //            val work_idx = ""+ AppGlobal.instance.get_product_idx()
@@ -136,9 +139,6 @@ class CountViewFragment : BaseFragment() {
             ll_component_count.visibility = View.GONE
         }
         btn_select_component.setOnClickListener {
-//            val intent = Intent(activity, ComponentInfoActivity::class.java)
-//            startActivity(intent)
-
             val intent = Intent(activity, ComponentInfoActivity::class.java)
             getBaseActivity().startActivity(intent, { r, c, m, d ->
                 if (r && d != null) {

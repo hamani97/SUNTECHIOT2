@@ -90,7 +90,7 @@ class WorkInfoActivity : BaseActivity() {
 
     private fun initView() {
 
-        tv_title.text = "WORK INFO"
+        tv_title.text = "OPERATOR DETAIL"
 
         list_adapter = ListAdapter(this, _list)
         lv_available_info.adapter = list_adapter
@@ -448,9 +448,9 @@ class WorkInfoActivity : BaseActivity() {
             var work_etime = OEEUtil.parseDateTime(_list[position]["work_etime"].toString())
 
             vh.tv_item_shift.text = _list[position]["shift_name"]
-            vh.tv_item_work_time.text = work_stime.toString("HH:mm") + "~" + work_etime.toString("HH:mm")
-            vh.tv_item_planned_time1.text = _list[position]["planned1_stime"] + "~" + _list[position]["planned1_etime"]
-            vh.tv_item_planned_time2.text = _list[position]["planned2_stime"] + "~" + _list[position]["planned2_etime"]
+            vh.tv_item_work_time.text = if (work_stime.toString() != "" && work_etime.toString() != "") work_stime.toString("HH:mm") + "~" + work_etime.toString("HH:mm") else ""
+            vh.tv_item_planned_time1.text = if (_list[position]["planned1_stime"] != "" && _list[position]["planned1_etime"] != "") _list[position]["planned1_stime"] + "~" + _list[position]["planned1_etime"] else ""
+            vh.tv_item_planned_time2.text = if (_list[position]["planned2_stime"] != "" && _list[position]["planned2_etime"] != "") _list[position]["planned2_stime"] + "~" + _list[position]["planned2_etime"] else ""
 
             if ((_context as WorkInfoActivity)._selected_index==position) {
                 vh.tv_item_shift.setTextColor(ContextCompat.getColor(_context, R.color.list_item_highlight_text_color))

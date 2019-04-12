@@ -59,7 +59,8 @@
 
                 <include layout="@layout/list_item_product_title"
                          android:layout_width="match_parent"
-                         android:layout_height="wrap_content"/>
+                         android:layout_height="wrap_content" />
+
             </LinearLayout>
 
             <View
@@ -77,8 +78,7 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:divider="#fff"
-                    android:dividerHeight="0dp"
-            />
+                    android:dividerHeight="0dp" />
 
             <View
                     android:layout_width="match_parent"
@@ -109,16 +109,10 @@
                 android:orientation="horizontal">
 
             <Button
-                    android:id="@+id/btn_cancel"
-                    style="@style/btn_orange"
-                    android:stateListAnimator="@null"
-                    android:text="@string/cancel" />
-
-            <Button
                     android:id="@+id/btn_confirm"
                     style="@style/btn_orange"
                     android:stateListAnimator="@null"
-                    android:text="@string/confirm" />
+                    android:text="@string/exit" />
 
         </LinearLayout>
     </LinearLayout>

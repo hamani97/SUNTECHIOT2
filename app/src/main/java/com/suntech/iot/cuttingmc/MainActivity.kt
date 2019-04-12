@@ -63,6 +63,13 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         AppGlobal.instance.setContext(this)
 
+        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+        if (item == null) {
+            tv_title.setText("No shift")
+        } else {
+            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+        }
+
         mHandler = MyHandler(this)
 
         // button click event
@@ -143,6 +150,8 @@ class MainActivity : BaseActivity() {
     }
 
     fun changeFragment(pos:Int) {
+//        if (pos==1) c
+//        else tv_title.visibility = View.GONE
         vp_fragments.setCurrentItem(pos, true)
     }
 
@@ -624,7 +633,7 @@ Log.e("params", "" + params)
 
         if (cmd=="count") {
 
-            AppGlobal.instance.playSound(this)
+            if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
             val layer = AppGlobal.instance.get_compo_layer()
 

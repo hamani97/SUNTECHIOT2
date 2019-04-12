@@ -45,26 +45,97 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="10dp"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
                 android:orientation="vertical">
 
-            <TextView
-                    android:id="@+id/tv_design_idx"
+            <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:gravity="center"
-                    android:text="IDX 1001"
-                    android:textSize="21sp"
-                    android:textColor="#333"
-                    android:textStyle="bold"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <TextView
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text="WOS"
+                        android:textSize="21sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"/>
+                <TextView
+                        android:id="@+id/tv_work_idx"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="21sp"
+                        android:textColor="@color/colorRed"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <TextView
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text="MODEL"
+                        android:textSize="21sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"/>
+                <TextView
+                        android:id="@+id/tv_work_model"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="21sp"
+                        android:textColor="@color/colorRed"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <TextView
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text="SIZE"
+                        android:textSize="21sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"/>
+                <TextView
+                        android:id="@+id/tv_work_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="21sp"
+                        android:textColor="@color/colorRed"
+                        android:textStyle="bold"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <TextView
+                        android:layout_width="90dp"
+                        android:layout_height="wrap_content"
+                        android:text="ACTUAL"
+                        android:textSize="21sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"/>
+                <TextView
+                        android:id="@+id/tv_work_actual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="21sp"
+                        android:textColor="@color/colorRed"
+                        android:textStyle="bold"/>
+            </LinearLayout>
 
             <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="20dp"
                     android:background="#000"/>
         </LinearLayout>
 
@@ -92,10 +163,6 @@
                         android:textColor="#333"
                         android:textStyle="bold"/>
 
-                <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2dp"
-                        android:background="#000"/>
             </LinearLayout>
 
             <LinearLayout
@@ -133,26 +200,16 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:layout_marginRight="5dp"
-                            android:background="@mipmap/btn_actual_count_plus"/>
+                            android:background="@mipmap/btn_actual_count_plus" />
 
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="50dp"
-                            android:gravity="center"
-                            android:text="@string/guide_actual_count_edit_input"
-                            android:textSize="18sp"
-                            android:textColor="#333"
-                            android:textStyle="bold"/>
+                    <ImageButton
+                            android:id="@+id/btn_actual_count_edit_minus"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginRight="5dp"
+                            android:background="@mipmap/btn_actual_count_minus" />
 
                 </LinearLayout>
-
-                <ImageButton
-                        android:id="@+id/btn_actual_count_edit_minus"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@mipmap/btn_actual_count_minus"/>
-
 
             </LinearLayout>
         </LinearLayout>
@@ -165,123 +222,11 @@
                 android:layout_marginRight="40dp"
                 android:orientation="vertical">
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:gravity="center"
-                    android:text="@string/label_actual_count_edit_input_list"
-                    android:textSize="21sp"
-                    android:textColor="#333"
-                    android:textStyle="bold"/>
-
             <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     android:layout_marginTop="5dp"
                     android:background="#000"/>
-        </LinearLayout>
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-            <LinearLayout
-                    android:id="@+id/ll_list_item_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="1dp"
-                    android:orientation="horizontal">
-
-                <ImageView
-                        android:id="@+id/ib_list_item_1"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/btn_icon_select_box"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="List1"
-                        android:textSize="20sp"
-                        android:textColor="#c00200"/>
-            </LinearLayout>
-
-
-            <LinearLayout
-                    android:id="@+id/ll_list_item_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="1dp"
-                    android:orientation="horizontal">
-
-                <ImageView
-                        android:id="@+id/ib_list_item_2"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/btn_icon_select_box"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="List1"
-                        android:textSize="20sp"
-                        android:textColor="#c00200"/>
-            </LinearLayout>
-
-            <LinearLayout
-                    android:id="@+id/ll_list_item_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="1dp"
-                    android:orientation="horizontal">
-
-                <ImageView
-                        android:id="@+id/ib_list_item_3"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/btn_icon_select_box"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="List1"
-                        android:textSize="20sp"
-                        android:textColor="#c00200"/>
-            </LinearLayout>
-
-            <LinearLayout
-                    android:id="@+id/ll_list_item_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="1dp"
-                    android:orientation="horizontal">
-
-                <ImageView
-                        android:id="@+id/ib_list_item_4"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/btn_icon_select_box"/>
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="List1"
-                        android:textSize="20sp"
-                        android:textColor="#c00200"/>
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -294,7 +239,7 @@
 
             <Button
                     android:id="@+id/btn_cancel"
-                    style="@style/btn_orange"
+                    style="@style/btn_cancel"
                     android:layout_width="150dp"
                     android:stateListAnimator="@null"
                     android:text="@string/cancel" />
@@ -304,7 +249,7 @@
                     style="@style/btn_orange"
                     android:layout_width="150dp"
                     android:stateListAnimator="@null"
-                    android:text="@string/confirm" />
+                    android:text="@string/save" />
 
         </LinearLayout>
     </LinearLayout>

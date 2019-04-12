@@ -60,12 +60,12 @@
                             style="@style/tab_btn_orange"
                             android:layout_width="440dp"
                             android:layout_marginLeft="140dp"
-                            android:text="Work Time" />
+                            android:text="WORK TIME" />
                     <TextView
                             style="@style/tab_btn_on"
                             android:layout_width="440dp"
                             android:layout_marginLeft="30dp"
-                            android:text="Planned Time" />
+                            android:text="PLANNED TIME" />
                 </LinearLayout>
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -83,7 +83,7 @@
                                 android:layout_weight="1"
                                 android:paddingRight="30dp"
                                 android:gravity="center"
-                                android:text="Start"
+                                android:text="START"
                                 android:textColor="@color/colorWhite"
                                 android:textSize="20sp" />
                         <TextView
@@ -92,7 +92,7 @@
                                 android:layout_weight="1"
                                 android:paddingLeft="10dp"
                                 android:gravity="center"
-                                android:text="End"
+                                android:text="END"
                                 android:textColor="@color/colorWhite"
                                 android:textSize="20sp" />
                     </LinearLayout>
@@ -107,7 +107,7 @@
                                 android:layout_weight="1"
                                 android:paddingRight="30dp"
                                 android:gravity="center"
-                                android:text="Start"
+                                android:text="START"
                                 android:textColor="@color/colorWhite"
                                 android:textSize="20sp" />
                         <TextView
@@ -116,7 +116,7 @@
                                 android:layout_weight="1"
                                 android:paddingLeft="10dp"
                                 android:gravity="center"
-                                android:text="End"
+                                android:text="END"
                                 android:textColor="@color/colorWhite"
                                 android:textSize="20sp" />
                     </LinearLayout>
@@ -339,6 +339,7 @@
                                     style="@style/grid_header_text"
                                     android:layout_width="0dp"
                                     android:layout_weight="1"
+                                    android:layout_marginLeft="20dp"
                                     android:text="@string/list_item_employee_number" />
                             <TextView
                                     style="@style/grid_header_text"
@@ -390,6 +391,7 @@
                                     style="@style/grid_header_text"
                                     android:layout_width="0dp"
                                     android:layout_weight="1"
+                                    android:layout_marginLeft="20dp"
                                     android:text="@string/list_item_employee_number" />
                             <TextView
                                     style="@style/grid_header_text"
@@ -432,7 +434,7 @@
 
             <Button
                     android:id="@+id/btn_setting_cancel"
-                    style="@style/btn_orange"
+                    style="@style/btn_cancel"
                     android:stateListAnimator="@null"
                     android:text="@string/cancel" />
 

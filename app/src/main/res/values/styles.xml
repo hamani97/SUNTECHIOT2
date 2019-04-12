@@ -39,6 +39,13 @@
         <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/shape_default_rectangle_button</item>
     </style>
+    <style name="btn_cancel" parent="btn_default">
+        <item name="android:textColor">@color/colorGray</item>
+        <item name="android:background">@drawable/shape_gray_rectangle_button</item>
+    </style>
+    <style name="btn_gray" parent="btn_default">
+        <item name="android:background">@drawable/shape_gray_rectangle_button</item>
+    </style>
     <style name="btn_orange" parent="btn_default">
         <item name="android:background">@drawable/shape_orange_rectangle_button</item>
     </style>
@@ -109,7 +116,7 @@
         <item name="android:orientation">horizontal</item>
     </style>
     <style name="table_row_title">
-        <item name="android:layout_width">140dp</item>
+        <item name="android:layout_width">150dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_marginRight">8dp</item>
         <item name="android:gravity">center</item>

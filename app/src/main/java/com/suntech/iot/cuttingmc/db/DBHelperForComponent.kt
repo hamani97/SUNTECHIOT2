@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import org.joda.time.DateTime
+import java.util.*
 
 class DBHelperForComponent
     /**
@@ -107,6 +108,32 @@ class DBHelperForComponent
             db.close()
             return null
         }
+    }
+
+    fun gets():  ArrayList<HashMap<String, String>>? {
+        var arr = ArrayList<HashMap<String, String>>()
+        val db = _openHelper.readableDatabase ?: return null
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, start_dt, end_dt " +
+                "from component where actual > 0 order by (target-actual) desc"
+        val cur = db.rawQuery(sql, arrayOf())
+        while (cur.moveToNext()) {
+            val row = HashMap<String, String>()
+            row.put("work_idx", cur.getString(0))
+            row.put("wosno", cur.getString(1))
+            row.put("shift_id", cur.getString(2))
+            row.put("shift_name", cur.getString(3))
+            row.put("styleno", cur.getString(4))
+            row.put("model", cur.getString(5))
+            row.put("size", cur.getString(6))
+            row.put("target", cur.getString(7))
+            row.put("actual", cur.getString(8))
+            row.put("start_dt", cur.getString(9))
+            row.put("end_dt", cur.getString(10))
+            arr.add(row)
+        }
+        cur.close()
+        db.close()
+        return arr
     }
 
     fun add(wosno: String, shift_id:String, shift_name:String, styleno: String, model:String, size:String, target: Int, actual: Int): Long {

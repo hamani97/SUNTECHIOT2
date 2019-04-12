@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
+import com.suntech.iot.cuttingmc.util.UtilString.addPairText
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import java.util.*
@@ -93,6 +94,7 @@ class SettingActivity : BaseActivity() {
         et_setting_port.setText(AppGlobal.instance.get_server_port())
 
         sw_long_touch.isChecked = AppGlobal.instance.get_long_touch()
+        sw_sound_at_count.isChecked = AppGlobal.instance.get_sound_at_count()
 
         // count setting
         // set hidden value
@@ -104,12 +106,12 @@ class SettingActivity : BaseActivity() {
         _selected_layer_10 = AppGlobal.instance.get_layer_pairs("10")
 
         // widget
-        if (_selected_layer_1 != "") tv_layer_1.text = (_selected_layer_1 + " pair")
-        if (_selected_layer_2 != "") tv_layer_2.text = (_selected_layer_2 + " pair")
-        if (_selected_layer_4 != "") tv_layer_4.text = (_selected_layer_4 + " pair")
-        if (_selected_layer_6 != "") tv_layer_6.text = (_selected_layer_6 + " pair")
-        if (_selected_layer_8 != "") tv_layer_8.text = (_selected_layer_8 + " pair")
-        if (_selected_layer_10 != "") tv_layer_10.text = (_selected_layer_10 + " pair")
+        if (_selected_layer_1 != "") tv_layer_1.text = addPairText(_selected_layer_1)
+        if (_selected_layer_2 != "") tv_layer_2.text = addPairText(_selected_layer_2)
+        if (_selected_layer_4 != "") tv_layer_4.text = addPairText(_selected_layer_4)
+        if (_selected_layer_6 != "") tv_layer_6.text = addPairText(_selected_layer_6)
+        if (_selected_layer_8 != "") tv_layer_8.text = addPairText(_selected_layer_8)
+        if (_selected_layer_10 != "") tv_layer_10.text = addPairText(_selected_layer_10)
 
         // target setting
         if (AppGlobal.instance.get_target_type() == "") targetTypeChange("device_per_accumulate")
@@ -246,6 +248,7 @@ class SettingActivity : BaseActivity() {
         AppGlobal.instance.set_server_ip(et_setting_server_ip.text.toString())
         AppGlobal.instance.set_server_port(et_setting_port.text.toString())
         AppGlobal.instance.set_long_touch(sw_long_touch.isChecked)
+        AppGlobal.instance.set_sound_at_count(sw_sound_at_count.isChecked)
 
         // count layer
         AppGlobal.instance.set_layer_pairs("1", _selected_layer_1)
@@ -448,12 +451,14 @@ class SettingActivity : BaseActivity() {
         var lists : ArrayList<HashMap<String, String>> = arrayListOf()
 
         arr.add("0.5 pair")
+        arr.add("1 pair")
         lists.add(hashMapOf("pair" to "0.5", "desc" to "0.5 pair"))
+        lists.add(hashMapOf("pair" to "1", "desc" to "1 pair"))
 
-        for (i in 1..5) {
+        for (i in 2..5) {
             var num = i.toString()
-            arr.add(num + " pair")
-            lists.add(hashMapOf("pair" to num, "desc" to num + " pair"))
+            arr.add(num + " pairs")
+            lists.add(hashMapOf("pair" to num, "desc" to num + " pairs"))
         }
 
         arr.add("None")

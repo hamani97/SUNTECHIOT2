@@ -86,20 +86,20 @@
                     android:textSize="20sp"
                     android:textColor="@color/colorOrange"/>
 
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:text="@string/bottom_label_mc_model"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorWhite"/>
-            <TextView
-                    android:id="@+id/tv_mc_model"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-"
-                    android:textSize="20sp"
-                    android:textColor="@color/colorOrange"/>
+            <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginLeft="30dp"-->
+                    <!--android:text="@string/bottom_label_mc_model"-->
+                    <!--android:textSize="20sp"-->
+                    <!--android:textColor="@color/colorWhite"/>-->
+            <!--<TextView-->
+                    <!--android:id="@+id/tv_mc_model"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="-"-->
+                    <!--android:textSize="20sp"-->
+                    <!--android:textColor="@color/colorOrange"/>-->
         </LinearLayout>
 
         <LinearLayout

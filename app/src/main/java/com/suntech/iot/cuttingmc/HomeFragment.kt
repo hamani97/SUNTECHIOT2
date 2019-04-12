@@ -10,6 +10,7 @@ import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.layout_bottom_info.*
+import kotlinx.android.synthetic.main.layout_top_menu.*
 
 class HomeFragment : BaseFragment() {
 
@@ -64,6 +65,7 @@ class HomeFragment : BaseFragment() {
     }
 
     override fun onSelected() {
+        activity.tv_title?.visibility = View.GONE
         updateView()
     }
 
@@ -77,7 +79,7 @@ class HomeFragment : BaseFragment() {
         tv_room.text = AppGlobal.instance.get_room()
         tv_line.text = AppGlobal.instance.get_line()
         tv_mc_no.text = AppGlobal.instance.get_mc_no1() //+ "-" + AppGlobal.instance.get_mc_no2()
-        tv_mc_model.text = AppGlobal.instance.get_mc_model()
+//        tv_mc_model.text = AppGlobal.instance.get_mc_model()
         tv_employee_no.text = AppGlobal.instance.get_worker_no()
         tv_employee_name.text = AppGlobal.instance.get_worker_name()
         tv_shift.text = AppGlobal.instance.get_current_shift_name()

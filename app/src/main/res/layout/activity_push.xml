@@ -92,9 +92,9 @@
 
             <Button
                     android:id="@+id/btn_cancel"
-                    style="@style/btn_orange"
+                    style="@style/btn_cancel"
                     android:stateListAnimator="@null"
-                    android:text="@string/cancel" />
+                    android:text="@string/exit" />
 
             <Button
                     android:id="@+id/btn_confirm"

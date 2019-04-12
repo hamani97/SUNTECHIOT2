@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
+import com.suntech.iot.cuttingmc.util.UtilString.addPairText
 import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import org.json.JSONObject
@@ -370,27 +371,27 @@ class ComponentInfoActivity : BaseActivity() {
         var lists : ArrayList<HashMap<String, String>> = arrayListOf()
 
         if (AppGlobal.instance.get_layer_pairs("1") != "") {
-            arr.add("1 Layer - " + AppGlobal.instance.get_layer_pairs("1") + " pair")
+            arr.add("1 Layer - " + addPairText(AppGlobal.instance.get_layer_pairs("1")))
             lists.add(hashMapOf("layer_no" to "1", "pair" to AppGlobal.instance.get_layer_pairs("1")))
         }
         if (AppGlobal.instance.get_layer_pairs("2") != "") {
-            arr.add("2 Layer - " + AppGlobal.instance.get_layer_pairs("2") + " pair")
+            arr.add("2 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("2")))
             lists.add(hashMapOf("layer_no" to "2", "pair" to AppGlobal.instance.get_layer_pairs("2")))
         }
         if (AppGlobal.instance.get_layer_pairs("4") != "") {
-            arr.add("4 Layer - " + AppGlobal.instance.get_layer_pairs("4") + " pair")
+            arr.add("4 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("4")))
             lists.add(hashMapOf("layer_no" to "4", "pair" to AppGlobal.instance.get_layer_pairs("4")))
         }
         if (AppGlobal.instance.get_layer_pairs("6") != "") {
-            arr.add("6 Layer - " + AppGlobal.instance.get_layer_pairs("6") + " pair")
+            arr.add("6 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("6")))
             lists.add(hashMapOf("layer_no" to "6", "pair" to AppGlobal.instance.get_layer_pairs("6")))
         }
         if (AppGlobal.instance.get_layer_pairs("8") != "") {
-            arr.add("8 Layer - " + AppGlobal.instance.get_layer_pairs("8") + " pair")
+            arr.add("8 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("8")))
             lists.add(hashMapOf("layer_no" to "8", "pair" to AppGlobal.instance.get_layer_pairs("8")))
         }
         if (AppGlobal.instance.get_layer_pairs("10") != "") {
-            arr.add("10 Layer - " + AppGlobal.instance.get_layer_pairs("10") + " pair")
+            arr.add("10 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("10")))
             lists.add(hashMapOf("layer_no" to "10", "pair" to AppGlobal.instance.get_layer_pairs("10")))
         }
 

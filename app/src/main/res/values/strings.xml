@@ -14,11 +14,9 @@
     <string name="title_target_type">TARGET TYPE</string>
     <string name="title_design_info">DESIGN INFO</string>
 
-    <string name="title_push_info">Push Info</string>
+    <string name="title_push_info">PUSH INFO</string>
 
     <!-- 카운트화면 -->
-    <string name="label_c_target">C.TARGET</string>
-    <string name="label_c_actual">C.ACTUAL</string>
     <string name="bottom_label_pieces">Pieces : \u0020</string>
     <string name="bottom_label_cycle_time">Cycle Time : \u0020</string>
     <string name="bottom_label_article">Article : \u0020</string>
@@ -35,31 +33,31 @@
     <string name="label_wifi">WiFi</string>
     <string name="label_ip">IP</string>
     <string name="label_mac">MAC</string>
-    <string name="label_factory">Factory</string>
-    <string name="label_room">Room</string>
-    <string name="label_line">Line</string>
-    <string name="label_mc_no">MC No</string>
-    <string name="label_mc_model">MC Model</string>
-    <string name="label_mc_serial">MC Serial</string>
-    <string name="label_server_ip">Server IP</string>
-    <string name="label_server_port">Port</string>
+    <string name="label_factory">FACTORY</string>
+    <string name="label_room">ZONE</string>
+    <string name="label_line">LINE</string>
+    <string name="label_mc_no">M/C No</string>
+    <string name="label_mc_model">MC MODEL</string>
+    <string name="label_mc_serial">MC SERIAL</string>
+    <string name="label_server_ip">SERVER IP</string>
+    <string name="label_server_port">PORT</string>
 
     <!-- COMPONENT 화면 -->
     <string name="label_wos">WOS</string>
     <string name="label_component">COMPONENT</string>
     <string name="label_size">SIZE</string>
-    <string name="label_layer">Layer</string>
+    <string name="label_layer">LAYER</string>
     <string name="label_model2">MODEL</string>
     <string name="label_style">STYLE</string>
     <string name="label_target">TARGET</string>
     <string name="label_actual">ACTUAL</string>
+    <string name="label_from_server">FROM SERVER</string>
+    <string name="label_from_device">FROM DEVICE</string>
 
     <!-- 액츄얼카운트화면 -->
-    <string name="title_actual_count_edit">Actual Count Edit</string>
-    <string name="title_actual_count_edit_input">Actual Edit Count Input</string>
-    <string name="label_actual_count_edit_input">Actual Count Edit</string>
-    <string name="guide_actual_count_edit_input">Administrator Approval Required</string>
-    <string name="label_actual_count_edit_input_list">Actual Count Edit List</string>
+    <string name="title_actual_count_edit">ACTUAL Q\'ty EDIT</string>
+    <string name="title_actual_count_edit_input">EDIT ACTUAL Q\'ty</string>
+    <string name="label_actual_count_edit_input">EDIT ACTUAL Q\'ty</string>
 
     <!-- 제품목록화면 -->
     <string name="title_product_list">Product List</string>
@@ -69,41 +67,42 @@
     <string name="bottom_label_operator_info">OPERATOR INFO</string>
     <string name="bottom_label_employee_number">Employee Number : \u0020</string>
     <string name="bottom_label_employee_name">Name : \u0020</string>
-    <string name="bottom_label_factory">Factory : \u0020</string>
-    <string name="bottom_label_room">Room : \u0020</string>
-    <string name="bottom_label_line">Line : \u0020</string>
-    <string name="bottom_label_number">Number : \u0020</string>
-    <string name="bottom_label_mc_model">Model : \u0020</string>
+    <string name="bottom_label_factory">FACTORY : \u0020</string>
+    <string name="bottom_label_room">ZONE : \u0020</string>
+    <string name="bottom_label_line">LINE : \u0020</string>
+    <string name="bottom_label_number">M/C NUMBER : \u0020</string>
+    <string name="bottom_label_mc_model">MODEL : \u0020</string>
 
     <!-- Common -->
     <string name="server">SERVER</string>
     <string name="manual">Manual</string>
     <string name="confirm">Confirm</string>
     <string name="save">Save</string>
+    <string name="exit">Exit</string>
     <string name="cancel">Cancel</string>
     <string name="check">Check</string>
-    <string name="search">Search</string>
+    <string name="search">SEARCH</string>
     <string name="notice">Notice</string>
 
     <string name="list_item_wos">WOS</string>
-    <string name="list_item_model">Model</string>
-    <string name="list_item_size">Size</string>
-    <string name="list_item_balance">Balance</string>
-    <string name="list_item_target">Target</string>
-    <string name="list_item_actual">Actual</string>
+    <string name="list_item_model">MODEL</string>
+    <string name="list_item_size">SIZE</string>
+    <string name="list_item_target">TARGET</string>
+    <string name="list_item_actual">ACTUAL</string>
+    <string name="list_item_balance">BALANCE</string>
 
-    <string name="list_item_shift">Shift</string>
-    <string name="list_item_work_time">Work Time</string>
-    <string name="list_item_planned_time1">Planned Time1</string>
-    <string name="list_item_planned_time2">Planned Time2</string>
+    <string name="list_item_shift">SHIFT</string>
+    <string name="list_item_work_time">WORK TIME</string>
+    <string name="list_item_planned_time1">PLANNED TIME1</string>
+    <string name="list_item_planned_time2">PLANNED TIME2</string>
 
-    <string name="list_item_employee_number">Employee Number</string>
-    <string name="list_item_name">Name</string>
+    <string name="list_item_employee_number">EMPLOYEE NUMBER</string>
+    <string name="list_item_name">NAME</string>
 
-    <string name="list_item_design_idx">Design IDX</string>
-    <string name="list_item_product_rate">Product Rate</string>
-    <string name="list_item_defective">Defective</string>
-    <string name="list_item_qualti_rate">Quality Rate</string>
+    <string name="list_item_design_idx">DESIGN IDX</string>
+    <string name="list_item_product_rate">PRODUCT RATE</string>
+    <string name="list_item_defective">DEFECTIVE</string>
+    <string name="list_item_qualti_rate">QUALLTY RATE</string>
 
     <!-- Message -->
     <string name="msg_no_operator">Operator not found</string>
