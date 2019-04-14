@@ -210,9 +210,10 @@ class CountViewFragment : BaseFragment() {
         tv_model.text = AppGlobal.instance.get_compo_model()
         tv_component.text = AppGlobal.instance.get_compo_component()
         tv_style_no.text = AppGlobal.instance.get_compo_style()
-        tv_size.text = AppGlobal.instance.get_compo_size()
-        tv_layer.text = AppGlobal.instance.get_compo_layer()
-        tv_target.text = AppGlobal.instance.get_compo_target()
+
+        tv_count_view_csize.text = AppGlobal.instance.get_compo_size()
+        tv_count_view_clayer.text = AppGlobal.instance.get_compo_layer()
+        tv_count_view_ctarget.text = AppGlobal.instance.get_compo_target()
 
         // component count view 화면 선택일때 처리
         if ((activity as MainActivity).countViewType == 2) {
@@ -224,92 +225,122 @@ class CountViewFragment : BaseFragment() {
 
         // total count view
         if ((activity as MainActivity).countViewType == 1) {
+
             tv_current_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
 
-        // component count view
-        } else if ((activity as MainActivity).countViewType == 2) {
-            tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
-        }
+            val elapsedTime = AppGlobal.instance.get_current_shift_accumulated_time()
 
-        // total count view 는 선택되지 않았더라도 무조건 처리
-
-        // Total count view
-//        tv_design_idx.text = AppGlobal.instance.get_design_info_idx()
-//        tv_pieces.text = AppGlobal.instance.get_pieces_info().toString()
-//        tv_cycle_time.text = AppGlobal.instance.get_cycle_time().toString()
-//
-//        tv_article.text = AppGlobal.instance.get_article()
-//        tv_model.text = AppGlobal.instance.get_model()
-//        tv_material.text = AppGlobal.instance.get_material_way()
-//        tv_component.text = AppGlobal.instance.get_component()
-
-
-        val elapsedTime = AppGlobal.instance.get_current_shift_accumulated_time()
-
-        val h = (elapsedTime / 3600)
+            val h = (elapsedTime / 3600)
 //            val m = ((elapsedTime - (h*3600)) / 60)
 //            val s = ((elapsedTime - (h*3600)) - m*60 )
-
-        tv_count_view_time.text = "" + h + "H"
+            tv_count_view_time.text = "" + h + "H"
 //            tv_count_view_time_ms.text = "" + m  + "M " + s + "S"
 
+            var total_actual = AppGlobal.instance.get_current_shift_actual_cnt()
 
-        var total_actual = AppGlobal.instance.get_current_shift_actual_cnt()
+            var ratio_txt = ""
+            var ratio = 0
+            if (_total_target > 0) {
+                ratio = (total_actual.toFloat() / _total_target.toFloat() * 100).toInt()
+                if (ratio > 999) ratio = 999
+                ratio_txt = "" + ratio + "%"
+            } else {
+                ratio_txt = "N/A"
+            }
 
-        var ratio_txt = ""
-        var ratio = 0
-        if (_total_target > 0) {
-            ratio = (total_actual.toFloat() / _total_target.toFloat() * 100).toInt()
-            if (ratio > 999) ratio = 999
-            ratio_txt = "" + ratio + "%"
-        } else {
-            ratio_txt = "N/A"
-        }
+            tv_count_view_target.text = "" +_total_target
+            tv_count_view_actual.text = "" + total_actual
+            tv_count_view_ratio.text = ratio_txt
+            tv_count_view_time.text = "" + h + "H"
 
-        tv_count_view_target.text = "" +_total_target
-        tv_count_view_actual.text = "" + total_actual
-        tv_count_view_ratio.text = ratio_txt
-        tv_count_view_time.text = "" + h + "H"
-
-        var maxEnumber = 0
-        var color_code = "ffffff"
-        for (i in 0..(_list.size - 1)) {
-            val row = _list[i]
-            val snumber = row["snumber"]?.toInt() ?: 0
-            val enumber = row["enumber"]?.toInt() ?: 0
-            color_code = row["color_code"].toString()
-            if (maxEnumber < enumber) maxEnumber = enumber
-            if (snumber <= ratio && enumber >= ratio) {
+            var maxEnumber = 0
+            var color_code = "ffffff"
+            for (i in 0..(_list.size - 1)) {
+                val row = _list[i]
+                val snumber = row["snumber"]?.toInt() ?: 0
+                val enumber = row["enumber"]?.toInt() ?: 0
+                color_code = row["color_code"].toString()
+                if (maxEnumber < enumber) maxEnumber = enumber
+                if (snumber <= ratio && enumber >= ratio) {
+                    tv_count_view_target.setTextColor(Color.parseColor("#"+color_code))
+                    tv_count_view_actual.setTextColor(Color.parseColor("#"+color_code))
+                    tv_count_view_ratio.setTextColor(Color.parseColor("#"+color_code))
+                    tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
+                }
+            }
+            if (maxEnumber < ratio) {
                 tv_count_view_target.setTextColor(Color.parseColor("#"+color_code))
                 tv_count_view_actual.setTextColor(Color.parseColor("#"+color_code))
                 tv_count_view_ratio.setTextColor(Color.parseColor("#"+color_code))
                 tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
             }
-        }
-        if (maxEnumber < ratio) {
-            tv_count_view_target.setTextColor(Color.parseColor("#"+color_code))
-            tv_count_view_actual.setTextColor(Color.parseColor("#"+color_code))
-            tv_count_view_ratio.setTextColor(Color.parseColor("#"+color_code))
-            tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
-        }
-
-
-        // component count view 화면을 보고 있을 경우 처리
-
-        if ((activity as MainActivity).countViewType == 2) {
-
-            var db = DBHelperForComponent(activity)
 
             val work_idx = AppGlobal.instance.get_work_idx()
-//            Log.e("get_work_idx", work_idx)
             if (work_idx=="") return
+
+            var db = DBHelperForComponent(activity)
 
             val item = db.get(work_idx)
             if (item != null && item.toString() != "") {
                 val target = item["target"].toString().toInt()
                 val actual = (item["actual"].toString().toInt())
 
-                var ratio = 0
+                if (target > 0) {
+                    ratio = (actual.toFloat() / target.toFloat() * 100).toInt()
+                    if (ratio > 100) {
+                        ratio = 100
+                        ratio_txt = "" + ratio + "% ~"
+                    } else {
+                        ratio_txt = "" + ratio + "%"
+                    }
+                } else {
+                    ratio = 1
+                    ratio_txt = "N/A"
+                }
+
+                tv_count_view_cactual.text = "" + actual
+                tv_count_view_crate.text = ratio_txt
+                line_progress1.progress = ratio
+
+                var maxEnumber = 0
+                var color_code = "ff0000"
+                for (i in 0..(_list.size - 1)) {
+                    val row = _list[i]
+                    val snumber = row["snumber"]?.toInt() ?: 0
+                    val enumber = row["enumber"]?.toInt() ?: 0
+                    color_code = row["color_code"].toString()
+                    if (maxEnumber < enumber) maxEnumber = enumber
+                    if (snumber <= ratio && enumber >= ratio) {
+                        line_progress1.progressStartColor = Color.parseColor("#"+color_code)
+                        line_progress1.progressEndColor = Color.parseColor("#"+color_code)
+                    }
+                }
+                if (maxEnumber < ratio) {
+                    line_progress1.progressStartColor = Color.parseColor("#"+color_code)
+                    line_progress1.progressEndColor = Color.parseColor("#"+color_code)
+                }
+            }
+
+        // component count view
+        } else if ((activity as MainActivity).countViewType == 2) {
+
+            tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
+
+            val work_idx = AppGlobal.instance.get_work_idx()
+            if (work_idx=="") return
+
+            var ratio_txt = ""
+            var ratio = 0
+
+            var db = DBHelperForComponent(activity)
+
+            // component count view 화면을 보고 있을 경우 처리
+
+            val item = db.get(work_idx)
+            if (item != null && item.toString() != "") {
+                val target = item["target"].toString().toInt()
+                val actual = (item["actual"].toString().toInt())
+
                 if (target > 0) {
                     ratio = (actual.toFloat() / target.toFloat() * 100).toInt()
                     if (ratio > 999) ratio = 999
@@ -349,18 +380,8 @@ class CountViewFragment : BaseFragment() {
                     _list_for_wos[_selected_component_pos]["actual"] = "" + actual
                     _list_for_wos[_selected_component_pos]["balance"] = "" + (target.toInt() - actual.toInt()).toString()
                     _list_for_wos_adapter?.notifyDataSetChanged()
-//                    item["target"] = "" + target
-//                    item["actual"] = "" + actual
-//                    item["balance"] = "" + (target.toInt() - actual.toInt()).toString()
                 }
             }
-
-//            val elapsedTime = AppGlobal.instance.get_current_shift_accumulated_time()
-
-//            val h = (elapsedTime / 3600)
-//            val m = ((elapsedTime - (h*3600)) / 60)
-//            val s = ((elapsedTime - (h*3600)) - m*60 )
-
         }
     }
 

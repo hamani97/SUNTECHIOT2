@@ -60,8 +60,8 @@ class ActualCountEditActivity : BaseActivity() {
         var total_actual = 0
         var total_balance = 0
 
-        val def_wosno = AppGlobal.instance.get_compo_wos().trim()
-        val def_size = AppGlobal.instance.get_compo_size().trim()
+        val def_wosno = AppGlobal.instance.get_compo_wos()
+        val def_size = AppGlobal.instance.get_compo_size()
 
         // 현재 선택된 제품을 찾는다.
         for (i in 0..(_list.size - 1)) {

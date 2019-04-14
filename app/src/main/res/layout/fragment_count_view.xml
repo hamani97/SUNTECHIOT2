@@ -33,7 +33,7 @@
                         android:layout_weight="1"
                         android:layout_marginTop="20dp"
                         android:layout_marginLeft="100dp"
-                        android:layout_marginRight="100dp"
+                        android:layout_marginRight="80dp"
                         android:orientation="vertical">
 
                     <LinearLayout
@@ -153,6 +153,142 @@
 
                         </LinearLayout>
 
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 차트 -->
+                <LinearLayout
+                        android:id="@+id/ll_charts"
+                        android:layout_width="240dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="#222222"
+                        android:visibility="visible">
+
+                    <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="WOS COUNT"
+                            android:textSize="30sp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp"
+                            android:textColor="@color/colorOrange"
+                            android:background="#383838"/>
+
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="32dp"
+                            android:orientation="vertical">
+
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="8dp">
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="SIZE  "
+                                    android:textColor="@color/colorWhite"
+                                    android:textSize="26sp" />
+                            <TextView
+                                    android:id="@+id/tv_count_view_csize"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/colorOrange"
+                                    android:textStyle="bold"
+                                    android:textSize="26dp" />
+                        </LinearLayout>
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="10dp">
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="LAYER(S)  "
+                                    android:textColor="@color/colorWhite"
+                                    android:textSize="26sp" />
+                            <TextView
+                                    android:id="@+id/tv_count_view_clayer"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/colorOrange"
+                                    android:textSize="26dp" />
+                        </LinearLayout>
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="32dp">
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="TARGET  "
+                                    android:textColor="@color/colorWhite"
+                                    android:textSize="26sp" />
+                            <TextView
+                                    android:id="@+id/tv_count_view_ctarget"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/colorOrange"
+                                    android:textSize="26dp" />
+                        </LinearLayout>
+                        <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="10dp">
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ACTUAL  "
+                                    android:textColor="@color/colorWhite"
+                                    android:textSize="26sp" />
+                            <TextView
+                                    android:id="@+id/tv_count_view_cactual"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0"
+                                    android:textColor="@color/colorOrange"
+                                    android:textSize="26dp" />
+                        </LinearLayout>
+
+                        <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="16dp"
+                                android:layout_marginTop="32dp"
+                                android:gravity="center_horizontal"
+                                android:orientation="vertical">
+
+                            <com.dinuscxj.progressbar.CircleProgressBar
+                                    android:id="@+id/line_progress1"
+                                    android:layout_width="130dp"
+                                    android:layout_height="130dp"
+                                    android:layout_centerInParent="true"
+                                    app:background_color="@color/colorWhite"
+                                    app:progress_start_color="#ff0000"
+                                    app:progress_end_color="#ff0000"
+                                    app:progress_background_color="@color/colorWhite"
+                                    app:progress_text_color="@color/colorBlack"
+                                    app:draw_progress_text="false"
+                                    app:progress_text_size="24dp"
+                                    app:style="solid"
+                                    android:progress="50"/>
+
+                            <TextView
+                                    android:id="@+id/tv_count_view_crate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
+                                    android:text="10%"
+                                    android:textSize="24sp"
+                                    android:textColor="#000"/>
+
+                        </RelativeLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

@@ -64,7 +64,7 @@ class ActualCountEditInputActivity : BaseActivity() {
         var db = DBHelperForComponent(this)
         val row = db.get(work_idx)
         val total_count = row!!["actual"].toString().toInt() + count.toInt()
-        val seq = row!!["seq"].toString().toInt()
+//        val seq = row!!["seq"].toString().toInt()
 
 //        val uri = "/senddata1.php"
 //        var params = listOf("mac_addr" to AppGlobal.instance.getMACAddress(),
