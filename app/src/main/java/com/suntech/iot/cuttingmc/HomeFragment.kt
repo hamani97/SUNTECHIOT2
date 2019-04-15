@@ -61,6 +61,7 @@ class HomeFragment : BaseFragment() {
             }
         }
         btn_setting_view.setOnClickListener { startActivity(Intent(activity, SettingActivity::class.java)) }
+
         updateView()
     }
 

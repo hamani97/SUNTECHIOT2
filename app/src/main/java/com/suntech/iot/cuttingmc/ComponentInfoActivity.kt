@@ -27,7 +27,7 @@ class ComponentInfoActivity : BaseActivity() {
     private var _selected_wos_idx : String = ""
     private var _selected_component_idx : String = ""
     private var _selected_component_code : String = ""
-    private var _selected_size_idx : String = ""
+//    private var _selected_size_idx : String = ""
 
     private var _selected_layer_no : String = ""
     private var _selected_pair_info : String = ""
@@ -93,6 +93,13 @@ class ComponentInfoActivity : BaseActivity() {
         _list_for_wos_adapter = ListWosAdapter(this, _list_for_wos)
         lv_wos_info.adapter = _list_for_wos_adapter
 
+        lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
+//            item = _list_for_wos_adapter?.getItem(i)
+//            Log.e("eee", )
+            _list_for_wos_adapter?.select(i)
+            _list_for_wos_adapter?.notifyDataSetChanged()
+        }
+
         tv_compo_wos.text = AppGlobal.instance.get_compo_wos()
         tv_compo_model.text = AppGlobal.instance.get_compo_model()
         tv_compo_style.text = AppGlobal.instance.get_compo_style()
@@ -104,7 +111,7 @@ class ComponentInfoActivity : BaseActivity() {
         // set hidden value
         _selected_wos_idx = AppGlobal.instance.get_compo_wos_idx()
         _selected_component_idx = AppGlobal.instance.get_compo_component_idx()
-        _selected_size_idx = AppGlobal.instance.get_compo_size_idx()
+//        _selected_size_idx = AppGlobal.instance.get_compo_size_idx()
 
         btn_setting_confirm.setOnClickListener {
             if (tv_compo_wos.text.toString() == "" || tv_compo_model.text.toString() == "" ||
@@ -144,7 +151,7 @@ class ComponentInfoActivity : BaseActivity() {
         // set hidden value
         AppGlobal.instance.set_compo_wos_idx(_selected_wos_idx)
         AppGlobal.instance.set_compo_component_idx(_selected_component_idx)
-        AppGlobal.instance.set_compo_size_idx(_selected_size_idx)
+//        AppGlobal.instance.set_compo_size_idx(_selected_size_idx)
 
         if (_selected_wos_index > -1) {
             // 아이템을 변경한 경우 누적 카운트를 초기화 한다.
@@ -330,7 +337,7 @@ class ComponentInfoActivity : BaseActivity() {
                 intent.putStringArrayListExtra("list", arr)
                 startActivity(intent, { r, c, m, d ->
                     if (r) {
-                        _selected_size_idx = lists[c]["idx"] ?: ""
+//                        _selected_size_idx = lists[c]["idx"] ?: ""
                         tv_compo_size.text = lists[c]["s_name"] ?: ""
                         tv_compo_target.text = lists[c]["s_target"] ?: ""
                         selectWosData()

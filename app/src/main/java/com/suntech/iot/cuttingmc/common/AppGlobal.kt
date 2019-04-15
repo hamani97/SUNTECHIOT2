@@ -84,8 +84,8 @@ class AppGlobal private constructor() {
     fun set_compo_component(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_component", value) }
     fun get_compo_component() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_component") }
     //
-    fun set_compo_size_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_size_idx", idx) }
-    fun get_compo_size_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_size_idx") }
+//    fun set_compo_size_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_size_idx", idx) }
+//    fun get_compo_size_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_size_idx") }
     fun set_compo_size(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_size", value) }
     fun get_compo_size() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_size") }
     fun set_compo_target(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_target", value) }

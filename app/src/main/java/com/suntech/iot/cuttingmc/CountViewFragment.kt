@@ -175,6 +175,13 @@ class CountViewFragment : BaseFragment() {
 //        val work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
 //        val work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
 
+        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+        if (item == null) {
+            activity.tv_title.setText("No shift")
+        } else {
+            activity.tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+        }
+
         var target_type = AppGlobal.instance.get_target_type()
 
         if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
@@ -197,8 +204,11 @@ class CountViewFragment : BaseFragment() {
             } else if (target_type=="device_per_accumulate") {
                 val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
                 val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
-                var cycle_time = if (_total_target > 0) (shift_total_time / _total_target) else shift_now_time
-                _total_target = if (cycle_time > 0) (shift_now_time / cycle_time).toInt() else 0
+                val cycle_time = if (_total_target > 0) (shift_total_time / _total_target) else shift_now_time
+                val target = if (cycle_time > 0) (shift_now_time / cycle_time).toInt()+1 else 1
+                _total_target = if (target > _total_target) _total_target else target
+
+                    Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shift_now_time+", cycle_time="+cycle_time)
             } else if (target_type=="device_per_day_total") {
                 Log.e("shift time", "target="+_total_target)
             }

@@ -63,13 +63,6 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         AppGlobal.instance.setContext(this)
 
-        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
-        if (item == null) {
-            tv_title.setText("No shift")
-        } else {
-            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-        }
-
         mHandler = MyHandler(this)
 
         // button click event
@@ -635,17 +628,23 @@ Log.e("params", "" + params)
 
             if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
+            // 레이어 선택 확인
             val layer = AppGlobal.instance.get_compo_layer()
-
             if (layer == "") {
                 Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
                 return
             }
-
             val layer_value = AppGlobal.instance.get_layer_pairs(layer)
-
-            if (layer_value == "" || layer_value == "") {
+            if (layer_value == "") {
                 Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Operator 선택 확인
+            val no = AppGlobal.instance.get_worker_no()
+            val name = AppGlobal.instance.get_worker_name()
+            if (no== "" || name == "") {
+                Toast.makeText(this, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
                 return
             }
 

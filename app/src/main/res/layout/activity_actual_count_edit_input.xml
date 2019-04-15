@@ -197,15 +197,15 @@
 
                     <ImageButton
                             android:id="@+id/btn_actual_count_edit_plus"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
                             android:layout_marginRight="5dp"
                             android:background="@mipmap/btn_actual_count_plus" />
 
                     <ImageButton
                             android:id="@+id/btn_actual_count_edit_minus"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
                             android:layout_marginRight="5dp"
                             android:background="@mipmap/btn_actual_count_minus" />
 

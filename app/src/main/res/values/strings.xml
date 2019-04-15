@@ -111,6 +111,7 @@
     <string name="msg_require_target_quantity">Please enter a target quantity</string>
     <string name="msg_layer_not_selected">Layer not selected</string>
     <string name="msg_no_setting">Setting not found</string>
+    <string name="msg_data_not_found">Data not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>
     <string name="msg_cannot_input_wos">Cannot input wos</string>
     <string name="msg_has_notselected">Nothing Selected</string>
