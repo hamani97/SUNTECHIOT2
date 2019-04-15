@@ -94,10 +94,12 @@ class ComponentInfoActivity : BaseActivity() {
         lv_wos_info.adapter = _list_for_wos_adapter
 
         lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
-//            item = _list_for_wos_adapter?.getItem(i)
-//            Log.e("eee", )
             _list_for_wos_adapter?.select(i)
             _list_for_wos_adapter?.notifyDataSetChanged()
+
+            tv_compo_size.text = _list_for_wos[i]["size"]!!
+            tv_compo_target.text = _list_for_wos[i]["target"]!!
+            tv_compo_actual.text = _list_for_wos[i]["actual"]!!
         }
 
         tv_compo_wos.text = AppGlobal.instance.get_compo_wos()
