@@ -94,6 +94,7 @@ class ComponentInfoActivity : BaseActivity() {
         lv_wos_info.adapter = _list_for_wos_adapter
 
         lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
+            _selected_wos_index = i
             _list_for_wos_adapter?.select(i)
             _list_for_wos_adapter?.notifyDataSetChanged()
 

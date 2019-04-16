@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
+import org.joda.time.DateTime
 
 class IntroActivity : BaseActivity() {
 
@@ -23,7 +25,11 @@ class IntroActivity : BaseActivity() {
         Log.e("settings", "line = " + AppGlobal.instance.get_line())
 
         Handler().postDelayed({
-            moveToNext()
+            if (AppGlobal.instance.get_server_ip()=="") {
+                moveToNext()
+            } else {
+                sendAppStartTime()
+            }
         }, 600)
     }
 
@@ -31,5 +37,25 @@ class IntroActivity : BaseActivity() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun sendAppStartTime() {
+        val now = DateTime()
+        val uri = "/setting1.php"
+        var params = listOf(
+            "code" to "time",
+            "mac_addr" to AppGlobal.instance.getMACAddress(),
+            "start_time" to now.toString("yyyy-MM-dd HH:mm:ss"))
+
+        request(this, uri, true, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if(code != "00"){
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+            moveToNext()
+        }, {
+            moveToNext()
+        })
     }
 }

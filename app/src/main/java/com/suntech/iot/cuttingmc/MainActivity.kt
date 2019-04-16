@@ -20,7 +20,6 @@ import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
@@ -403,86 +402,46 @@ Log.e("params", "" + params)
         })
     }
 
-    private fun sendTarget(target:String) {
-        if (AppGlobal.instance.get_server_ip()=="") return
-
-        val work_idx = "" + AppGlobal.instance.get_product_idx()
-        if (work_idx == "") return
-
-        var db = SimpleDatabaseHelper(this)
-        val row = db.get(work_idx)
-        val seq = row!!["seq"].toString().toInt()
-
-        val uri = "/targetdata.php"
-        var params = listOf(
-            "mac_addr" to AppGlobal.instance.getMACAddress(),
-            "didx" to AppGlobal.instance.get_design_info_idx(),
-            "target" to target,
-            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
-            "factory_idx" to AppGlobal.instance.get_room_idx(),
-            "line_idx" to AppGlobal.instance.get_line_idx(),
-            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
-            "seq" to seq)
-
-        request(this, uri, true,false, params, { result ->
-            var code = result.getString("code")
-            var msg = result.getString("msg")
-            if (code == "00") {
-            } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
     fun endWork() {
 
     }
 
-//    private fun updateCurrentWorkTarget() {
-//        val idx = AppGlobal.instance.get_design_info_idx()
-//        if (idx == "") return
-//
-//        val work_idx = "" + AppGlobal.instance.get_product_idx()
-//        if (work_idx == "") return
-//
-//        var db = SimpleDatabaseHelper(this)
-//        val row = db.get(work_idx)
-//        if (row == null) return
-//
-//        val actual = row["actual"].toString().toInt()
-//
-//        val elapsedTime = AppGlobal.instance.get_current_product_accumulated_time()
-//        val elapsedTime_no_constraint = AppGlobal.instance.get_current_product_accumulated_time(true)
-//        val cycle_time = AppGlobal.instance.get_cycle_time()
-//        var target = (ceil(elapsedTime.toFloat() / cycle_time.toFloat())).toInt()
-//        var target_no_contraint = (ceil(elapsedTime_no_constraint.toFloat() / cycle_time.toFloat())).toInt()
-//
-//        //Log.e("test", "elapsedTime = " + elapsedTime)
-//        //Log.e("test", "cycle_time = " + cycle_time)
-//        //Log.e("test", "target = " + target)
-//        db.updateWorkTarget(work_idx, target, target_no_contraint)
-//
-//        if (Constants.DEMO_VERSION) {
-//            val current_shift_time = AppGlobal.instance.get_current_shift_time()
-//            var work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
-//            var work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
-//
-//            var start_dt = OEEUtil.parseDateTime(row["start_dt"].toString())
-//            var end_dt = work_etime
-//            val list = db.gets()
-//
-//            if (list == null || list.size <= 1) start_dt = work_stime
-//            val t = AppGlobal.instance.compute_work_time(start_dt, end_dt, false, false)
-//
-//            target = ( t / cycle_time )
-//        }
-//        // actual 이 0이면 서버로 보내지 않음
-//        if (actual > 0) sendTarget(target.toString())
-//    }
+    private fun updateCurrentWorkTarget() {
+        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+        if (item != null) {
+            var _total_target = 0
+            var target_type = AppGlobal.instance.get_target_type()
+            if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+            } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+                when (item["shift_idx"]) {
+                    "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+                    "2" -> _total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+                    "3" -> _total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+                }
+            }
+
+            if (_total_target > 0) {
+                val uri = "/sendtarget.php"
+                var params = listOf(
+                    "mac_addr" to AppGlobal.instance.getMACAddress(),
+                    "date" to DateTime().toString("yyyy-MM-dd"),
+                    "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+                    "target_count" to _total_target)
+
+                request(this, uri, true,false, params, { result ->
+                    var code = result.getString("code")
+                    var msg = result.getString("msg")
+                    if(code != "00"){
+                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+        }
+    }
 
     /////// 쓰레드
 //    private val _downtime_timer = Timer()
-    private val _timer_task1 = Timer()          // 서버 접속 체크 ping test.
+    private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
     private val _timer_task2 = Timer()          // 작업시간, 디자인, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
 
     private fun start_timer() {
@@ -501,7 +460,7 @@ Log.e("params", "" + params)
             override fun run() {
                 runOnUiThread {
                     sendPing()
-//                    updateCurrentWorkTarget()
+                    updateCurrentWorkTarget()
                 }
             }
         }
@@ -594,7 +553,6 @@ Log.e("params", "" + params)
         if (pos_end < 0) return
 
         if (isJSONValid(recvBuffer)) {
-
             val parser = JsonParser()
             val element = parser.parse(recvBuffer)
             val cmd = element.asJsonObject.get("cmd").asString
@@ -658,7 +616,6 @@ Log.e("params", "" + params)
                 } else {
                     AppGlobal.instance.set_accumulated_count(0)
                 }
-                inc_count = 1
             } else {
                 inc_count = layer_value.toInt()
             }
@@ -677,10 +634,9 @@ Log.e("params", "" + params)
                 db.updateWorkActual(work_idx, actual)
             }
 
-
             _last_count_received_time = DateTime()
 
-            sendCountData(value.toString())
+            sendCountData(value.toString(), inc_count)
 
 //            _stitch_db.add(work_idx, value.toString())
         }
@@ -718,8 +674,42 @@ Log.e("params", "" + params)
 
     }
 
-    private fun sendCountData(count:String) {
+    private fun sendCountData(count:String, inc_count:Int) {
+        if (AppGlobal.instance.get_server_ip()=="") return
 
+        val work_idx = AppGlobal.instance.get_work_idx()
+        if (work_idx == "") return
+
+        var db = DBHelperForComponent(this)
+        val row = db.get(work_idx)
+        val actual = row!!["actual"].toString().toInt()
+//        val seq = row!!["seq"].toString().toInt()
+        val seq = "1"
+
+        val uri = "/senddata1.php"
+        var params = listOf(
+            "mac_addr" to AppGlobal.instance.getMACAddress(),
+            "didx" to "0",
+            "count" to inc_count.toString(),
+            "total_count" to actual,
+            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
+            "factory_idx" to AppGlobal.instance.get_room_idx(),
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+            "seq" to seq,
+            "wos" to AppGlobal.instance.get_compo_wos(),
+            "comp" to AppGlobal.instance.get_compo_component_idx(),
+            "size" to AppGlobal.instance.get_compo_size(),
+            "max_rpm" to "",
+            "avr_rpm" to "")
+
+        request(this, uri, true,false, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if(code != "00") {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
