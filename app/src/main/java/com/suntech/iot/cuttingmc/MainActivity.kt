@@ -21,6 +21,7 @@ import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
+import com.suntech.iot.cuttingmc.popup.DefectiveActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
@@ -69,10 +70,12 @@ class MainActivity : BaseActivity() {
             btn_home.setOnLongClickListener { changeFragment(0); true }
             btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
+            btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
             btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
             btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
+            btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
         }
 
         // fragment & swipe
@@ -653,7 +656,7 @@ Log.e("params", "" + params)
         val row = db.get(wosno, size)
 
         if (row == null) {
-            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0)
+            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0)
             val row2 = db.get(wosno, size)
             if (row2 == null) {
                 Log.e("work_idx", "none")

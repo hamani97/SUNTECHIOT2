@@ -59,6 +59,17 @@
     <string name="title_actual_count_edit_input">EDIT ACTUAL Q\'ty</string>
     <string name="label_actual_count_edit_input">EDIT ACTUAL Q\'ty</string>
 
+    <!-- 디펙티브 화면-->
+    <string name="title_defective_input">Defective input</string>
+    <string name="label_defective_input_qty">Defective Q\'ty</string>
+    <string name="label_defective_input_list">Defective List</string>
+
+    <!-- 다운타임화면 -->
+    <string name="title_down_time_info">Down Time Info</string>
+    <string name="title_down_time_input">Down Time Input</string>
+    <string name="title_down_time_list">Down Time Input</string>
+    <string name="msg_has_notcompleted">Info not complete</string>
+
     <!-- 제품목록화면 -->
     <string name="title_product_list">Product List</string>
 
@@ -103,6 +114,13 @@
     <string name="list_item_product_rate">PRODUCT RATE</string>
     <string name="list_item_defective">DEFECTIVE</string>
     <string name="list_item_qualti_rate">QUALLTY RATE</string>
+
+    <string name="list_item_start_time">Start Time</string>
+    <string name="list_item_end_time">End Time</string>
+    <string name="list_item_down_time">DownTime</string>
+    <string name="list_item_completed">Completed</string>
+    <string name="list_item_list">List</string>
+    <string name="list_item_total">TOTAL</string>
 
     <!-- Message -->
     <string name="msg_no_operator">Operator not found</string>

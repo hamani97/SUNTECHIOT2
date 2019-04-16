@@ -45,6 +45,7 @@ class DBHelperForComponent
                         "size text, " +
                         "target int, " +
                         "actual int, " +
+                        "defective int, " +
                         "start_dt DATE default CURRENT_TIMESTAMP, " +
                         "end_dt DATE)"
 
@@ -57,7 +58,7 @@ class DBHelperForComponent
     operator fun get(work_idx: String): ContentValues? {
         val db = _openHelper.readableDatabase ?: return null
         val row = ContentValues()
-        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, start_dt, end_dt " +
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, defective, start_dt, end_dt " +
                 "from component where _id = ?"
         val cur = db.rawQuery(sql, arrayOf(work_idx.toString()))
         if (cur.moveToNext()) {
@@ -70,8 +71,9 @@ class DBHelperForComponent
             row.put("size", cur.getInt(6))
             row.put("target", cur.getInt(7))
             row.put("actual", cur.getInt(8))
-            row.put("start_dt", cur.getString(9))
-            row.put("end_dt", cur.getInt(10))
+            row.put("defective", cur.getInt(9))
+            row.put("start_dt", cur.getString(10))
+            row.put("end_dt", cur.getInt(11))
             cur.close()
             db.close()
             return row
@@ -85,7 +87,7 @@ class DBHelperForComponent
     operator fun get(wosno: String, size: String): ContentValues? {
         val db = _openHelper.readableDatabase ?: return null
         val row = ContentValues()
-        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, start_dt, end_dt " +
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, defective, start_dt, end_dt " +
                 "from component where wosno = ? and size = ?"
         val cur = db.rawQuery(sql, arrayOf(wosno.toString(), size.toString()))
         if (cur.moveToNext()) {
@@ -98,8 +100,9 @@ class DBHelperForComponent
             row.put("size", cur.getInt(6))
             row.put("target", cur.getInt(7))
             row.put("actual", cur.getInt(8))
-            row.put("start_dt", cur.getString(9))
-            row.put("end_dt", cur.getInt(10))
+            row.put("defective", cur.getInt(9))
+            row.put("start_dt", cur.getString(10))
+            row.put("end_dt", cur.getInt(11))
             cur.close()
             db.close()
             return row
@@ -113,7 +116,7 @@ class DBHelperForComponent
     fun gets():  ArrayList<HashMap<String, String>>? {
         var arr = ArrayList<HashMap<String, String>>()
         val db = _openHelper.readableDatabase ?: return null
-        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, start_dt, end_dt " +
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, defective, start_dt, end_dt " +
                 "from component where actual > 0 order by (target-actual) desc"
         val cur = db.rawQuery(sql, arrayOf())
         while (cur.moveToNext()) {
@@ -127,8 +130,9 @@ class DBHelperForComponent
             row.put("size", cur.getString(6))
             row.put("target", cur.getString(7))
             row.put("actual", cur.getString(8))
-            row.put("start_dt", cur.getString(9))
-            row.put("end_dt", cur.getString(10))
+            row.put("defective", cur.getString(9))
+            row.put("start_dt", cur.getString(10))
+            row.put("end_dt", cur.getString(11))
             arr.add(row)
         }
         cur.close()
@@ -136,7 +140,7 @@ class DBHelperForComponent
         return arr
     }
 
-    fun add(wosno: String, shift_id:String, shift_name:String, styleno: String, model:String, size:String, target: Int, actual: Int): Long {
+    fun add(wosno: String, shift_id:String, shift_name:String, styleno: String, model:String, size:String, target: Int, actual: Int, defective: Int): Long {
         val db = _openHelper.writableDatabase ?: return 0
         val row = ContentValues()
         row.put("wosno", wosno)
@@ -147,6 +151,7 @@ class DBHelperForComponent
         row.put("size", size)
         row.put("target", target)
         row.put("actual", actual)
+        row.put("defective", defective)
         row.put("start_dt", DateTime().toString("yyyy-MM-dd HH:mm:ss"))
         val id = db.insert("component", null, row)
         db.close()
@@ -157,6 +162,14 @@ class DBHelperForComponent
         val db = _openHelper.writableDatabase ?: return
         val row = ContentValues()
         row.put("actual", actual)
+        db.update("component", row, "_id = ?", arrayOf(work_idx.toString()))
+        db.close()
+    }
+
+    fun updateDefective(work_idx: String, defective: Int) {
+        val db = _openHelper.writableDatabase ?: return
+        val row = ContentValues()
+        row.put("defective", defective)
         db.update("component", row, "_id = ?", arrayOf(work_idx.toString()))
         db.close()
     }

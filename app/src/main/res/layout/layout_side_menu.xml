@@ -32,5 +32,12 @@
                 android:layout_marginBottom="50dp"
                 android:background="@drawable/btn_side_icon_actual_count_edit" />
 
+        <ImageButton
+                android:id="@+id/btn_defective_info"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="70dp"
+                android:background="@drawable/btn_side_icon_defective_info" />
+
     </LinearLayout>
 </LinearLayout>
