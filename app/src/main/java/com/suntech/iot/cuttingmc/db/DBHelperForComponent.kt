@@ -117,8 +117,35 @@ class DBHelperForComponent
         var arr = ArrayList<HashMap<String, String>>()
         val db = _openHelper.readableDatabase ?: return null
         val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, defective, start_dt, end_dt " +
-                "from component where actual > 0 order by (target-actual) desc"
+                    "from component where actual > 0 order by (target-actual) desc"
         val cur = db.rawQuery(sql, arrayOf())
+        while (cur.moveToNext()) {
+            val row = HashMap<String, String>()
+            row.put("work_idx", cur.getString(0))
+            row.put("wosno", cur.getString(1))
+            row.put("shift_id", cur.getString(2))
+            row.put("shift_name", cur.getString(3))
+            row.put("styleno", cur.getString(4))
+            row.put("model", cur.getString(5))
+            row.put("size", cur.getString(6))
+            row.put("target", cur.getString(7))
+            row.put("actual", cur.getString(8))
+            row.put("defective", cur.getString(9))
+            row.put("start_dt", cur.getString(10))
+            row.put("end_dt", cur.getString(11))
+            arr.add(row)
+        }
+        cur.close()
+        db.close()
+        return arr
+    }
+
+    fun gets(wosno: String, size: String):  ArrayList<HashMap<String, String>>? {
+        var arr = ArrayList<HashMap<String, String>>()
+        val db = _openHelper.readableDatabase ?: return null
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, size, target, actual, defective, start_dt, end_dt " +
+                "from component where actual > 0 or (wosno = ? and size = ?) order by (target-actual) desc"
+        val cur = db.rawQuery(sql, arrayOf(wosno.toString(), size.toString()))
         while (cur.moveToNext()) {
             val row = HashMap<String, String>()
             row.put("work_idx", cur.getString(0))

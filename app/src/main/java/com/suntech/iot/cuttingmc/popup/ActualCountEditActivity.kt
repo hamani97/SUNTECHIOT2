@@ -51,17 +51,17 @@ class ActualCountEditActivity : BaseActivity() {
         tv_item_row1.text = ""
         tv_item_row2.text = ""
 
+        val def_wosno = AppGlobal.instance.get_compo_wos()
+        val def_size = AppGlobal.instance.get_compo_size()
+
         var db = DBHelperForComponent(this)
-        _list = db.gets() ?: _list
+        _list = db.gets(def_wosno, def_size) ?: _list
 
         list_adapter = ProductListActivity.ListAdapter(this, _list)
         lv_products.adapter = list_adapter
         var total_target = 0
         var total_actual = 0
         var total_balance = 0
-
-        val def_wosno = AppGlobal.instance.get_compo_wos()
-        val def_size = AppGlobal.instance.get_compo_size()
 
         // 현재 선택된 제품을 찾는다.
         for (i in 0..(_list.size - 1)) {

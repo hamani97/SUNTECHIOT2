@@ -709,10 +709,10 @@ Log.e("params", "" + params)
 
     private fun sendStartDownTime(dt:DateTime) {
         if (AppGlobal.instance.get_server_ip()=="") return
-Log.e("downtime", "sendStartDownTime")
+
         val work_idx = "" + AppGlobal.instance.get_work_idx()
         if (work_idx=="") return
-Log.e("downtime", "" + work_idx)
+
         if (_is_call) return
         _is_call = true
 /*
@@ -723,7 +723,7 @@ Log.e("downtime", "" + work_idx)
         var down_db = DBHelperForDownTime(this)
         val count = down_db.counts_for_notcompleted()
         if (count > 0) return
-Log.e("downtime", "" + count.toString())
+
         val list = down_db.gets()
 
         val uri = "/downtimedata.php"
@@ -747,7 +747,8 @@ Log.e("downtime", "" + count.toString())
                 var idx = result.getString("idx")
                 AppGlobal.instance.set_downtime_idx(idx)
 
-                val didx = AppGlobal.instance.get_design_info_idx()
+//                val didx = AppGlobal.instance.get_design_info_idx()
+                val didx = "0"
                 val work_info = AppGlobal.instance.get_current_shift_time()
                 val shift_idx = work_info?.getString("shift_idx") ?: ""
                 val shift_name = work_info?.getString("shift_name") ?: ""
@@ -782,10 +783,8 @@ Log.e("downtime", "" + count.toString())
         val now = DateTime()
         val downtime_time = AppGlobal.instance.get_downtime_sec()
 
-Log.e("checkDownTime", "work_idx = " + work_idx + ", downtime value = " + downtime_time)
-
         if (downtime_time == "") {
-            Toast.makeText(this, getString(R.string.msg_no_downtime), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, getString(R.string.msg_no_downtime), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -808,8 +807,6 @@ Log.e("checkDownTime", "work_idx = " + work_idx + ", downtime value = " + downti
             !(planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis ) &&
             downtime_time_sec > 0 &&
             now.millis - _last_count_received_time.millis > downtime_time_sec*1000) {
-
-            Log.e("checkDownTime", "server send")
 
             sendStartDownTime(_last_count_received_time)
             startDowntimeActivity()
