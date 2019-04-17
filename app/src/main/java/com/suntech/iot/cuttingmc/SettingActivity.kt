@@ -14,6 +14,7 @@ import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.util.UtilString.addPairText
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
+import org.joda.time.DateTime
 import java.util.*
 
 class SettingActivity : BaseActivity() {
@@ -69,6 +70,7 @@ class SettingActivity : BaseActivity() {
     }
 
     private fun initView() {
+
         tv_title.setText(R.string.title_setting)
 
         // system setting
@@ -264,6 +266,7 @@ class SettingActivity : BaseActivity() {
         AppGlobal.instance.set_target_manual_shift("2", tv_shift_2.text.toString())
         AppGlobal.instance.set_target_manual_shift("3", tv_shift_3.text.toString())
 
+        // 장비 설정값 저장
         val uri = "/setting1.php"
         var params = listOf(
             "code" to "server",
@@ -281,8 +284,21 @@ class SettingActivity : BaseActivity() {
             var code = result.getString("code")
             Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
             if(code == "00") {
+                sendAppStartTime()      // 앱 시작을 알림. 결과에 상관없이 종료
                 finish()
             }
+        })
+    }
+
+    private fun sendAppStartTime() {
+        val now = DateTime()
+        val uri = "/setting1.php"
+        var params = listOf(
+            "code" to "time",
+            "mac_addr" to AppGlobal.instance.getMACAddress(),
+            "start_time" to now.toString("yyyy-MM-dd HH:mm:ss"))
+        request(this, uri, true, params, { result ->
+            var code = result.getString("code")
         })
     }
 

@@ -20,8 +20,11 @@ import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
+import com.suntech.iot.cuttingmc.db.DBHelperForDownTime
+import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.DefectiveActivity
+import com.suntech.iot.cuttingmc.popup.DownTimeActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
@@ -41,6 +44,8 @@ class MainActivity : BaseActivity() {
 
     private var _doubleBackToExitPressedOnce = false
     private var _last_count_received_time = DateTime()
+
+    var _is_call = false
 
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -70,11 +75,13 @@ class MainActivity : BaseActivity() {
             btn_home.setOnLongClickListener { changeFragment(0); true }
             btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
+            btn_downtime.setOnLongClickListener { startDowntimeActivity();true }
             btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
             btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
             btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
+            btn_downtime.setOnClickListener { startDowntimeActivity() }
             btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
         }
 
@@ -406,7 +413,22 @@ Log.e("params", "" + params)
     }
 
     fun endWork() {
+        // 다운타임이 있으면 완료로 처리
+//        val downtime_idx = AppGlobal.instance.get_downtime_idx()
+//        if (downtime_idx!="") sendEndDownTimeForce()
 
+        var db = SimpleDatabaseHelper(this)
+        db.delete()
+
+        var db1 = DBHelperForComponent(this)
+        db1.delete()
+
+        var db2 = DBHelperForDownTime(this)
+        db2.delete()
+
+//        var db3 = DBHelperForCount(this)
+//        db3.delete()
+//        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
     }
 
     private fun updateCurrentWorkTarget() {
@@ -443,21 +465,21 @@ Log.e("params", "" + params)
     }
 
     /////// 쓰레드
-//    private val _downtime_timer = Timer()
+    private val _downtime_timer = Timer()
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
     private val _timer_task2 = Timer()          // 작업시간, 디자인, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
 
     private fun start_timer() {
 
-//        val downtime_task = object : TimerTask() {
-//            override fun run() {
-//                runOnUiThread {
-//                    checkDownTime()
+        val downtime_task = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    checkDownTime()
 //                    checkExit()
-//                }
-//            }
-//        }
-//        _downtime_timer.schedule(downtime_task, 500, 1000)
+                }
+            }
+        }
+        _downtime_timer.schedule(downtime_task, 500, 1000)
 
         val task1 = object : TimerTask() {
             override fun run() {
@@ -479,7 +501,7 @@ Log.e("params", "" + params)
         _timer_task2.schedule(task2, 600000, 600000)
     }
     private fun cancel_timer () {
-//        _downtime_timer.cancel()
+        _downtime_timer.cancel()
         _timer_task1.cancel()
         _timer_task2.cancel()
     }
@@ -637,7 +659,7 @@ Log.e("params", "" + params)
                 db.updateWorkActual(work_idx, actual)
             }
 
-            _last_count_received_time = DateTime()
+            _last_count_received_time = DateTime()      // downtime 시간 초기화
 
             sendCountData(value.toString(), inc_count)
 
@@ -671,10 +693,142 @@ Log.e("params", "" + params)
         }
         val br_intent = Intent("need.refresh")
         this.sendBroadcast(br_intent)
+
+        // 작업시작할때 현재 쉬프트의 날짜를 기록해놓음
+        val current = AppGlobal.instance.get_current_work_time()
+        val shift = current.getJSONObject(0)
+        var shift_stime = OEEUtil.parseDateTime(shift["work_stime"].toString())
+        AppGlobal.instance.set_current_work_day(shift_stime.toString("yyyy-MM-dd"))
+
+        // 현재 shift의 첫생산인데 지각인경우 downtime 처리
     }
 
     fun startNewProduct(didx:String, piece_info:Int, cycle_time:Int, model:String, article:String, material_way:String, component:String) {
 
+    }
+
+    private fun sendStartDownTime(dt:DateTime) {
+        if (AppGlobal.instance.get_server_ip()=="") return
+Log.e("downtime", "sendStartDownTime")
+        val work_idx = "" + AppGlobal.instance.get_work_idx()
+        if (work_idx=="") return
+Log.e("downtime", "" + work_idx)
+        if (_is_call) return
+        _is_call = true
+/*
+        var db = SimpleDatabaseHelper(this)
+        val row = db.get(work_idx)
+        val seq = row!!["seq"].toString().toInt() + 1
+*/
+        var down_db = DBHelperForDownTime(this)
+        val count = down_db.counts_for_notcompleted()
+        if (count > 0) return
+Log.e("downtime", "" + count.toString())
+        val list = down_db.gets()
+
+        val uri = "/downtimedata.php"
+        var params = listOf(
+            "code" to "start",
+            "mac_addr" to AppGlobal.instance.getMACAddress(),
+//            "didx" to AppGlobal.instance.get_design_info_idx(),
+            "didx" to "0",
+            "sdate" to dt.toString("yyyy-MM-dd"),
+            "stime" to dt.toString("HH:mm:ss"),
+            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
+            "factory_idx" to AppGlobal.instance.get_room_idx(),
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+            "seq" to (list?.size ?: 0) + 1)
+
+        request(this, uri, true,false, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                var idx = result.getString("idx")
+                AppGlobal.instance.set_downtime_idx(idx)
+
+                val didx = AppGlobal.instance.get_design_info_idx()
+                val work_info = AppGlobal.instance.get_current_shift_time()
+                val shift_idx = work_info?.getString("shift_idx") ?: ""
+                val shift_name = work_info?.getString("shift_name") ?: ""
+
+                down_db.add(idx, work_idx, didx, shift_idx, shift_name, dt.toString("yyyy-MM-dd HH:mm:ss"))
+
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+            _is_call = false
+        },{
+            _is_call = false
+        })
+    }
+
+    private fun checkDownTime() {
+        var db = DBHelperForDownTime(this)
+        val count = db.counts_for_notcompleted()
+
+        if (count > 0) {
+            _last_count_received_time = DateTime()
+            return
+        }
+//        val idx = AppGlobal.instance.get_design_info_idx()
+//        if (idx == "") return
+//        val work_idx = "" + AppGlobal.instance.get_product_idx()
+//        if (work_idx == "") return
+
+        val work_idx = "" + AppGlobal.instance.get_work_idx()
+        if (work_idx == "") return
+
+        val now = DateTime()
+        val downtime_time = AppGlobal.instance.get_downtime_sec()
+
+Log.e("checkDownTime", "work_idx = " + work_idx + ", downtime value = " + downtime_time)
+
+        if (downtime_time == "") {
+            Toast.makeText(this, getString(R.string.msg_no_downtime), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val item = AppGlobal.instance.get_current_shift_time()
+        if (item==null) return
+
+        var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+        var work_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+        var planned1_stime_dt = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString())
+        var planned1_etime_dt = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString())
+        var planned2_stime_dt = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString())
+        var planned2_etime_dt = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
+
+        val downtime_time_sec = downtime_time.toInt()
+//        Log.e("downtime", "server send ready")
+        // 워크 타임안에 있으면서 휴식 시간이 아니고,
+        // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
+        if (work_stime.millis < now.millis && work_etime.millis > now.millis &&
+            !(planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) &&
+            !(planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis ) &&
+            downtime_time_sec > 0 &&
+            now.millis - _last_count_received_time.millis > downtime_time_sec*1000) {
+
+            Log.e("checkDownTime", "server send")
+
+            sendStartDownTime(_last_count_received_time)
+            startDowntimeActivity()
+        }
+
+        // 워크 타임이 아니거나 휴식 시간 안에 있으면 downtime 시작 시간을 현재 시간으로 초기화
+        if (work_stime.millis > now.millis ||
+            work_etime.millis < now.millis ||
+            (planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) ||
+            (planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis )) {
+            _last_count_received_time = now
+        }
+    }
+
+    private fun startDowntimeActivity () {
+        val br_intent = Intent("start.downtime")
+        this.sendBroadcast(br_intent)
+        val intent = Intent(this, DownTimeActivity::class.java)
+        startActivity(intent)
     }
 
     private fun sendCountData(count:String, inc_count:Int) {
