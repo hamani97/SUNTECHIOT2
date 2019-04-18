@@ -21,7 +21,6 @@ import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
 import com.suntech.iot.cuttingmc.db.DBHelperForDownTime
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.DefectiveActivity
 import com.suntech.iot.cuttingmc.popup.DownTimeActivity
@@ -216,7 +215,7 @@ class MainActivity : BaseActivity() {
             "factory_idx" to AppGlobal.instance.get_room_idx(),
             "line_idx" to AppGlobal.instance.get_line_idx(),
             "date" to dt.toString("yyyy-MM-dd"))
-Log.e("params", "" + params)
+//Log.e("params", "" + params)
 
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
@@ -417,8 +416,8 @@ Log.e("params", "" + params)
 //        val downtime_idx = AppGlobal.instance.get_downtime_idx()
 //        if (downtime_idx!="") sendEndDownTimeForce()
 
-        var db = SimpleDatabaseHelper(this)
-        db.delete()
+//        var db = SimpleDatabaseHelper(this)
+//        db.delete()
 
         var db1 = DBHelperForComponent(this)
         db1.delete()
@@ -700,6 +699,10 @@ Log.e("params", "" + params)
         var shift_stime = OEEUtil.parseDateTime(shift["work_stime"].toString())
         AppGlobal.instance.set_current_work_day(shift_stime.toString("yyyy-MM-dd"))
 
+        // downtime sec 초기화
+        // 새로 선택한 상품이 있으므로 이 값을 초기화 한다. 기존에 없던 부분
+        _last_count_received_time = DateTime()
+
         // 현재 shift의 첫생산인데 지각인경우 downtime 처리
     }
 
@@ -707,7 +710,32 @@ Log.e("params", "" + params)
 
     }
 
+    // downtime 발생시 푸시 발송
+    private fun sendPush() {
+        val uri = "/pushcall.php"
+        var params = listOf(
+            "code" to "push_text_list",
+            "mac_addr" to AppGlobal.instance.getMACAddress(),
+            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
+            "factory_idx" to AppGlobal.instance.get_room_idx(),
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+            "machine_no" to AppGlobal.instance.get_mc_no1(),
+            "mc_model" to AppGlobal.instance.get_mc_model(),
+            "seq" to "0",
+            "text" to "downtime occurrence")
+
+        request(this, uri, true, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if(code != "00"){
+//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private fun sendStartDownTime(dt:DateTime) {
+
         if (AppGlobal.instance.get_server_ip()=="") return
 
         val work_idx = "" + AppGlobal.instance.get_work_idx()
@@ -755,6 +783,8 @@ Log.e("params", "" + params)
 
                 down_db.add(idx, work_idx, didx, shift_idx, shift_name, dt.toString("yyyy-MM-dd HH:mm:ss"))
 
+                sendPush()
+
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -799,7 +829,6 @@ Log.e("params", "" + params)
         var planned2_etime_dt = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
 
         val downtime_time_sec = downtime_time.toInt()
-//        Log.e("downtime", "server send ready")
         // 워크 타임안에 있으면서 휴식 시간이 아니고,
         // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
         if (work_stime.millis < now.millis && work_etime.millis > now.millis &&

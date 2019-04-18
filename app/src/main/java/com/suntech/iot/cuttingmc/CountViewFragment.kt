@@ -18,7 +18,6 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import kotlinx.android.synthetic.main.fragment_count_view.*
 import kotlinx.android.synthetic.main.layout_bottom_info_3.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
@@ -397,8 +396,8 @@ class CountViewFragment : BaseFragment() {
 
     private fun fetchServerTarget() {
         val work_idx = AppGlobal.instance.get_product_idx()
-        var db = SimpleDatabaseHelper(activity)
-        val row = db.get(work_idx)
+//        var db = SimpleDatabaseHelper(activity)
+//        val row = db.get(work_idx)
 
         val uri = "/getlist1.php"
         var params = listOf(

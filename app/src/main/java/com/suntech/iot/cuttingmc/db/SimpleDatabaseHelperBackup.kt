@@ -11,7 +11,7 @@ import java.util.*
 /**
  * Created by rightsna on 2018. 1. 2..
  */
-class SimpleDatabaseHelper
+class SimpleDatabaseHelperBackup
 /**
  * Construct a new database helper object
  * @param context The current context for the application or activity

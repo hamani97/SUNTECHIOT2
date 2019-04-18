@@ -11,9 +11,6 @@ import android.widget.TextView
 import com.suntech.iot.cuttingmc.R
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
-import kotlinx.android.synthetic.main.activity_product_list.*
-import kotlinx.android.synthetic.main.list_item_product_total.*
 
 class ProductListActivity : BaseActivity() {
 
@@ -32,44 +29,44 @@ class ProductListActivity : BaseActivity() {
     }
 
     private fun initView() {
-        tv_item_row0.text = "TOTAL"
-        tv_item_row1.text = ""
-        tv_item_row2.text = ""
-
-        var db = SimpleDatabaseHelper(this)
-        _list = db.gets() ?: _list
-
-        list_adapter = ListAdapter(this, _list)
-        lv_products.adapter = list_adapter
-
-        btn_confirm.setOnClickListener {
-            finish(true, 1, "ok", null)
-        }
-
-        var total_target = 0
-        var total_actual = 0
-        var total_balance = 0
-
-        for (i in 0..(_list.size - 1)) {
-
-            val item = _list[i]
-
-            val target = item["target"]?.toInt() ?: 0
-            val actual = item["actual"]?.toInt() ?: 0
-            val balance = target - actual
-
-            total_target += target
-            total_actual += actual
-            total_balance += balance
-
-            item.put("target", target.toString())
-            item.put("actual", actual.toString())
-            item.put("balance", balance.toString())
-        }
-
-        tv_item_row3.text = total_target.toString()
-        tv_item_row4.text = total_actual.toString()
-        tv_item_row5.text = total_balance.toString()
+//        tv_item_row0.text = "TOTAL"
+//        tv_item_row1.text = ""
+//        tv_item_row2.text = ""
+//
+//        var db = SimpleDatabaseHelper(this)
+//        _list = db.gets() ?: _list
+//
+//        list_adapter = ListAdapter(this, _list)
+//        lv_products.adapter = list_adapter
+//
+//        btn_confirm.setOnClickListener {
+//            finish(true, 1, "ok", null)
+//        }
+//
+//        var total_target = 0
+//        var total_actual = 0
+//        var total_balance = 0
+//
+//        for (i in 0..(_list.size - 1)) {
+//
+//            val item = _list[i]
+//
+//            val target = item["target"]?.toInt() ?: 0
+//            val actual = item["actual"]?.toInt() ?: 0
+//            val balance = target - actual
+//
+//            total_target += target
+//            total_actual += actual
+//            total_balance += balance
+//
+//            item.put("target", target.toString())
+//            item.put("actual", actual.toString())
+//            item.put("balance", balance.toString())
+//        }
+//
+//        tv_item_row3.text = total_target.toString()
+//        tv_item_row4.text = total_actual.toString()
+//        tv_item_row5.text = total_balance.toString()
     }
 
     class ListAdapter(context: Context, list: ArrayList<HashMap<String, String>>) : BaseAdapter() {

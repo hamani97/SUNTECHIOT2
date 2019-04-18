@@ -56,7 +56,8 @@ class PushActivity : BaseActivity() {
         var i = 0
 
         val uri = "/pushcall.php"
-        var params = listOf("code" to "push_text_list",
+        var params = listOf(
+            "code" to "push_text_list",
             "mac_addr" to AppGlobal.instance.getMACAddress(),
             "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
             "factory_idx" to AppGlobal.instance.get_room_idx(),

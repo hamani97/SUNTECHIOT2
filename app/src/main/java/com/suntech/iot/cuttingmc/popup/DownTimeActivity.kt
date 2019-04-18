@@ -91,8 +91,8 @@ class DownTimeActivity : BaseActivity() {
         lv_downtimes.adapter = list_adapter
 
         var total_downtime = 0
-        _list?.forEach { item ->
 
+        _list?.forEach { item ->
             item.put("downtime", "")
             val start_dt = OEEUtil.parseDateTime(item["start_dt"])
             if (item["end_dt"]!=null) {
@@ -150,7 +150,7 @@ class DownTimeActivity : BaseActivity() {
             }
 
             vh.tv_item_shift_name.text = _list[position]["shift_name"]
-            vh.tv_item_design_idx.text = _list[position]["design_idx"]
+//            vh.tv_item_design_idx.text = _list[position]["design_idx"]
             vh.tv_item_start_time.text = _list[position]["start_dt"]
             vh.tv_item_end_time.text = _list[position]["end_dt"]
             vh.tv_item_downtime.text = _list[position]["downtime"]
@@ -159,13 +159,13 @@ class DownTimeActivity : BaseActivity() {
 
             if (_list[position]["completed"]=="N") {
                 vh.tv_item_shift_name.setTextColor(Color.parseColor("#ff0000"))
-                vh.tv_item_design_idx.setTextColor(Color.parseColor("#ff0000"))
+//                vh.tv_item_design_idx.setTextColor(Color.parseColor("#ff0000"))
                 vh.tv_item_start_time.setTextColor(Color.parseColor("#ff0000"))
                 vh.tv_item_completed.setTextColor(Color.parseColor("#ff0000"))
             }
             else {
                 vh.tv_item_shift_name.setTextColor(Color.parseColor("#000000"))
-                vh.tv_item_design_idx.setTextColor(Color.parseColor("#000000"))
+//                vh.tv_item_design_idx.setTextColor(Color.parseColor("#000000"))
                 vh.tv_item_start_time.setTextColor(Color.parseColor("#000000"))
                 vh.tv_item_completed.setTextColor(Color.parseColor("#000000"))
             }
@@ -175,7 +175,7 @@ class DownTimeActivity : BaseActivity() {
 
         private class ViewHolder(row: View?) {
             val tv_item_shift_name: TextView
-            val tv_item_design_idx: TextView
+//            val tv_item_design_idx: TextView
             val tv_item_start_time: TextView
             val tv_item_end_time: TextView
             val tv_item_downtime: TextView
@@ -184,7 +184,7 @@ class DownTimeActivity : BaseActivity() {
 
             init {
                 this.tv_item_shift_name = row?.findViewById<TextView>(R.id.tv_item_shift_name) as TextView
-                this.tv_item_design_idx = row?.findViewById<TextView>(R.id.tv_item_design_idx) as TextView
+//                this.tv_item_design_idx = row?.findViewById<TextView>(R.id.tv_item_design_idx) as TextView
                 this.tv_item_start_time = row?.findViewById<TextView>(R.id.tv_item_start_time) as TextView
                 this.tv_item_end_time = row?.findViewById<TextView>(R.id.tv_item_end_time) as TextView
                 this.tv_item_downtime = row?.findViewById<TextView>(R.id.tv_item_downtime) as TextView

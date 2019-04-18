@@ -14,7 +14,6 @@ import com.suntech.iot.cuttingmc.R
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.db.DBHelperForDownTime
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelper
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import kotlinx.android.synthetic.main.activity_down_time_input.*
 import org.joda.time.DateTime
@@ -24,14 +23,14 @@ class DownTimeInputActivity : BaseActivity() {
 
     private var list_adapter: ListAdapter? = null
     private var _list: ArrayList<HashMap<String, String>> = arrayListOf()
-    private var _selected_idx =-1
+    private var _selected_idx = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_down_time_input)
         initView()
-        updateList()
         fetchData()
+        updateList()
     }
 
     private fun initView() {
@@ -63,7 +62,7 @@ class DownTimeInputActivity : BaseActivity() {
         for (i in 0..(list.length() - 1)) {
 
             val item = list.getJSONObject(i)
-            var map=hashMapOf(
+            var map = hashMapOf(
                 "idx" to item.getString("idx"),
                 "name" to item.getString("name"),
                 "color" to item.getString("color"),
@@ -82,12 +81,11 @@ class DownTimeInputActivity : BaseActivity() {
     }
 
     private fun sendEndDownTime() {
-
-        if (AppGlobal.instance.get_server_ip()=="") {
+        if (AppGlobal.instance.get_server_ip() == "") {
             Toast.makeText(this, getString(R.string.msg_has_not_server_info), Toast.LENGTH_SHORT).show()
             return
         }
-        if (_selected_idx<0) {
+        if (_selected_idx < 0) {
             Toast.makeText(this, getString(R.string.msg_has_notselected), Toast.LENGTH_SHORT).show()
             return
         }
@@ -95,7 +93,8 @@ class DownTimeInputActivity : BaseActivity() {
         val downtime = _list[_selected_idx]["idx"]
 
         val uri = "/downtimedata.php"
-        var params = listOf("code" to "end",
+        var params = listOf(
+            "code" to "end",
             "idx" to AppGlobal.instance.get_downtime_idx(),
             "downtime" to downtime,
             "edate" to DateTime().toString("yyyy-MM-dd"),
@@ -105,11 +104,9 @@ class DownTimeInputActivity : BaseActivity() {
         btn_cancel.isEnabled = false
 
         request(this, uri, true,true, params, { result ->
-
             var code = result.getString("code")
             var msg = result.getString("msg")
-            if(code == "00") {
-
+            if (code == "00") {
                 val idx = AppGlobal.instance.get_downtime_idx()
 
                 var db = DBHelperForDownTime(this)
@@ -117,9 +114,11 @@ class DownTimeInputActivity : BaseActivity() {
 
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 finish(true, 0, "ok", null)
-            }else if(code == "99") {
+
+            } else if (code == "99") {
                 resendStartDownTime()
-            }else {
+
+            } else {
                 btn_confirm.isEnabled = true
                 btn_cancel.isEnabled = true
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -128,16 +127,16 @@ class DownTimeInputActivity : BaseActivity() {
     }
 
     private fun resendStartDownTime() {
-        if (AppGlobal.instance.get_server_ip()=="") return
+        if (AppGlobal.instance.get_server_ip() == "") return
 
-        val work_idx = ""+AppGlobal.instance.get_product_idx()
+        val work_idx = "" + AppGlobal.instance.get_product_idx()
         if (work_idx=="") return
 
         val idx = intent.getStringExtra("idx")
         var db = DBHelperForDownTime(this)
         val item = db.get(idx)
-        if (item !=null) {
 
+        if (item !=null) {
             val start_dt = item["start_dt"].toString()
             val didx = item["design_idx"].toString()
             val shift_idx = item["shift_id"].toString()
@@ -145,12 +144,14 @@ class DownTimeInputActivity : BaseActivity() {
             val dt = OEEUtil.parseDateTime(start_dt)
             db.delete(idx)
 
-            var work_db = SimpleDatabaseHelper(this)
-            val row = work_db.get(work_idx)
-            val seq = row!!["seq"].toString().toInt()
+//            var work_db = SimpleDatabaseHelper(this)
+//            val row = work_db.get(work_idx)
+//            val seq = row!!["seq"].toString().toInt()
+            val seq = item["seq"]
 
             val uri = "/downtimedata.php"
-            var params = listOf("code" to "start",
+            var params = listOf(
+                "code" to "start",
                 "mac_addr" to AppGlobal.instance.getMACAddress(),
                 "didx" to didx,
                 "sdate" to dt.toString("yyyy-MM-dd"),
@@ -162,16 +163,16 @@ class DownTimeInputActivity : BaseActivity() {
                 "seq" to seq)
 
             request(this, uri, true, false, params, { result ->
-
                 var code = result.getString("code")
                 var msg = result.getString("msg")
                 if (code == "00") {
-
                     var idx = result.getString("idx")
                     AppGlobal.instance.set_downtime_idx(idx)
+
                     db.add(idx, work_idx, didx, shift_idx, shift_name, start_dt)
 
                     sendEndDownTime()
+
                 } else {
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }
@@ -180,22 +181,20 @@ class DownTimeInputActivity : BaseActivity() {
     }
 
     private fun fetchData() {
-
         val uri = "/getlist1.php"
-        var params = listOf("code" to "down_time",
+        var params = listOf(
+            "code" to "down_time",
             "factory_parent_idx" to AppGlobal.instance.get_factory_idx())
 
         request(this, uri, false, params, { result ->
-
             var code = result.getString("code")
             var msg = result.getString("msg")
-            if(code == "00"){
-
+            if (code == "00") {
                 var list = result.getJSONArray("item")
                 AppGlobal.instance.set_downtime_list(list)
                 updateList()
 
-            }else{
+            } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         })
