@@ -46,7 +46,7 @@
     <string name="label_wos">WOS</string>
     <string name="label_component">COMPONENT</string>
     <string name="label_size">SIZE</string>
-    <string name="label_layer">LAYER</string>
+    <string name="label_layer">PAIR(S)</string>
     <string name="label_model2">MODEL</string>
     <string name="label_style">STYLE</string>
     <string name="label_target">TARGET</string>
@@ -137,5 +137,7 @@
     <string name="msg_exit_shift">Do you want to exit?</string>
     <string name="msg_has_not_server_info">Cannot find server</string>
     <string name="msg_no_downtime">Downtime message not found</string>
+
+    <string name="msg_exit_automatically">Workday ends automatically</string>
 
 </resources>

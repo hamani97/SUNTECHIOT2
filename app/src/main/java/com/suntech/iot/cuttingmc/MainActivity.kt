@@ -20,7 +20,9 @@ import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
+import com.suntech.iot.cuttingmc.db.DBHelperForCount
 import com.suntech.iot.cuttingmc.db.DBHelperForDownTime
+import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelperBackup
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.DefectiveActivity
 import com.suntech.iot.cuttingmc.popup.DownTimeActivity
@@ -40,6 +42,8 @@ import java.util.*
 class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
+
+    var _stitch_db = DBHelperForCount(this)
 
     private var _doubleBackToExitPressedOnce = false
     private var _last_count_received_time = DateTime()
@@ -416,8 +420,8 @@ class MainActivity : BaseActivity() {
 //        val downtime_idx = AppGlobal.instance.get_downtime_idx()
 //        if (downtime_idx!="") sendEndDownTimeForce()
 
-//        var db = SimpleDatabaseHelper(this)
-//        db.delete()
+        var db = SimpleDatabaseHelperBackup(this)
+        db.delete()
 
         var db1 = DBHelperForComponent(this)
         db1.delete()
@@ -425,9 +429,10 @@ class MainActivity : BaseActivity() {
         var db2 = DBHelperForDownTime(this)
         db2.delete()
 
-//        var db3 = DBHelperForCount(this)
-//        db3.delete()
-//        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
+        var db3 = DBHelperForCount(this)
+        db3.delete()
+
+        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
     }
 
     private fun updateCurrentWorkTarget() {
@@ -632,7 +637,7 @@ class MainActivity : BaseActivity() {
 
             var inc_count = 1
 
-            if (layer_value == "0.5") {
+            if (layer_value == "0") {
                 val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
                 if (accumulated_count <= 1) {
                     AppGlobal.instance.set_accumulated_count(1)
@@ -662,7 +667,7 @@ class MainActivity : BaseActivity() {
 
             sendCountData(value.toString(), inc_count)
 
-//            _stitch_db.add(work_idx, value.toString())
+            _stitch_db.add(work_idx, value.toString())
         }
     }
 
@@ -863,6 +868,9 @@ class MainActivity : BaseActivity() {
         val work_idx = AppGlobal.instance.get_work_idx()
         if (work_idx == "") return
 
+        var shift_idx = AppGlobal.instance.get_current_shift_idx()
+        if (shift_idx == "") shift_idx = "0"
+
         var db = DBHelperForComponent(this)
         val row = db.get(work_idx)
         val actual = row!!["actual"].toString().toInt()
@@ -878,14 +886,14 @@ class MainActivity : BaseActivity() {
             "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
             "factory_idx" to AppGlobal.instance.get_room_idx(),
             "line_idx" to AppGlobal.instance.get_line_idx(),
-            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+            "shift_idx" to  shift_idx,
             "seq" to seq,
             "wos" to AppGlobal.instance.get_compo_wos(),
             "comp" to AppGlobal.instance.get_compo_component_idx(),
             "size" to AppGlobal.instance.get_compo_size(),
             "max_rpm" to "",
             "avr_rpm" to "")
-
+//Log.e("params", params.toString())
         request(this, uri, true,false, params, { result ->
             var code = result.getString("code")
             var msg = result.getString("msg")

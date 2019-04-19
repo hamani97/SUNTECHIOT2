@@ -380,36 +380,38 @@ class ComponentInfoActivity : BaseActivity() {
         var arr: ArrayList<String> = arrayListOf<String>()
         var lists : ArrayList<HashMap<String, String>> = arrayListOf()
 
+        if (AppGlobal.instance.get_layer_pairs("0") != "") {
+            arr.add("0.5 Pair - " + addPairText(AppGlobal.instance.get_layer_pairs("0")))
+            lists.add(hashMapOf("layer_no" to "0", "pair" to AppGlobal.instance.get_layer_pairs("0")))
+        }
         if (AppGlobal.instance.get_layer_pairs("1") != "") {
-            arr.add("1 Layer - " + addPairText(AppGlobal.instance.get_layer_pairs("1")))
+            arr.add("1 Pair - " + addPairText(AppGlobal.instance.get_layer_pairs("1")))
             lists.add(hashMapOf("layer_no" to "1", "pair" to AppGlobal.instance.get_layer_pairs("1")))
         }
         if (AppGlobal.instance.get_layer_pairs("2") != "") {
-            arr.add("2 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("2")))
+            arr.add("2 Pairs - " + addPairText(AppGlobal.instance.get_layer_pairs("2")))
             lists.add(hashMapOf("layer_no" to "2", "pair" to AppGlobal.instance.get_layer_pairs("2")))
         }
+        if (AppGlobal.instance.get_layer_pairs("3") != "") {
+            arr.add("3 Pairs - " + addPairText(AppGlobal.instance.get_layer_pairs("3")))
+            lists.add(hashMapOf("layer_no" to "3", "pair" to AppGlobal.instance.get_layer_pairs("3")))
+        }
         if (AppGlobal.instance.get_layer_pairs("4") != "") {
-            arr.add("4 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("4")))
+            arr.add("4 Pairs - " + addPairText(AppGlobal.instance.get_layer_pairs("4")))
             lists.add(hashMapOf("layer_no" to "4", "pair" to AppGlobal.instance.get_layer_pairs("4")))
         }
-        if (AppGlobal.instance.get_layer_pairs("6") != "") {
-            arr.add("6 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("6")))
-            lists.add(hashMapOf("layer_no" to "6", "pair" to AppGlobal.instance.get_layer_pairs("6")))
-        }
-        if (AppGlobal.instance.get_layer_pairs("8") != "") {
-            arr.add("8 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("8")))
-            lists.add(hashMapOf("layer_no" to "8", "pair" to AppGlobal.instance.get_layer_pairs("8")))
-        }
-        if (AppGlobal.instance.get_layer_pairs("10") != "") {
-            arr.add("10 Layers - " + addPairText(AppGlobal.instance.get_layer_pairs("10")))
-            lists.add(hashMapOf("layer_no" to "10", "pair" to AppGlobal.instance.get_layer_pairs("10")))
+        if (AppGlobal.instance.get_layer_pairs("5") != "") {
+            arr.add("5 Pairs - " + addPairText(AppGlobal.instance.get_layer_pairs("5")))
+            lists.add(hashMapOf("layer_no" to "5", "pair" to AppGlobal.instance.get_layer_pairs("5")))
         }
 
         val intent = Intent(this, PopupSelectList::class.java)
         intent.putStringArrayListExtra("list", arr)
         startActivity(intent, { r, c, m, d ->
             if (r) {
-                tv_compo_layer.text = lists[c]["layer_no"] ?: ""
+                var tv_text = lists[c]["layer_no"] ?: ""
+                if (tv_text=="0") tv_text = "0.5"
+                tv_compo_layer.text = tv_text
                 _selected_layer_no = lists[c]["layer_no"] ?: ""
                 _selected_pair_info = lists[c]["pair"] ?: ""
             }

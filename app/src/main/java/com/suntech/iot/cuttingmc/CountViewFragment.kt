@@ -1,9 +1,7 @@
 package com.suntech.iot.cuttingmc
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.AlertDialog
+import android.content.*
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -109,26 +107,26 @@ class CountViewFragment : BaseFragment() {
 //            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
 //        }
         btn_exit.setOnClickListener {
-            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
-//            val work_idx = ""+ AppGlobal.instance.get_product_idx()
-//            if (work_idx == "") {
-//                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
-//                return@setOnClickListener
-//            }
-//            val alertDialogBuilder = AlertDialog.Builder(activity)
-//            alertDialogBuilder.setTitle(getString(R.string.notice))
-//            alertDialogBuilder
-//                .setMessage(getString(R.string.msg_exit_shift))
-//                .setCancelable(false)
-//                .setPositiveButton(getString(R.string.confirm), DialogInterface.OnClickListener { dialog, id ->
-//                    (activity as MainActivity).changeFragment(0)
-//                    (activity as MainActivity).endWork()
-//                })
-//                .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
-//                    dialog.cancel()
-//                } )
-//            val alertDialog = alertDialogBuilder.create()
-//            alertDialog.show()
+//            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
+            val work_idx = ""+ AppGlobal.instance.get_work_idx()
+            if (work_idx == "") {
+                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val alertDialogBuilder = AlertDialog.Builder(activity)
+            alertDialogBuilder.setTitle(getString(R.string.notice))
+            alertDialogBuilder
+                .setMessage(getString(R.string.msg_exit_shift))
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.confirm), DialogInterface.OnClickListener { dialog, id ->
+                    (activity as MainActivity).changeFragment(0)
+                    (activity as MainActivity).endWork()
+                })
+                .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
+                    dialog.cancel()
+                } )
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
         }
 
         // Component count view

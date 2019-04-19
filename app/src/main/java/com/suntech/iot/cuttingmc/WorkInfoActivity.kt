@@ -262,7 +262,7 @@ class WorkInfoActivity : BaseActivity() {
                 et_setting_p_1_s_h.text = planned1_stime.toString("HH")
                 et_setting_p_1_s_m.text = planned1_stime.toString("mm")
             }
-            if (_list[1]["planned1_etime"]!=null && _list[1]["planned1_etime"]!="") {
+            if (_list[0]["planned1_etime"]!=null && _list[0]["planned1_etime"]!="") {
                 val planned1_etime = OEEUtil.parseTime2(_list[0]["planned1_etime"].toString())
                 et_setting_p_1_e_h.text = planned1_etime.toString("HH")
                 et_setting_p_1_e_m.text = planned1_etime.toString("mm")
