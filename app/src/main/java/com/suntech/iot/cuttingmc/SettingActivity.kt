@@ -100,12 +100,12 @@ class SettingActivity : BaseActivity() {
 
         // count setting
         // set hidden value
-        _selected_layer_0 = AppGlobal.instance.get_layer_pairs("0")
-        _selected_layer_1 = AppGlobal.instance.get_layer_pairs("1")
-        _selected_layer_2 = AppGlobal.instance.get_layer_pairs("2")
-        _selected_layer_3 = AppGlobal.instance.get_layer_pairs("3")
-        _selected_layer_4 = AppGlobal.instance.get_layer_pairs("4")
-        _selected_layer_5 = AppGlobal.instance.get_layer_pairs("5")
+        _selected_layer_0 = AppGlobal.instance.get_layer_pairs("0")     // 1 layer = 0.5 pair
+        _selected_layer_1 = AppGlobal.instance.get_layer_pairs("1")     // 2 layer = 1 pair
+        _selected_layer_2 = AppGlobal.instance.get_layer_pairs("2")     // 4 layer = 2 pairs
+        _selected_layer_3 = AppGlobal.instance.get_layer_pairs("3")     // 6 layer = 3 pairs
+        _selected_layer_4 = AppGlobal.instance.get_layer_pairs("4")     // 8 layer = 4 pairs
+        _selected_layer_5 = AppGlobal.instance.get_layer_pairs("5")     // 10 layer = 5 pairs
 
         // widget
         if (_selected_layer_0 != "") tv_layer_0.text = addPairText(_selected_layer_0)
@@ -468,7 +468,7 @@ class SettingActivity : BaseActivity() {
 
         arr.add("0.5 pair")
         arr.add("1 pair")
-        lists.add(hashMapOf("pair" to "0", "desc" to "0.5 pair"))
+        lists.add(hashMapOf("pair" to "0.5", "desc" to "0.5 pair"))
         lists.add(hashMapOf("pair" to "1", "desc" to "1 pair"))
 
         for (i in 2..5) {

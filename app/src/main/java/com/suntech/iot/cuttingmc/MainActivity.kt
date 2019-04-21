@@ -29,10 +29,12 @@ import com.suntech.iot.cuttingmc.popup.DownTimeActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
+import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_side_menu.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
+import org.joda.time.Days
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -78,13 +80,15 @@ class MainActivity : BaseActivity() {
             btn_home.setOnLongClickListener { changeFragment(0); true }
             btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
-            btn_downtime.setOnLongClickListener { startDowntimeActivity();true }
+//            btn_downtime.setOnLongClickListener { startDowntimeActivity();true }
+            btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
             btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
             btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
             btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
-            btn_downtime.setOnClickListener { startDowntimeActivity() }
+//            btn_downtime.setOnClickListener { startDowntimeActivity() }
+            btn_downtime.setOnClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show() }
             btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
         }
 
@@ -94,6 +98,7 @@ class MainActivity : BaseActivity() {
         adapter.addFragment(CountViewFragment(), "")
         vp_fragments.adapter = adapter
         adapter.notifyDataSetChanged()
+
         vp_fragments.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(state: Int) {
                 (adapter.getItem(state) as BaseFragment).onSelected()
@@ -145,7 +150,7 @@ class MainActivity : BaseActivity() {
             return
         }
         this._doubleBackToExitPressedOnce = true
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show()
         Handler().postDelayed({ _doubleBackToExitPressedOnce = false }, 2000)
     }
 
@@ -155,11 +160,12 @@ class MainActivity : BaseActivity() {
     }
 
     fun changeFragment(pos:Int) {
-//        if (pos==1) c
-//        else tv_title.visibility = View.GONE
         vp_fragments.setCurrentItem(pos, true)
     }
 
+    // 시작시 호출
+    // 이후 10분에 한번씩 호출
+    // 서버에 작업시간, 다운타임 기본시간, 색삭값을 호출
     private fun fetchRequiredData() {
         if (AppGlobal.instance.get_server_ip().trim() != "") {
             fetchWorkData()
@@ -168,7 +174,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun fetchMaualShift(): JSONObject? {
+    private fun fetchManualShift(): JSONObject? {
         // manual 데이터가 있으면 가져온다.
         val manual = AppGlobal.instance.get_work_time_manual()
         if (manual != null && manual.length()>0) {
@@ -210,7 +216,7 @@ class MainActivity : BaseActivity() {
      */
     private fun fetchWorkData() {
         var dt = DateTime()
-        val shift3: JSONObject? = fetchMaualShift()      // manual 데이터가 있으면 가져온다.
+        val shift3: JSONObject? = fetchManualShift()      // manual 데이터가 있으면 가져온다.
 
         val uri = "/getlist1.php"
         var params = listOf(
@@ -219,7 +225,7 @@ class MainActivity : BaseActivity() {
             "factory_idx" to AppGlobal.instance.get_room_idx(),
             "line_idx" to AppGlobal.instance.get_line_idx(),
             "date" to dt.toString("yyyy-MM-dd"))
-//Log.e("params", "" + params)
+Log.e("params", "" + params)
 
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
@@ -240,10 +246,7 @@ class MainActivity : BaseActivity() {
                     }
                     list1.put(today_shift)
                 }
-//                Log.e("today work list-1", "" + list1.toString())
                 list1 = handleWorkData(list1)
-//                Log.e("today work list-2", "" + list1.toString())
-
                 AppGlobal.instance.set_today_work_time(list1)
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -277,10 +280,7 @@ class MainActivity : BaseActivity() {
                     }
                     list2.put(yester_shift)
                 }
-//                Log.e("yester work list-1", "" + list2.toString())
                 list2 = handleWorkData(list2)
-//                Log.e("yester work list-2", "" + list2.toString())
-
                 AppGlobal.instance.set_prev_work_time(list2)
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -415,32 +415,14 @@ class MainActivity : BaseActivity() {
         })
     }
 
-    fun endWork() {
-        // 다운타임이 있으면 완료로 처리
-//        val downtime_idx = AppGlobal.instance.get_downtime_idx()
-//        if (downtime_idx!="") sendEndDownTimeForce()
-
-        var db = SimpleDatabaseHelperBackup(this)
-        db.delete()
-
-        var db1 = DBHelperForComponent(this)
-        db1.delete()
-
-        var db2 = DBHelperForDownTime(this)
-        db2.delete()
-
-        var db3 = DBHelperForCount(this)
-        db3.delete()
-
-        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
-    }
-
+    // 10초마다 현재 target 서버에 저장
     private fun updateCurrentWorkTarget() {
         var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
         if (item != null) {
             var _total_target = 0
             var target_type = AppGlobal.instance.get_target_type()
             if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+
             } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
                 when (item["shift_idx"]) {
                     "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
@@ -448,13 +430,13 @@ class MainActivity : BaseActivity() {
                     "3" -> _total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
                 }
             }
-
+            Log.e("updateCurrentWorkTarget", "target_type=" + target_type + ", _total_target=" + _total_target)
             if (_total_target > 0) {
                 val uri = "/sendtarget.php"
                 var params = listOf(
                     "mac_addr" to AppGlobal.instance.getMACAddress(),
                     "date" to DateTime().toString("yyyy-MM-dd"),
-                    "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+                    "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
                     "target_count" to _total_target)
 
                 request(this, uri, true,false, params, { result ->
@@ -468,6 +450,75 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    fun endWork() {
+        AppGlobal.instance.set_work_idx("")
+        AppGlobal.instance.set_worker_no("")
+        AppGlobal.instance.set_worker_name("")
+//        AppGlobal.instance.set_design_info_idx("")
+//        AppGlobal.instance.set_model("")
+//        AppGlobal.instance.set_article("")
+//        AppGlobal.instance.set_material_way("")
+//        AppGlobal.instance.set_component("")
+
+        AppGlobal.instance.set_current_shift_actual_cnt(0)
+
+        // 다운타임이 있으면 완료로 처리
+        val downtime_idx = AppGlobal.instance.get_downtime_idx()
+        if (downtime_idx!="") sendEndDownTimeForce()
+
+        var db = SimpleDatabaseHelperBackup(this)
+        db.delete()
+
+        var db2 = DBHelperForDownTime(this)
+        db2.delete()
+
+        var db3 = DBHelperForCount(this)
+        db3.delete()
+
+        // Component DB는 그날의 shift 가 다 끝나야 초기화한다.
+        val today = AppGlobal.instance.get_today_work_time()
+        if (today.length() > 0) {
+            val shift = today.getJSONObject(today.length() - 1)
+            var shift_etime = OEEUtil.parseDateTime(shift["work_etime"].toString())
+            val now = DateTime()
+            if (shift_etime.millis <= now.millis) {
+                var db1 = DBHelperForComponent(this)
+                db1.delete()
+
+//                AppGlobal.instance.set_compo_wos("")
+//                AppGlobal.instance.set_compo_model("")
+//                AppGlobal.instance.set_compo_style("")
+//                AppGlobal.instance.set_compo_component("")
+                AppGlobal.instance.set_compo_size("")
+                AppGlobal.instance.set_compo_target("")
+            }
+        }
+//Log.e("today", today.toString())
+//        var db1 = DBHelperForComponent(this)
+//        db1.delete()
+
+        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
+    }
+
+//    private fun checkExit() {
+//        val work_idx = ""+AppGlobal.instance.get_work_idx()
+//        if (work_idx=="") return
+//
+//        val last_work_dt = OEEUtil.parseDate(AppGlobal.instance.get_current_work_day())
+//Log.e("checkExit", "last_work_dt="+last_work_dt.toString())
+//        val current = AppGlobal.instance.get_current_work_time()
+//        if (current.length()==0) return
+//
+//        val shift = current.getJSONObject(0)
+//        var shift_stime = OEEUtil.parseDateTime(shift["work_stime"].toString())
+//        var d = Days.daysBetween(last_work_dt.toLocalDate(), shift_stime.toLocalDate()).getDays()
+//Log.e("checkExit", "shift stime="+shift_stime.toString())
+//Log.e("checkExit", "d="+d.toString())
+//        if (d != 0) {
+////            endWork()
+//        }
+//    }
+
     /////// 쓰레드
     private val _downtime_timer = Timer()
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
@@ -478,7 +529,7 @@ class MainActivity : BaseActivity() {
         val downtime_task = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
-                    checkDownTime()
+//                    checkDownTime()
 //                    checkExit()
                 }
             }
@@ -616,12 +667,13 @@ class MainActivity : BaseActivity() {
             if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
             // 레이어 선택 확인
-            val layer = AppGlobal.instance.get_compo_layer()
-            if (layer == "") {
-                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
-                return
-            }
-            val layer_value = AppGlobal.instance.get_layer_pairs(layer)
+//            val layer = AppGlobal.instance.get_compo_layer()
+//            if (layer == "") {
+//                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
+//                return
+//            }
+            // Pairs 선택 확인
+            val layer_value = AppGlobal.instance.get_compo_pairs()
             if (layer_value == "") {
                 Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
                 return
@@ -637,7 +689,7 @@ class MainActivity : BaseActivity() {
 
             var inc_count = 1
 
-            if (layer_value == "0") {
+            if (layer_value == "0.5") {
                 val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
                 if (accumulated_count <= 1) {
                     AppGlobal.instance.set_accumulated_count(1)
@@ -741,7 +793,7 @@ class MainActivity : BaseActivity() {
 
     private fun sendStartDownTime(dt:DateTime) {
 
-        if (AppGlobal.instance.get_server_ip()=="") return
+        if (AppGlobal.instance.get_server_ip() == "") return
 
         val work_idx = "" + AppGlobal.instance.get_work_idx()
         if (work_idx=="") return
@@ -796,6 +848,43 @@ class MainActivity : BaseActivity() {
             _is_call = false
         },{
             _is_call = false
+        })
+    }
+
+    private fun sendEndDownTimeForce() {
+        if (AppGlobal.instance.get_server_ip() == "") return
+        if (AppGlobal.instance.get_downtime_idx() == "") return
+
+        val downtime = "99"
+        val uri = "/downtimedata.php"
+        var params = listOf(
+            "code" to "end",
+            "idx" to AppGlobal.instance.get_downtime_idx(),
+            "downtime" to downtime,
+            "edate" to DateTime().toString("yyyy-MM-dd"),
+            "etime" to DateTime().toString("HH:mm:ss"))
+
+        request(this, uri, true,false, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                val idx = AppGlobal.instance.get_downtime_idx()
+                AppGlobal.instance.set_downtime_idx("")
+                var db = DBHelperForDownTime(this)
+                db.updateEnd(idx, "ignored")
+
+                // 기존 다운타임 화면이 열려있으면 닫고
+                val br_intent = Intent("start.downtime")
+                this.sendBroadcast(br_intent)
+
+                // 카운트뷰로 이동
+                if (vp_fragments.currentItem != 1) changeFragment(1)
+
+            } else if (code == "99") {
+                // ?
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
         })
     }
 

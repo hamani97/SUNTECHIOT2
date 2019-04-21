@@ -206,9 +206,13 @@ class WorkInfoActivity : BaseActivity() {
                 shift3.put("planned1_stime", "")
                 shift3.put("planned1_etime", "")
             }
-
-            AppGlobal.instance.set_work_time_manual(shift3)
+        } else {
+            shift3.put("available_stime", "")
+            shift3.put("available_etime", "")
+            shift3.put("planned1_stime", "")
+            shift3.put("planned1_etime", "")
         }
+        AppGlobal.instance.set_work_time_manual(shift3)
         finish()
     }
 

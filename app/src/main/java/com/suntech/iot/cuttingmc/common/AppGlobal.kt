@@ -93,6 +93,8 @@ class AppGlobal private constructor() {
 
     fun set_compo_layer(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_layer", value) }
     fun get_compo_layer() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_layer") }
+    fun set_compo_pairs(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_pairs", value) }
+    fun get_compo_pairs() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_pairs") }
 
 
     // 작업자 정보 설정
@@ -135,25 +137,25 @@ class AppGlobal private constructor() {
     fun get_work_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
 
     // 작업 프로덕트 고유값 설정
-    fun reset_product_idx() {
-        UtilLocalStorage.setString(instance._context!!, "work_idx", "")
-    }
-    fun set_product_idx() {
-        var product_idx = get_product_idx()
-        if (product_idx == "" ) product_idx = "1000"
-        val new_product_idx = product_idx.toInt() + 1
-        UtilLocalStorage.setString(instance._context!!, "work_idx", new_product_idx.toString())
-    }
-    fun get_product_idx() : String {
-        return UtilLocalStorage.getString(instance._context!!, "work_idx")
-    }
+//    fun reset_product_idx() {
+//        UtilLocalStorage.setString(instance._context!!, "work_idx", "")
+//    }
+//    fun set_product_idx() {
+//        var product_idx = get_product_idx()
+//        if (product_idx == "" ) product_idx = "1000"
+//        val new_product_idx = product_idx.toInt() + 1
+//        UtilLocalStorage.setString(instance._context!!, "work_idx", new_product_idx.toString())
+//    }
+//    fun get_product_idx() : String {
+//        return UtilLocalStorage.getString(instance._context!!, "work_idx")
+//    }
 
 
     // 디자인 정보 설정
-    fun set_design_info_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_design_info_idx", idx) }
-    fun get_design_info_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_design_info_idx") }
-    fun set_design_info(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "design_info", data) }
-    fun get_design_info() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "design_info") }
+//    fun set_design_info_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_design_info_idx", idx) }
+//    fun get_design_info_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_design_info_idx") }
+//    fun set_design_info(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "design_info", data) }
+//    fun get_design_info() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "design_info") }
 
     fun set_cycle_time(idx: Int) { UtilLocalStorage.setInt(instance._context!!, "current_cycle_time", idx) }
     fun get_cycle_time() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_cycle_time") }
@@ -222,7 +224,7 @@ class AppGlobal private constructor() {
     }
     fun get_current_shift_time() : JSONObject? {
         val list = get_current_work_time()
-        if (list.length() == 0 ) return null
+        if (list.length() == 0) return null
         val idx = get_current_shift_time_idx()
         if (idx < 0) return null
         return list.getJSONObject(idx)
@@ -254,51 +256,6 @@ class AppGlobal private constructor() {
         }
         return today
     }
-
-    fun get_mac_address(): String? {
-        var mac = getMACAddress()
-        if (mac == "") mac = "NO_MAC_ADDRESS"
-        return mac
-    }
-    fun getMACAddress(): String {
-        val interfaceName = "wlan0"
-        try {
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
-            for (intf in interfaces) {
-                if (!intf.getName().equals(interfaceName)) continue
-
-                val mac = intf.getHardwareAddress() ?: return ""
-                val buf = StringBuilder()
-                for (idx in mac.indices)
-                    buf.append(String.format("%02X:", mac[idx]))
-                if (buf.length > 0) buf.deleteCharAt(buf.length - 1)
-                return buf.toString()
-            }
-        } catch (ex: Exception) {
-            Log.e("Error", ex.toString())
-        }
-        return ""
-    }
-
-    fun get_local_ip(): String {
-        try {
-            val en = NetworkInterface.getNetworkInterfaces()
-            while (en.hasMoreElements()) {
-                val interf = en.nextElement()
-                val ips = interf.inetAddresses
-                while (ips.hasMoreElements()) {
-                    val inetAddress = ips.nextElement()
-                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
-                        return inetAddress.hostAddress.toString()
-                    }
-                }
-            }
-        } catch (ex: SocketException) {
-            Log.e("Error", ex.toString())
-        }
-        return ""
-    }
-
 
     // 현재 쉬프트의 누적 시간을 구함
     fun get_current_shift_accumulated_time() : Int {
@@ -416,6 +373,51 @@ class AppGlobal private constructor() {
 */
         return dif.toInt()
     }
+
+    fun get_mac_address(): String? {
+        var mac = getMACAddress()
+        if (mac == "") mac = "NO_MAC_ADDRESS"
+        return mac
+    }
+    fun getMACAddress(): String {
+        val interfaceName = "wlan0"
+        try {
+            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (intf in interfaces) {
+                if (!intf.getName().equals(interfaceName)) continue
+
+                val mac = intf.getHardwareAddress() ?: return ""
+                val buf = StringBuilder()
+                for (idx in mac.indices)
+                    buf.append(String.format("%02X:", mac[idx]))
+                if (buf.length > 0) buf.deleteCharAt(buf.length - 1)
+                return buf.toString()
+            }
+        } catch (ex: Exception) {
+            Log.e("Error", ex.toString())
+        }
+        return ""
+    }
+
+    fun get_local_ip(): String {
+        try {
+            val en = NetworkInterface.getNetworkInterfaces()
+            while (en.hasMoreElements()) {
+                val interf = en.nextElement()
+                val ips = interf.inetAddresses
+                while (ips.hasMoreElements()) {
+                    val inetAddress = ips.nextElement()
+                    if (!inetAddress.isLoopbackAddress && inetAddress is Inet4Address) {
+                        return inetAddress.hostAddress.toString()
+                    }
+                }
+            }
+        } catch (ex: SocketException) {
+            Log.e("Error", ex.toString())
+        }
+        return ""
+    }
+
 
     // Network & Wifi check
     private fun isNetworkAvailable(context: Context): Boolean {

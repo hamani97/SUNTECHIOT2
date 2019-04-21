@@ -46,11 +46,12 @@
     <string name="label_wos">WOS</string>
     <string name="label_component">COMPONENT</string>
     <string name="label_size">SIZE</string>
-    <string name="label_layer">PAIR(S)</string>
+    <string name="label_layer">LAYER</string>
     <string name="label_model2">MODEL</string>
     <string name="label_style">STYLE</string>
     <string name="label_target">TARGET</string>
     <string name="label_actual">ACTUAL</string>
+    <string name="label_rate">RATE</string>
     <string name="label_from_server">FROM SERVER</string>
     <string name="label_from_device">FROM DEVICE</string>
 
@@ -127,7 +128,7 @@
     <string name="msg_require_info">Info not complete</string>
     <string name="msg_select_layer1">Please select layer1 value</string>
     <string name="msg_require_target_quantity">Please enter a target quantity</string>
-    <string name="msg_layer_not_selected">Layer not selected</string>
+    <string name="msg_layer_not_selected">Work info not selected</string>
     <string name="msg_no_setting">Setting not found</string>
     <string name="msg_data_not_found">Data not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>

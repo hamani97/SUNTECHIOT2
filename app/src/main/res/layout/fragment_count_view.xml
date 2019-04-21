@@ -96,18 +96,17 @@
                             android:orientation="horizontal">
 
                         <TextView
-                                android:id="@+id/tv_count_view_ratio"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="start"
-                                android:text="30%"
+                                android:text="@string/label_rate"
                                 android:textSize="112sp"
                                 android:textColor="#fff"
                                 android:textStyle="bold"/>
 
                         <TextView
-                                android:id="@+id/tv_count_view_time"
+                                android:id="@+id/tv_count_view_ratio"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -166,6 +165,7 @@
                         android:visibility="visible">
 
                     <TextView
+                            android:id="@+id/tv_btn_wos_count"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
@@ -177,6 +177,7 @@
                             android:background="#383838" />
 
                     <LinearLayout
+                            android:id="@+id/ll_btn_wos_count"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:padding="32dp"
@@ -208,7 +209,7 @@
                             <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="PAIR(S)  "
+                                    android:text="LAYER(S)  "
                                     android:textColor="@color/colorWhite"
                                     android:textSize="26sp" />
                             <TextView

@@ -69,6 +69,7 @@ class CountViewFragment : BaseFragment() {
         } else {
             ll_total_count.visibility = View.GONE
             ll_component_count.visibility = View.VISIBLE
+            fetchFilterWos()    // 기존 선택된 WOS 가 있으면 로드해서 화면에 표시한다.
         }
 
         // Worker info
@@ -94,7 +95,7 @@ class CountViewFragment : BaseFragment() {
         tv_count_view_target.text = "0"
         tv_count_view_actual.text = "0"
         tv_count_view_ratio.text = "0%"
-        tv_count_view_time.text = "0H"
+//        tv_count_view_time.text = "0H"
 
         // Component count view
         tv_component_view_target.text = "0"
@@ -108,7 +109,7 @@ class CountViewFragment : BaseFragment() {
 //        }
         btn_exit.setOnClickListener {
 //            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
-            val work_idx = ""+ AppGlobal.instance.get_work_idx()
+            val work_idx = "" + AppGlobal.instance.get_work_idx()
             if (work_idx == "") {
                 Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -124,16 +125,26 @@ class CountViewFragment : BaseFragment() {
                 })
                 .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
                     dialog.cancel()
-                } )
+                })
             val alertDialog = alertDialogBuilder.create()
             alertDialog.show()
         }
 
-        // Component count view
+        // Component count view buttons
         btn_total_count_view.setOnClickListener {
             (activity as MainActivity).countViewType = 1
             ll_total_count.visibility = View.VISIBLE
             ll_component_count.visibility = View.GONE
+        }
+        tv_btn_wos_count.setOnClickListener {
+            (activity as MainActivity).countViewType = 2
+            ll_total_count.visibility = View.GONE
+            ll_component_count.visibility = View.VISIBLE
+        }
+        ll_btn_wos_count.setOnClickListener {
+            (activity as MainActivity).countViewType = 2
+            ll_total_count.visibility = View.GONE
+            ll_component_count.visibility = View.VISIBLE
         }
         btn_select_component.setOnClickListener {
             val intent = Intent(activity, ComponentInfoActivity::class.java)
@@ -166,7 +177,6 @@ class CountViewFragment : BaseFragment() {
     }
 
     private fun countTarget() {
-
 //        val now_time = DateTime()
 //        val current_shift_time = AppGlobal.instance.get_current_shift_time()
 //        val work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
@@ -205,7 +215,7 @@ class CountViewFragment : BaseFragment() {
                 val target = if (cycle_time > 0) (shift_now_time / cycle_time).toInt()+1 else 1
                 _total_target = if (target > _total_target) _total_target else target
 
-                    Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shift_now_time+", cycle_time="+cycle_time)
+Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shift_now_time+", cycle_time="+cycle_time)
             } else if (target_type=="device_per_day_total") {
                 Log.e("shift time", "target="+_total_target)
             }
@@ -219,7 +229,7 @@ class CountViewFragment : BaseFragment() {
         tv_style_no.text = AppGlobal.instance.get_compo_style()
 
         tv_count_view_csize.text = AppGlobal.instance.get_compo_size()
-        tv_count_view_clayer.text = AppGlobal.instance.get_compo_layer()
+        tv_count_view_clayer.text = AppGlobal.instance.get_compo_pairs()
         tv_count_view_ctarget.text = AppGlobal.instance.get_compo_target()
 
         // component count view 화면 선택일때 처리
@@ -235,13 +245,13 @@ class CountViewFragment : BaseFragment() {
 
             tv_current_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
 
-            val elapsedTime = AppGlobal.instance.get_current_shift_accumulated_time()
-
-            val h = (elapsedTime / 3600)
-//            val m = ((elapsedTime - (h*3600)) / 60)
-//            val s = ((elapsedTime - (h*3600)) - m*60 )
-            tv_count_view_time.text = "" + h + "H"
-//            tv_count_view_time_ms.text = "" + m  + "M " + s + "S"
+//            val elapsedTime = AppGlobal.instance.get_current_shift_accumulated_time()
+//
+//            val h = (elapsedTime / 3600)
+////            val m = ((elapsedTime - (h*3600)) / 60)
+////            val s = ((elapsedTime - (h*3600)) - m*60 )
+//            tv_count_view_time.text = "" + h + "H"
+////            tv_count_view_time_ms.text = "" + m  + "M " + s + "S"
 
             var total_actual = AppGlobal.instance.get_current_shift_actual_cnt()
 
@@ -258,7 +268,7 @@ class CountViewFragment : BaseFragment() {
             tv_count_view_target.text = "" +_total_target
             tv_count_view_actual.text = "" + total_actual
             tv_count_view_ratio.text = ratio_txt
-            tv_count_view_time.text = "" + h + "H"
+//            tv_count_view_time.text = "" + h + "H"
 
             var maxEnumber = 0
             var color_code = "ffffff"
@@ -272,18 +282,24 @@ class CountViewFragment : BaseFragment() {
                     tv_count_view_target.setTextColor(Color.parseColor("#"+color_code))
                     tv_count_view_actual.setTextColor(Color.parseColor("#"+color_code))
                     tv_count_view_ratio.setTextColor(Color.parseColor("#"+color_code))
-                    tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
+//                    tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
                 }
             }
             if (maxEnumber < ratio) {
                 tv_count_view_target.setTextColor(Color.parseColor("#"+color_code))
                 tv_count_view_actual.setTextColor(Color.parseColor("#"+color_code))
                 tv_count_view_ratio.setTextColor(Color.parseColor("#"+color_code))
-                tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
+//                tv_count_view_time.setTextColor(Color.parseColor("#"+color_code))
             }
 
             val work_idx = AppGlobal.instance.get_work_idx()
-            if (work_idx=="") return
+            if (work_idx=="") {
+                tv_count_view_ctarget.text = "0"
+                tv_count_view_cactual.text = "0"
+                tv_count_view_crate.text = "N/A"
+                line_progress1.progress = 0
+                return
+            }
 
             var db = DBHelperForComponent(activity)
 
@@ -334,7 +350,17 @@ class CountViewFragment : BaseFragment() {
             tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
 
             val work_idx = AppGlobal.instance.get_work_idx()
-            if (work_idx=="") return
+            if (work_idx=="") {
+                tv_component_view_target.text = "0"
+                tv_component_view_actual.text = "0"
+                tv_component_view_ratio.text = "0%"
+
+                _selected_component_pos = -1
+                _list_for_wos.removeAll(_list_for_wos)
+                _list_for_wos_adapter?.select(_selected_component_pos)
+                _list_for_wos_adapter?.notifyDataSetChanged()
+                return
+            }
 
             var ratio_txt = ""
             var ratio = 0
@@ -393,7 +419,7 @@ class CountViewFragment : BaseFragment() {
     }
 
     private fun fetchServerTarget() {
-        val work_idx = AppGlobal.instance.get_product_idx()
+//        val work_idx = AppGlobal.instance.get_work_idx()
 //        var db = SimpleDatabaseHelper(activity)
 //        val row = db.get(work_idx)
 
