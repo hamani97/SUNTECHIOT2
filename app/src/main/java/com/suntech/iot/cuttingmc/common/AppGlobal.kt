@@ -196,15 +196,54 @@ class AppGlobal private constructor() {
     fun get_accumulated_count() : Int { return UtilLocalStorage.getInt(instance._context!!, "accumulated_count") }
 
 
+    // 어제시간과 오늘시간 중에 지나지 않은 날짜의 JSON을 선택해서 반환
+    fun get_current_work_time() : JSONArray {
+        val today = get_today_work_time()
+        val yesterday = get_prev_work_time()
+        if (yesterday.length()>0) {
+            val now = DateTime()
+            val item = yesterday.getJSONObject(yesterday.length()-1)
+            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+            if (shift_etime.millis > now.millis) {
+                return yesterday
+            }
+        }
+        return today
+    }
+
     // Shift info
+    fun compute_work_shift() {
+        var no_shift = true
+        val list = get_current_work_time()
+        if (list.length() > 0) {
+            val now_millis = DateTime().millis
+            for (i in 0..(list.length() - 1)) {
+                val item = list.getJSONObject(i)
+                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+                var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+                if (shift_stime.millis <= now_millis && now_millis < shift_etime.millis) {
+                    UtilLocalStorage.setInt(instance._context!!, "current_shift_idx", item["shift_idx"].toString().toInt())
+                    UtilLocalStorage.setString(instance._context!!, "current_shift_name", item["shift_name"].toString())
+                    no_shift = false
+                    break
+                }
+            }
+        }
+        if (no_shift) {
+            UtilLocalStorage.setInt(instance._context!!, "current_shift_idx", -1)
+            UtilLocalStorage.setString(instance._context!!, "current_shift_name", "No-shift")
+        }
+    }
+    fun get_current_shift_name() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_name") }
+
     fun get_current_shift_idx() : String {
         var item: JSONObject = get_current_shift_time() ?: return ""
         return item["shift_idx"].toString()
     }
-    fun get_current_shift_name() : String {
-        var item: JSONObject = get_current_shift_time() ?: return "No-shift"
-        return item["shift_name"].toString()
-    }
+//    fun get_current_shift_name() : String {
+//        var item: JSONObject = get_current_shift_time() ?: return "No-shift"
+//        return item["shift_name"].toString()
+//    }
     fun get_current_shift_time_idx() : Int {
         val list = get_current_work_time()
         if (list.length() == 0) return -1
@@ -242,20 +281,6 @@ class AppGlobal private constructor() {
     fun set_work_time_manual(data: JSONObject) { UtilLocalStorage.setJSONObject(instance._context!!, "current_work_time_manual", data) }
     fun get_work_time_manual() : JSONObject? { return UtilLocalStorage.getJSONObject(instance._context!!, "current_work_time_manual") }
 
-    // 어제시간과 오늘시간 중에 지나지 않은 날짜를 선택해서 반환
-    fun get_current_work_time() : JSONArray {
-        val today = get_today_work_time()
-        val yesterday = get_prev_work_time()
-        if (yesterday.length()>0) {
-            val now = DateTime()
-            val item = yesterday.getJSONObject(yesterday.length()-1)
-            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-            if (shift_etime.millis > now.millis) {
-                return yesterday
-            }
-        }
-        return today
-    }
 
     // 현재 쉬프트의 누적 시간을 구함
     fun get_current_shift_accumulated_time() : Int {

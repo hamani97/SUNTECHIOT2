@@ -29,12 +29,10 @@ import com.suntech.iot.cuttingmc.popup.DownTimeActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
-import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.layout_side_menu.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
-import org.joda.time.Days
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -210,11 +208,17 @@ class MainActivity : BaseActivity() {
         return null
     }
 
+    // 당일과 전일 데이터를 모두 불러왔는지 체크하기 위한 변수 (2가 되면 모두 읽어옴)
+    // 타이머에서 매초 이 값을 검사한다.
+    var _load_work_data_cnt = 0
+
     /*
      *  당일 작업시간 가져오기. 새벽이 지난 시간은 1일을 더한다.
      *  전일 작업이 끝나지 않았을수 있기 때문에 전일 데이터도 가져온다.
      */
     private fun fetchWorkData() {
+        _load_work_data_cnt = 0
+
         var dt = DateTime()
         val shift3: JSONObject? = fetchManualShift()      // manual 데이터가 있으면 가져온다.
 
@@ -225,6 +229,7 @@ class MainActivity : BaseActivity() {
             "factory_idx" to AppGlobal.instance.get_room_idx(),
             "line_idx" to AppGlobal.instance.get_line_idx(),
             "date" to dt.toString("yyyy-MM-dd"))
+
 Log.e("params", "" + params)
 
         request(this, uri, false, params, { result ->
@@ -248,6 +253,7 @@ Log.e("params", "" + params)
                 }
                 list1 = handleWorkData(list1)
                 AppGlobal.instance.set_today_work_time(list1)
+                _load_work_data_cnt++
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -282,51 +288,7 @@ Log.e("params", "" + params)
                 }
                 list2 = handleWorkData(list2)
                 AppGlobal.instance.set_prev_work_time(list2)
-            } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    /*
-     *  downtime check time
-     *  select_yn = 'Y' 것만 가져온다.
-     *  etc_yn = 'Y' 이면 second 값, 'N' 이면 name 값이 리턴된다. (1800)
-     */
-    private fun fetchDownTimeType() {
-        val uri = "/getlist1.php"
-        var params = listOf("code" to "check_time")
-
-        request(this, uri, false, params, { result ->
-            var code = result.getString("code")
-            var msg = result.getString("msg")
-            if (code == "00") {
-                var value = result.getString("value")
-                AppGlobal.instance.set_downtime_sec(value)
-                val s = value.toInt()
-                if (s > 0) {
-                }
-            } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    /*
-     *  칼라코드 가져오기
-     *  color_name = 'yellow'
-     *  color_cole = 'FFBC34'
-     */
-    private fun fetchColorData() {
-        val uri = "/getlist1.php"
-        var params = listOf("code" to "color")
-
-        request(this, uri, false, params, { result ->
-            var code = result.getString("code")
-            var msg = result.getString("msg")
-            if (code == "00") {
-                var list = result.getJSONArray("item")
-                AppGlobal.instance.set_color_code(list)
+                _load_work_data_cnt++
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -380,6 +342,51 @@ Log.e("params", "" + params)
 //            Log.e("new list", ""+item.toString())
         }
         return list
+    }
+
+    /*
+     *  downtime check time
+     *  select_yn = 'Y' 것만 가져온다.
+     *  etc_yn = 'Y' 이면 second 값, 'N' 이면 name 값이 리턴된다. (1800)
+     */
+    private fun fetchDownTimeType() {
+        val uri = "/getlist1.php"
+        var params = listOf("code" to "check_time")
+
+        request(this, uri, false, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                var value = result.getString("value")
+                AppGlobal.instance.set_downtime_sec(value)
+                val s = value.toInt()
+                if (s > 0) {
+                }
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    /*
+     *  칼라코드 가져오기
+     *  color_name = 'yellow'
+     *  color_cole = 'FFBC34'
+     */
+    private fun fetchColorData() {
+        val uri = "/getlist1.php"
+        var params = listOf("code" to "color")
+
+        request(this, uri, false, params, { result ->
+            var code = result.getString("code")
+            var msg = result.getString("msg")
+            if (code == "00") {
+                var list = result.getJSONArray("item")
+                AppGlobal.instance.set_color_code(list)
+            } else {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
 
@@ -519,6 +526,10 @@ Log.e("params", "" + params)
 //        }
 //    }
 
+    private fun compute_work_shift() {
+        AppGlobal.instance.compute_work_shift()
+    }
+
     /////// 쓰레드
     private val _downtime_timer = Timer()
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
@@ -529,6 +540,10 @@ Log.e("params", "" + params)
         val downtime_task = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
+                    if (_load_work_data_cnt >= 2) {
+                        _load_work_data_cnt = 0
+                        compute_work_shift()
+                    }
 //                    checkDownTime()
 //                    checkExit()
                 }
