@@ -182,12 +182,12 @@ class CountViewFragment : BaseFragment() {
 //        val work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
 //        val work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
 
-        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
-        if (item == null) {
-            activity.tv_title.setText("No shift")
-        } else {
-            activity.tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-        }
+//        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+//        if (item == null) {
+//            activity.tv_title.setText("No shift")
+//        } else {
+//            activity.tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+//        }
 
         var target_type = AppGlobal.instance.get_target_type()
 

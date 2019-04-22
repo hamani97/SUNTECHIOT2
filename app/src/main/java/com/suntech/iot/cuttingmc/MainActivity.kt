@@ -29,7 +29,9 @@ import com.suntech.iot.cuttingmc.popup.DownTimeActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
+import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.layout_side_menu.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
@@ -208,16 +210,13 @@ class MainActivity : BaseActivity() {
         return null
     }
 
-    // 당일과 전일 데이터를 모두 불러왔는지 체크하기 위한 변수 (2가 되면 모두 읽어옴)
-    // 타이머에서 매초 이 값을 검사한다.
-    var _load_work_data_cnt = 0
-
     /*
      *  당일 작업시간 가져오기. 새벽이 지난 시간은 1일을 더한다.
      *  전일 작업이 끝나지 않았을수 있기 때문에 전일 데이터도 가져온다.
      */
     private fun fetchWorkData() {
-        _load_work_data_cnt = 0
+        // 당일과 전일 데이터를 모두 불러왔는지 체크하기 위한 변수 (2가 되면 모두 읽어옴)
+        var _load_work_data_cnt = 0
 
         var dt = DateTime()
         val shift3: JSONObject? = fetchManualShift()      // manual 데이터가 있으면 가져온다.
@@ -253,7 +252,9 @@ Log.e("params", "" + params)
                 }
                 list1 = handleWorkData(list1)
                 AppGlobal.instance.set_today_work_time(list1)
+
                 _load_work_data_cnt++
+                if (_load_work_data_cnt >= 2) compute_work_shift()
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
@@ -288,11 +289,45 @@ Log.e("params", "" + params)
                 }
                 list2 = handleWorkData(list2)
                 AppGlobal.instance.set_prev_work_time(list2)
+
                 _load_work_data_cnt++
+                if (_load_work_data_cnt >= 2) compute_work_shift()
             } else {
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    // 현재 쉬프트와 idx, 작업 시간, 다음 작업시간 등을 미리 구해놓는다.
+    private fun compute_work_shift() {
+        Log.e("compute_work_shift", "reload")
+
+        val list = AppGlobal.instance.get_current_work_time()
+        if (list.length() > 0) {
+            val now_millis = DateTime().millis
+            for (i in 0..(list.length() - 1)) {
+                val item = list.getJSONObject(i)
+                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+                var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+                if (shift_stime.millis <= now_millis && now_millis < shift_etime.millis) {
+                    AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
+                    AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
+
+                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+
+                    val br_intent = Intent("need.refresh")
+                    this.sendBroadcast(br_intent)
+                    return
+                }
+            }
+        }
+        AppGlobal.instance.set_current_shift_idx("-1")
+        AppGlobal.instance.set_current_shift_name("No-shift")
+
+        tv_title.setText("No shift")
+
+        val br_intent = Intent("need.refresh")
+        this.sendBroadcast(br_intent)
     }
 
     /*
@@ -526,9 +561,6 @@ Log.e("params", "" + params)
 //        }
 //    }
 
-    private fun compute_work_shift() {
-        AppGlobal.instance.compute_work_shift()
-    }
 
     /////// 쓰레드
     private val _downtime_timer = Timer()
@@ -540,10 +572,6 @@ Log.e("params", "" + params)
         val downtime_task = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
-                    if (_load_work_data_cnt >= 2) {
-                        _load_work_data_cnt = 0
-                        compute_work_shift()
-                    }
 //                    checkDownTime()
 //                    checkExit()
                 }

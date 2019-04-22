@@ -1,6 +1,9 @@
 package com.suntech.iot.cuttingmc
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +17,25 @@ import kotlinx.android.synthetic.main.layout_top_menu.*
 
 class HomeFragment : BaseFragment() {
 
+    private val _need_to_home_refresh = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            updateView()
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity.registerReceiver(_need_to_home_refresh, IntentFilter("need.refresh"))
+        updateView()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        activity.unregisterReceiver(_need_to_home_refresh)
     }
 
     override fun initViews() {
@@ -67,11 +87,6 @@ class HomeFragment : BaseFragment() {
 
     override fun onSelected() {
         activity.tv_title?.visibility = View.GONE
-        updateView()
-    }
-
-    override fun onResume() {
-        super.onResume()
         updateView()
     }
 

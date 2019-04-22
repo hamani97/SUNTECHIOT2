@@ -212,34 +212,15 @@ class AppGlobal private constructor() {
     }
 
     // Shift info
-    fun compute_work_shift() {
-        var no_shift = true
-        val list = get_current_work_time()
-        if (list.length() > 0) {
-            val now_millis = DateTime().millis
-            for (i in 0..(list.length() - 1)) {
-                val item = list.getJSONObject(i)
-                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-                var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-                if (shift_stime.millis <= now_millis && now_millis < shift_etime.millis) {
-                    UtilLocalStorage.setInt(instance._context!!, "current_shift_idx", item["shift_idx"].toString().toInt())
-                    UtilLocalStorage.setString(instance._context!!, "current_shift_name", item["shift_name"].toString())
-                    no_shift = false
-                    break
-                }
-            }
-        }
-        if (no_shift) {
-            UtilLocalStorage.setInt(instance._context!!, "current_shift_idx", -1)
-            UtilLocalStorage.setString(instance._context!!, "current_shift_name", "No-shift")
-        }
-    }
+    fun set_current_shift_name(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_name", value) }
     fun get_current_shift_name() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_name") }
 
-    fun get_current_shift_idx() : String {
-        var item: JSONObject = get_current_shift_time() ?: return ""
-        return item["shift_idx"].toString()
-    }
+    fun set_current_shift_idx(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_idx", value) }
+    fun get_current_shift_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_idx") }
+//    fun get_current_shift_idx() : String {
+//        var item: JSONObject = get_current_shift_time() ?: return ""
+//        return item["shift_idx"].toString()
+//    }
 //    fun get_current_shift_name() : String {
 //        var item: JSONObject = get_current_shift_time() ?: return "No-shift"
 //        return item["shift_name"].toString()

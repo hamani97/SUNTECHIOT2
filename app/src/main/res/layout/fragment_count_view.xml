@@ -234,7 +234,7 @@
                                     android:id="@+id/tv_count_view_ctarget"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:text=""
                                     android:textColor="@color/colorOrange"
                                     android:textSize="26dp" />
                         </LinearLayout>
@@ -252,7 +252,7 @@
                                     android:id="@+id/tv_count_view_cactual"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0"
+                                    android:text=""
                                     android:textColor="@color/colorOrange"
                                     android:textSize="26dp" />
                         </LinearLayout>
