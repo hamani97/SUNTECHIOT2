@@ -29,9 +29,7 @@ import com.suntech.iot.cuttingmc.popup.DownTimeActivity
 import com.suntech.iot.cuttingmc.popup.PushActivity
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
-import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_main.view.*
 import kotlinx.android.synthetic.main.layout_side_menu.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
@@ -298,36 +296,77 @@ Log.e("params", "" + params)
         })
     }
 
+    private var is_loop :Boolean = false
+//    var _current_shift_etime = ""
+    var _current_shift_etime_millis = 0L
+    var _next_shift_stime_millis = 0L
+
     // 현재 쉬프트와 idx, 작업 시간, 다음 작업시간 등을 미리 구해놓는다.
+    // 매초마다 검사를 하기 위해 최대한 작업을 단순화하기 위함
     private fun compute_work_shift() {
+
+        if (is_loop) return
+        is_loop = true
+
         Log.e("compute_work_shift", "reload")
 
         val list = AppGlobal.instance.get_current_work_time()
+
+        // 현재 쉬프트의 종료 시간을 구한다. 자동 종료를 위해
+        // 종료 시간이 있으면 다음 시작 시간을 구할 필요없음. 이 로직이 실행되므로 자동으로 구해짐.
         if (list.length() > 0) {
             val now_millis = DateTime().millis
             for (i in 0..(list.length() - 1)) {
                 val item = list.getJSONObject(i)
-                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-                var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-                if (shift_stime.millis <= now_millis && now_millis < shift_etime.millis) {
+                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString()).millis
+                var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
+
+                if (shift_stime <= now_millis && now_millis < shift_etime) {
+                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+
                     AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
                     AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
 
-                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-
                     val br_intent = Intent("need.refresh")
                     this.sendBroadcast(br_intent)
+
+                    _current_shift_etime_millis = shift_etime
+                    _next_shift_stime_millis = 0L
+
+                    Log.e("compute_work_shift", "shift_idx=" + item["shift_idx"].toString() + ", shift_name=" + item["shift_name"].toString() +
+                            ", work time=" + item["work_stime"].toString() + " ~ " + item["work_etime"].toString() + ", current work end time=" + _current_shift_etime_millis)
+                    is_loop = false
                     return
                 }
             }
         }
+        tv_title.setText("No shift")
+
         AppGlobal.instance.set_current_shift_idx("-1")
         AppGlobal.instance.set_current_shift_name("No-shift")
 
-        tv_title.setText("No shift")
-
         val br_intent = Intent("need.refresh")
         this.sendBroadcast(br_intent)
+
+        _current_shift_etime_millis = 0L
+        _next_shift_stime_millis = 0L
+
+        Log.e("compute_work_shift", "current work end time=" + _current_shift_etime_millis + ", shift_idx=-1, shift_name=No-shift")
+
+        // 종료 시간이 없다는 것은 작업 시간이 아니라는 의미이므로 다음 시작 시간을 구한다.
+        if (list.length() > 0) {
+            val now_millis = DateTime().millis
+            for (i in 0..(list.length() - 1)) {
+                val item = list.getJSONObject(i)
+                var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString()).millis
+
+                if (shift_stime > now_millis) {
+                    _next_shift_stime_millis = shift_stime
+                    break
+                }
+            }
+        }
+        is_loop = false
     }
 
     /*
@@ -562,6 +601,24 @@ Log.e("params", "" + params)
 //    }
 
 
+    fun checkCurrentShiftEndTime() {
+        if (_current_shift_etime_millis != 0L) {
+            val now_millis = DateTime().millis
+            if (_current_shift_etime_millis <= DateTime().millis) {
+                Log.e("checkCurrentShiftEnd", "end time . finish shift work =============================> need reload")
+                compute_work_shift()
+            }
+        } else {
+            if (_next_shift_stime_millis != 0L) {
+                val now_millis = DateTime().millis
+                if (_next_shift_stime_millis <= DateTime().millis) {
+                    Log.e("checkCurrentShiftEnd", "start time . start shift work =============================> need reload")
+                    compute_work_shift()
+                }
+            }
+        }
+    }
+
     /////// 쓰레드
     private val _downtime_timer = Timer()
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
@@ -572,6 +629,7 @@ Log.e("params", "" + params)
         val downtime_task = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
+                    checkCurrentShiftEndTime()
 //                    checkDownTime()
 //                    checkExit()
                 }
