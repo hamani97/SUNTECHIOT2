@@ -97,6 +97,7 @@ class SettingActivity : BaseActivity() {
 
         sw_long_touch.isChecked = AppGlobal.instance.get_long_touch()
         sw_sound_at_count.isChecked = AppGlobal.instance.get_sound_at_count()
+        sw_screen_blink_effect.isChecked = AppGlobal.instance.get_screen_blink()
 
         // count setting
         // set hidden value
@@ -251,6 +252,7 @@ class SettingActivity : BaseActivity() {
         AppGlobal.instance.set_server_port(et_setting_port.text.toString())
         AppGlobal.instance.set_long_touch(sw_long_touch.isChecked)
         AppGlobal.instance.set_sound_at_count(sw_sound_at_count.isChecked)
+        AppGlobal.instance.set_screen_blink(sw_screen_blink_effect.isChecked)
 
         // count layer
         AppGlobal.instance.set_layer_pairs("0", _selected_layer_0)
