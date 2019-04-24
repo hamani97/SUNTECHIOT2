@@ -109,7 +109,7 @@ class ComponentInfoActivity : BaseActivity() {
         tv_compo_component.text = AppGlobal.instance.get_compo_component()
         tv_compo_size.text = AppGlobal.instance.get_compo_size()
         tv_compo_layer.text = AppGlobal.instance.get_compo_layer()
-        tv_compo_target.text = AppGlobal.instance.get_compo_target()
+        tv_compo_target.text = "" + AppGlobal.instance.get_compo_target()
 
         // set hidden value
         _selected_wos_idx = AppGlobal.instance.get_compo_wos_idx()
@@ -149,7 +149,7 @@ class ComponentInfoActivity : BaseActivity() {
         AppGlobal.instance.set_compo_component(tv_compo_component.text.toString())
         AppGlobal.instance.set_compo_size(tv_compo_size.text.toString())
 //        AppGlobal.instance.set_compo_pairs(tv_compo_pairs.text.toString())
-        AppGlobal.instance.set_compo_target(tv_compo_target.text.toString())
+        AppGlobal.instance.set_compo_target(tv_compo_target.text.toString().toInt())
 
         AppGlobal.instance.set_compo_layer(tv_compo_layer.text.toString())
         AppGlobal.instance.set_compo_pairs(_selected_pair_info)

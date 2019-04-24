@@ -296,24 +296,24 @@ Log.e("params", "" + params)
         })
     }
 
-    private var is_loop :Boolean = false
-//    var _current_shift_etime = ""
-    var _current_shift_etime_millis = 0L
-    var _next_shift_stime_millis = 0L
 
-    // 현재 쉬프트와 idx, 작업 시간, 다음 작업시간 등을 미리 구해놓는다.
-    // 매초마다 검사를 하기 위해 최대한 작업을 단순화하기 위함
+    /*
+     *  Shift 전환을 위한 변수를 미리 세팅한다.
+     *  현재 Shift의 idx, 종료시간과 다음 Shift의 시작 시간을 미리 구해놓는다. (매초마다 검사를 하기 때문에 최대한 작업을 단순화하기 위함)
+     */
+    private var is_loop :Boolean = false        // 처리 중일때 중복 처리를 하지 않기 위함
+    var _current_shift_etime_millis = 0L        // 현재 Shift 의 종료 시간 저장
+    var _next_shift_stime_millis = 0L           // 다음 Shift 의 시작 시간 저장 (종료 시간이 0L 일때만 세팅된다.)
+
     private fun compute_work_shift() {
 
         if (is_loop) return
         is_loop = true
 
-        Log.e("compute_work_shift", "reload")
-
         val list = AppGlobal.instance.get_current_work_time()
 
         // 현재 쉬프트의 종료 시간을 구한다. 자동 종료를 위해
-        // 종료 시간이 있으면 다음 시작 시간을 구할 필요없음. 이 로직이 실행되므로 자동으로 구해짐.
+        // 종료 시간이 있으면 다음 시작 시간을 구할 필요없음. 종료되면 이 로직이 실행되므로 자동으로 구해지기 때문..
         if (list.length() > 0) {
             val now_millis = DateTime().millis
             for (i in 0..(list.length() - 1)) {
@@ -334,12 +334,17 @@ Log.e("params", "" + params)
                     _next_shift_stime_millis = 0L
 
                     Log.e("compute_work_shift", "shift_idx=" + item["shift_idx"].toString() + ", shift_name=" + item["shift_name"].toString() +
-                            ", work time=" + item["work_stime"].toString() + " ~ " + item["work_etime"].toString() + ", current work end time=" + _current_shift_etime_millis)
+                            ", work time=" + item["work_stime"].toString() + "~" + item["work_etime"].toString() + " ===> Current shift end millis = " + _current_shift_etime_millis)
                     is_loop = false
                     return
                 }
             }
         }
+
+        // 루프를 빠져나왔다는 것은 현재 작업중인 Shift 가 없다는 의미이므로 다음 Shift 의 시작 시간을 구한다.
+        // 만약 해당일의 모든 Shift 가 끝났으며 다음 시작 시간은 0L 로 저장됨.
+        // 다음날 Shift 시작 정보는 10분마다 로딩하므로 구할 필요없음
+
         tv_title.setText("No shift")
 
         AppGlobal.instance.set_current_shift_idx("-1")
@@ -350,8 +355,6 @@ Log.e("params", "" + params)
 
         _current_shift_etime_millis = 0L
         _next_shift_stime_millis = 0L
-
-        Log.e("compute_work_shift", "current work end time=" + _current_shift_etime_millis + ", shift_idx=-1, shift_name=No-shift")
 
         // 종료 시간이 없다는 것은 작업 시간이 아니라는 의미이므로 다음 시작 시간을 구한다.
         if (list.length() > 0) {
@@ -366,6 +369,8 @@ Log.e("params", "" + params)
                 }
             }
         }
+        Log.e("compute_work_shift", "shift_idx=-1, shift_name=No-shift ===> Next shift start millis = " + _next_shift_stime_millis)
+
         is_loop = false
     }
 
@@ -571,7 +576,7 @@ Log.e("params", "" + params)
 //                AppGlobal.instance.set_compo_style("")
 //                AppGlobal.instance.set_compo_component("")
                 AppGlobal.instance.set_compo_size("")
-                AppGlobal.instance.set_compo_target("")
+                AppGlobal.instance.set_compo_target(0)
             }
         }
 //Log.e("today", today.toString())
@@ -601,6 +606,11 @@ Log.e("params", "" + params)
 //    }
 
 
+    /*
+     *  Shift 전환을 위한 실시간 검사
+     *  현재 작업중인 Shift 가 있으면 종료되는 시간을 검사해서 종료 시간이 되었다면 다음 쉬프트를 계산한다. (_current_shift_etime_millis)
+     *  현재 작업중인 Shift 가 없으면 일하는 시간이 아니므로 다음 시작 시간을 검사하고, 시작 시간이라면 Shift의 종료시간을 계산한다. (_next_shift_stime_millis)
+     */
     fun checkCurrentShiftEndTime() {
         if (_current_shift_etime_millis != 0L) {
             val now_millis = DateTime().millis

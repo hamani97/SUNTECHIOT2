@@ -91,8 +91,8 @@ class AppGlobal private constructor() {
 //    fun get_compo_size_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_size_idx") }
     fun set_compo_size(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_size", value) }
     fun get_compo_size() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_size") }
-    fun set_compo_target(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_target", value) }
-    fun get_compo_target() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_target") }
+    fun set_compo_target(value: Int) { UtilLocalStorage.setInt(instance._context!!, "current_compo_target", value) }
+    fun get_compo_target() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_compo_target") }
 
     fun set_compo_layer(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_layer", value) }
     fun get_compo_layer() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_layer") }
