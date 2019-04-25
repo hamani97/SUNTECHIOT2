@@ -343,7 +343,7 @@ Log.e("params", "" + params)
         }
 
         // 루프를 빠져나왔다는 것은 현재 작업중인 Shift 가 없다는 의미이므로 다음 Shift 의 시작 시간을 구한다.
-        // 만약 해당일의 모든 Shift 가 끝났으며 다음 시작 시간은 0L 로 저장됨.
+        // 만약 해당일의 모든 Shift 가 끝났으며 다음 시작 시간은 0L 로 저장한다.
         // 다음날 Shift 시작 정보는 10분마다 로딩하므로 구할 필요없음
 
         tv_title.setText("No shift")
@@ -614,14 +614,12 @@ Log.e("params", "" + params)
      */
     fun checkCurrentShiftEndTime() {
         if (_current_shift_etime_millis != 0L) {
-            val now_millis = DateTime().millis
             if (_current_shift_etime_millis <= DateTime().millis) {
                 Log.e("checkCurrentShiftEnd", "end time . finish shift work =============================> need reload")
                 compute_work_shift()
             }
         } else {
             if (_next_shift_stime_millis != 0L) {
-                val now_millis = DateTime().millis
                 if (_next_shift_stime_millis <= DateTime().millis) {
                     Log.e("checkCurrentShiftEnd", "start time . start shift work =============================> need reload")
                     compute_work_shift()
