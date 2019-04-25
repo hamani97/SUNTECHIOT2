@@ -38,6 +38,7 @@ class CountViewFragment : BaseFragment() {
 
     private val _need_to_refresh = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            computeCycleTime()
             updateView()
         }
     }
@@ -50,6 +51,8 @@ class CountViewFragment : BaseFragment() {
         super.onResume()
         activity.registerReceiver(_need_to_refresh, IntentFilter("need.refresh"))
         is_loop = true
+        computeCycleTime()
+        fetchColorData()     // Get Color
         updateView()
         startHandler()
     }
@@ -79,10 +82,7 @@ class CountViewFragment : BaseFragment() {
             Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
 //            (activity as MainActivity).changeFragment(0)
         }
-
-        updateView()
-        fetchColorData()     // Get Color
-        countTarget()
+        computeCycleTime()
     }
 
     override fun initViews() {
@@ -175,9 +175,8 @@ class CountViewFragment : BaseFragment() {
             })
         }
         viewWosData()
-        updateView()
+//        updateView()      // onResume() 에서 함
         fetchColorData()    // Get Color
-        countTarget()
         fetchFilterWos()    // 기존 선택된 WOS 가 있으면 로드해서 화면에 표시한다.
     }
 
@@ -193,18 +192,14 @@ class CountViewFragment : BaseFragment() {
         tv_count_view_ctarget.text = "" + AppGlobal.instance.get_compo_target()
     }
 
-    private fun countTarget() {
-//        val now_time = DateTime()
-//        val current_shift_time = AppGlobal.instance.get_current_shift_time()
-//        val work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
-//        val work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
+    // 해당 시간에만 카운트 값을 변경하기 위한 변수
+    // 타이밍 값을 미리 계산해 놓는다.
+    var _current_cycle_time = 0
 
-//        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
-//        if (item == null) {
-//            activity.tv_title.setText("No shift")
-//        } else {
-//            activity.tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-//        }
+    // Total target을 표시할 사이클 타임을 계산한다.
+    private fun computeCycleTime() {
+
+        force_count = true
 
         var target_type = AppGlobal.instance.get_target_type()
 
@@ -212,15 +207,21 @@ class CountViewFragment : BaseFragment() {
             fetchServerTarget()
 
         } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-            _total_target = 0
+            var total_target = 0
 
             var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
             if (item != null) {
                 when (item["shift_idx"]) {
-                    "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
-                    "2" -> _total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
-                    "3" -> _total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+                    "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+                    "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+                    "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
                 }
+            } else {
+                // 작업 시간이 아니므로 값을 초기화 한다.
+                _current_cycle_time = 15
+                _total_target = 0
+                AppGlobal.instance.set_current_shift_actual_cnt(0)
+                return
             }
 
             if (target_type=="device_per_hourly") {
@@ -228,15 +229,109 @@ class CountViewFragment : BaseFragment() {
             } else if (target_type=="device_per_accumulate") {
                 val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
                 val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
-                val cycle_time = if (_total_target > 0) (shift_total_time / _total_target) else shift_now_time
-                val target = if (cycle_time > 0) (shift_now_time / cycle_time).toInt()+1 else 1
-                _total_target = if (target > _total_target) _total_target else target
 
-Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shift_now_time+", cycle_time="+cycle_time)
+                _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
+                if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
+
+                Log.e("computeCycleTime", "shift_total_time="+shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
+                Log.e("computeCycleTime", "shift_now_time="+shift_now_time)          // 현재 작업이 진행된 시간 (초)
+                Log.e("computeCycleTime", "cycle_time="+_current_cycle_time)
+
             } else if (target_type=="device_per_day_total") {
-                Log.e("shift time", "target="+_total_target)
+                _current_cycle_time = 3600 * 5 // 5H
+                Log.e("computeCycleTime", "cycle_time="+_current_cycle_time)
             }
-            updateView()
+        }
+    }
+
+//    private fun countTarget() {
+////        val now_time = DateTime()
+////        val current_shift_time = AppGlobal.instance.get_current_shift_time()
+////        val work_stime = OEEUtil.parseDateTime(current_shift_time?.getString("work_stime"))
+////        val work_etime = OEEUtil.parseDateTime(current_shift_time?.getString("work_etime"))
+//
+////        var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+////        if (item == null) {
+////            activity.tv_title.setText("No shift")
+////        } else {
+////            activity.tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+////        }
+//
+//        var target_type = AppGlobal.instance.get_target_type()
+//
+//        if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+//            fetchServerTarget()
+//
+//        } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+//            _total_target = 0
+//
+//            var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+//            if (item != null) {
+//                when (item["shift_idx"]) {
+//                    "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+//                    "2" -> _total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+//                    "3" -> _total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+//                }
+//            }
+//
+//            if (target_type=="device_per_hourly") {
+//
+//            } else if (target_type=="device_per_accumulate") {
+//                val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
+//                val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+//                val cycle_time = if (_total_target > 0) (shift_total_time / _total_target) else shift_now_time
+//                val target = if (cycle_time > 0) (shift_now_time / cycle_time).toInt()+1 else 1
+//                _total_target = if (target > _total_target) _total_target else target
+//
+//Log.e("countTarget", "shift_total_time="+shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
+//Log.e("countTarget", "shift_now_time="+shift_now_time)          // 현재 작업이 진행된 시간 (초)
+//Log.e("countTarget", "cycle_time="+cycle_time)
+//
+//            } else if (target_type=="device_per_day_total") {
+//                Log.e("shift time", "target="+_total_target)
+//            }
+//            updateView()
+//        }
+//    }
+
+    // 무조건 계산해야 할경우 true
+    var force_count = true
+    private fun countTarget() {
+        if (_current_cycle_time <= 0) return
+
+        val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+        if (shift_now_time <= 0) return
+
+        if (shift_now_time % _current_cycle_time == 0 || force_count) {
+            force_count = false
+            Log.e("countTarget", "Count refresh =====> shift_now_time=" + shift_now_time)
+            var target_type = AppGlobal.instance.get_target_type()
+            if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+                fetchServerTarget()
+
+            } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+                var total_target = 0
+
+                var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+                if (item != null) {
+                    when (item["shift_idx"]) {
+                        "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+                        "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+                        "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+                    }
+                }
+
+                if (target_type=="device_per_accumulate") {
+                    val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+                    val target = (shift_now_time / _current_cycle_time).toInt() + 1
+                    _total_target = if (target > total_target) total_target else target
+
+                } else if (target_type=="device_per_hourly") {
+
+                } else if (target_type=="device_per_day_total") {
+                    _total_target = total_target
+                }
+            }
         }
     }
 
@@ -246,13 +341,14 @@ Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shi
 
     private fun updateView() {
 
+        countTarget()
+
         // Total count view 화면 정보 표시
         val total_actual = AppGlobal.instance.get_current_shift_actual_cnt()
 
         if (_current_target_count != _total_target || _current_actual_count != total_actual) {
             _current_target_count = _total_target
             _current_actual_count = total_actual
-
             var ratio = 0
             var ratio_txt = "N/A"
 
@@ -285,7 +381,6 @@ Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shi
         val work_idx = AppGlobal.instance.get_work_idx()
 
         if ((activity as MainActivity).countViewType == 1) {
-            // 현재 시간 표시
             tv_current_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
 
             if (work_idx=="") {
@@ -327,7 +422,6 @@ Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shi
                 }
             }
         } else if ((activity as MainActivity).countViewType == 2) {
-            // 현재 시간 표시
             tv_component_time.text = DateTime.now().toString("yyyy-MM-dd HH:mm:ss")
 
             if (work_idx=="") {
@@ -428,7 +522,7 @@ Log.e("shift time", "shift_total_time="+shift_total_time+", shift_now_time="+shi
                 updateView()
                 if (handle_cnt++ > 15) {
                     handle_cnt = 0
-                    countTarget()
+                    computeCycleTime()
                 }
                 startHandler()
             }

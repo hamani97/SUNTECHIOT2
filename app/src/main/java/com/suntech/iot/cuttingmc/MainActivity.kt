@@ -327,14 +327,15 @@ Log.e("params", "" + params)
                     AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
                     AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
 
-                    val br_intent = Intent("need.refresh")
-                    this.sendBroadcast(br_intent)
-
                     _current_shift_etime_millis = shift_etime
                     _next_shift_stime_millis = 0L
 
                     Log.e("compute_work_shift", "shift_idx=" + item["shift_idx"].toString() + ", shift_name=" + item["shift_name"].toString() +
                             ", work time=" + item["work_stime"].toString() + "~" + item["work_etime"].toString() + " ===> Current shift end millis = " + _current_shift_etime_millis)
+
+                    val br_intent = Intent("need.refresh")
+                    this.sendBroadcast(br_intent)
+
                     is_loop = false
                     return
                 }
@@ -349,9 +350,6 @@ Log.e("params", "" + params)
 
         AppGlobal.instance.set_current_shift_idx("-1")
         AppGlobal.instance.set_current_shift_name("No-shift")
-
-        val br_intent = Intent("need.refresh")
-        this.sendBroadcast(br_intent)
 
         _current_shift_etime_millis = 0L
         _next_shift_stime_millis = 0L
@@ -370,6 +368,9 @@ Log.e("params", "" + params)
             }
         }
         Log.e("compute_work_shift", "shift_idx=-1, shift_name=No-shift ===> Next shift start millis = " + _next_shift_stime_millis)
+
+        val br_intent = Intent("need.refresh")
+        this.sendBroadcast(br_intent)
 
         is_loop = false
     }

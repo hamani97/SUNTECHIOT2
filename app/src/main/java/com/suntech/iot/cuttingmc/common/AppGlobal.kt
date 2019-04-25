@@ -278,7 +278,7 @@ class AppGlobal private constructor() {
         return compute_work_time(shift_stime, shift_etime, false)
     }
 
-    // 현재 쉬프트의 총 시간을 구함 (쉬프트시작시간,종료시간무시)
+    // 현재 쉬프트의 총 작업 시간을 구함 (쉬프트시작시간,종료시간무시)
     fun get_current_shift_total_time() : Int {
 
         var item = get_current_shift_time()
@@ -312,8 +312,8 @@ class AppGlobal private constructor() {
         var item = get_current_shift_time()
         if (item==null) return 0
 
-        var shift_etime = etime
         var shift_stime = stime
+        var shift_etime = etime
 
         // 작업시간내에서만 계산
         var shift_stime_src = OEEUtil.parseDateTime(item["work_stime"].toString())
@@ -325,11 +325,11 @@ class AppGlobal private constructor() {
 
         if (is_total) {
             var now = DateTime()
-            if (now.millis < shift_etime.millis ) shift_etime = now // 작업종료시간보다 넘은경우, 현재시간은 종료시간으로 고정
+            if (now.millis < shift_etime.millis ) shift_etime = now  // 작업종료시간보다 넘은경우, 현재시간은 종료시간으로 고정
             if (now.millis < shift_stime.millis ) shift_stime = now  // 작업시작시간보다 빠른경우, 현재시간은 시작시간으로 고정
         }
 
-        var dif = (shift_etime.millis - shift_stime.millis)/1000
+        var dif = (shift_etime.millis - shift_stime.millis) / 1000
 
         //Log.e("test", "shift_stime = "+ shift_stime.toString())
         //Log.e("test", "shift_etime = "+ shift_etime.toString())
