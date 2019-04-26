@@ -385,7 +385,7 @@ class ComponentInfoActivity : BaseActivity() {
 
         for (i in 0..5) {
             val i_str = i.toString()
-            val i_plus_str = (i+1).toString()
+            val i_plus_str = if (i > 0) (i*2).toString() else "1"
             if (AppGlobal.instance.get_layer_pairs(i_str) != "") {
                 arr.add(i_plus_str + " Layer - " + addPairText(AppGlobal.instance.get_layer_pairs(i_str)))
                 lists.add(hashMapOf("layer_no" to i_plus_str, "pair" to AppGlobal.instance.get_layer_pairs(i_str)))

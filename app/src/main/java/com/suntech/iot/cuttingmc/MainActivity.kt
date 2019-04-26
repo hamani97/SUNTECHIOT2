@@ -81,6 +81,7 @@ class MainActivity : BaseActivity() {
 //            btn_downtime.setOnLongClickListener { startDowntimeActivity();true }
             btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
             btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
+            btn_production_report.setOnLongClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
             btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
@@ -88,6 +89,7 @@ class MainActivity : BaseActivity() {
 //            btn_downtime.setOnClickListener { startDowntimeActivity() }
             btn_downtime.setOnClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show() }
             btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
+            btn_production_report.setOnClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)) }
         }
 
         // fragment & swipe

@@ -159,10 +159,7 @@ class SettingActivity : BaseActivity() {
             Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
         }
         btn_manual_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
-//        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
-        btn_manual_hourly.setOnClickListener {
-            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
-        }
+        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
         btn_manual_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
 
         // check server button

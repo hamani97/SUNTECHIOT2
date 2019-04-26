@@ -363,7 +363,7 @@
                                 android:text="Accumulation by Start" />
                         <Button
                                 android:id="@+id/btn_manual_hourly"
-                                style="@style/tab_btn_disable"
+                                style="@style/tab_btn_off"
                                 android:layout_width="320dp"
                                 android:stateListAnimator="@null"
                                 android:text="Accumulation by Hourly" />

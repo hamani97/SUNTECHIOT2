@@ -224,24 +224,24 @@ class CountViewFragment : BaseFragment() {
                 return
             }
 
-            if (target_type=="device_per_hourly") {
-
-            } else if (target_type=="device_per_accumulate") {
+            if (target_type=="device_per_accumulate") {
                 val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
                 val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
 
                 _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
                 if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
 
-                Log.e("computeCycleTime", "shift_total_time="+shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
-                Log.e("computeCycleTime", "shift_now_time="+shift_now_time)          // 현재 작업이 진행된 시간 (초)
-                Log.e("computeCycleTime", "cycle_time="+_current_cycle_time)
+                Log.e("computeCycleTime", "shift_total_time = " + shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
+                Log.e("computeCycleTime", "shift_now_time = " + shift_now_time)          // 현재 작업이 진행된 시간 (초)
+
+            } else if (target_type=="device_per_hourly") {
+                _current_cycle_time = 86400
 
             } else if (target_type=="device_per_day_total") {
-                _current_cycle_time = 3600 * 5 // 5H
-                Log.e("computeCycleTime", "cycle_time="+_current_cycle_time)
+                _current_cycle_time = 86400
             }
         }
+        Log.e("computeCycleTime", "cycle_time = " + _current_cycle_time)
     }
 
 //    private fun countTarget() {
@@ -296,15 +296,18 @@ class CountViewFragment : BaseFragment() {
 
     // 무조건 계산해야 할경우 true
     var force_count = true
+
     private fun countTarget() {
-        if (_current_cycle_time <= 0) return
+        if (_current_cycle_time >= 86400 && force_count == false) return
 
         val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
-        if (shift_now_time <= 0) return
+        if (shift_now_time <= 0 && force_count == false) return
 
         if (shift_now_time % _current_cycle_time == 0 || force_count) {
+            Log.e("countTarget", "Count refresh start ===========> shift_now_time = " + shift_now_time)
+            Log.e("test -----", "shift_now_time % _current_cycle_time = " + shift_now_time % _current_cycle_time)
+            Log.e("test -----", "force_count = " + force_count)
             force_count = false
-            Log.e("countTarget", "Count refresh =====> shift_now_time=" + shift_now_time)
             var target_type = AppGlobal.instance.get_target_type()
             if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
                 fetchServerTarget()
@@ -322,16 +325,23 @@ class CountViewFragment : BaseFragment() {
                 }
 
                 if (target_type=="device_per_accumulate") {
-                    val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+//                    val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
                     val target = (shift_now_time / _current_cycle_time).toInt() + 1
                     _total_target = if (target > total_target) total_target else target
 
                 } else if (target_type=="device_per_hourly") {
+                    val shift_total_time = AppGlobal.instance.get_current_shift_total_time()    // 현시프트의 총 시간
+                    val target_per_hour = total_target.toFloat() / shift_total_time.toFloat() * 3600    // 시간당 만들어야 할 갯수
+                    val target = ((shift_now_time / 3600).toInt() * target_per_hour + target_per_hour).toInt()    // 현 시간에 만들어야 할 갯수
+                    _total_target = if (target > total_target) total_target else target
+
+                    Log.e("test -----", "target_per_hour = " + target_per_hour + ", _total_target = " + _total_target + ", _current_cycle_time = " + _current_cycle_time)
 
                 } else if (target_type=="device_per_day_total") {
                     _total_target = total_target
                 }
             }
+            Log.e("countTarget", "Count refresh end ===========> shift_now_time = " + shift_now_time)
         }
     }
 
