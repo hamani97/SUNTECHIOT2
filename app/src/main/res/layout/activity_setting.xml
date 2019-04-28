@@ -130,7 +130,7 @@
 
                     <LinearLayout style="@style/table_row">
                         <TextView style="@style/table_row_title" android:text="@string/label_server_port" />
-                        <EditText style="@style/table_row_data_editor1" android:id="@+id/et_setting_port" />
+                        <EditText style="@style/table_row_data_editor1" android:id="@+id/et_setting_port" android:inputType="number" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -201,12 +201,29 @@
                                     android:id="@+id/sw_screen_blink_effect"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginRight="60dp"
                                     android:layout_marginLeft="12dp"
                                     android:checked="false"/>
                         </LinearLayout>
-
                     </LinearLayout>
-
+                    <LinearLayout style="@style/table_row">
+                        <TextView style="@style/table_row_title" android:text="Remaining number"
+                                  android:layout_width="240dp" />
+                        <EditText
+                                style="@style/table_row_data_editor1"
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:inputType="number"
+                                android:id="@+id/et_remain_number" />
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="12dp"
+                                android:layout_marginRight="8dp"
+                                android:text="( 5 ~ 30 )"
+                                android:textColor="@color/colorGray"
+                                android:textSize="21sp" />
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>

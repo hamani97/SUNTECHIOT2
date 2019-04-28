@@ -114,6 +114,7 @@ class ComponentInfoActivity : BaseActivity() {
         // set hidden value
         _selected_wos_idx = AppGlobal.instance.get_compo_wos_idx()
         _selected_component_idx = AppGlobal.instance.get_compo_component_idx()
+        _selected_pair_info = AppGlobal.instance.get_compo_pairs()
 //        _selected_size_idx = AppGlobal.instance.get_compo_size_idx()
 
         btn_setting_confirm.setOnClickListener {

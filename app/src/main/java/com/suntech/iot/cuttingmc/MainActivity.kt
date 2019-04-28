@@ -306,6 +306,7 @@ Log.e("params", "" + params)
     private var is_loop :Boolean = false        // 처리 중일때 중복 처리를 하지 않기 위함
     var _current_shift_etime_millis = 0L        // 현재 Shift 의 종료 시간 저장
     var _next_shift_stime_millis = 0L           // 다음 Shift 의 시작 시간 저장 (종료 시간이 0L 일때만 세팅된다.)
+    var _last_working = false
 
     private fun compute_work_shift() {
 
@@ -331,6 +332,13 @@ Log.e("params", "" + params)
 
                     _current_shift_etime_millis = shift_etime
                     _next_shift_stime_millis = 0L
+
+                    // 마지막 레코드라면 그날의 마지막 작업이므로 마지막을 위한 플래그 세팅
+                    if (i == list.length()-1) {
+                        _last_working = true
+                    } else {
+                        _last_working = false
+                    }
 
                     Log.e("compute_work_shift", "shift_idx=" + item["shift_idx"].toString() + ", shift_name=" + item["shift_name"].toString() +
                             ", work time=" + item["work_stime"].toString() + "~" + item["work_etime"].toString() + " ===> Current shift end millis = " + _current_shift_etime_millis)
@@ -553,7 +561,7 @@ Log.e("params", "" + params)
 
         // 다운타임이 있으면 완료로 처리
         val downtime_idx = AppGlobal.instance.get_downtime_idx()
-        if (downtime_idx!="") sendEndDownTimeForce()
+        if (downtime_idx != "") sendEndDownTimeForce()
 
         var db = SimpleDatabaseHelperBackup(this)
         db.delete()
@@ -609,18 +617,51 @@ Log.e("params", "" + params)
 //    }
 
 
+    fun endTodayWork() {
+        AppGlobal.instance.set_work_idx("")
+        AppGlobal.instance.set_worker_no("")
+        AppGlobal.instance.set_worker_name("")
+        AppGlobal.instance.set_compo_size("")
+        AppGlobal.instance.set_compo_target(0)
+
+        AppGlobal.instance.set_current_shift_actual_cnt(0)
+
+        var db = SimpleDatabaseHelperBackup(this)
+        db.delete()
+
+        var db2 = DBHelperForDownTime(this)
+        db2.delete()
+
+        var db3 = DBHelperForCount(this)
+        db3.delete()
+
+        var db4 = DBHelperForComponent(this)
+        db4.delete()
+
+        Toast.makeText(this, getString(R.string.msg_exit_automatically), Toast.LENGTH_SHORT).show()
+    }
+
     /*
      *  Shift 전환을 위한 실시간 검사
      *  현재 작업중인 Shift 가 있으면 종료되는 시간을 검사해서 종료 시간이 되었다면 다음 쉬프트를 계산한다. (_current_shift_etime_millis)
      *  현재 작업중인 Shift 가 없으면 일하는 시간이 아니므로 다음 시작 시간을 검사하고, 시작 시간이라면 Shift의 종료시간을 계산한다. (_next_shift_stime_millis)
      */
     fun checkCurrentShiftEndTime() {
+        // 현재 Shift 끝남
         if (_current_shift_etime_millis != 0L) {
             if (_current_shift_etime_millis <= DateTime().millis) {
                 Log.e("checkCurrentShiftEnd", "end time . finish shift work =============================> need reload")
+                AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
+                // 마지막 작업이 끝났으면 완전 초기화
+                if (_last_working == true) {
+                    endTodayWork()
+                    _last_working = false
+                }
                 compute_work_shift()
             }
+
         } else {
+            // 다음 Shift 시작됨
             if (_next_shift_stime_millis != 0L) {
                 if (_next_shift_stime_millis <= DateTime().millis) {
                     Log.e("checkCurrentShiftEnd", "start time . start shift work =============================> need reload")
@@ -770,7 +811,7 @@ Log.e("params", "" + params)
         }
         return true
     }
-    private fun saveRowData(cmd:String, value: JsonElement) {
+    private fun saveRowData(cmd: String, value: JsonElement) {
         var db = DBHelperForComponent(this)
 //        var db = SimpleDatabaseHelper(this)
 
@@ -778,12 +819,13 @@ Log.e("params", "" + params)
 
             if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
-            // 레이어 선택 확인
-//            val layer = AppGlobal.instance.get_compo_layer()
-//            if (layer == "") {
-//                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
-//                return
-//            }
+            // 작업 시간인지 확인
+            var shift_idx = AppGlobal.instance.get_current_shift_idx().toInt()
+            if (shift_idx <= 0) {
+                Toast.makeText(this, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
+                return
+            }
+
             // Pairs 선택 확인
             val layer_value = AppGlobal.instance.get_compo_pairs()
             if (layer_value == "") {

@@ -110,26 +110,26 @@ class CountViewFragment : BaseFragment() {
 
         // End Work button
         btn_exit.setOnClickListener {
-            //            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
-            val work_idx = "" + AppGlobal.instance.get_work_idx()
-            if (work_idx == "") {
-                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val alertDialogBuilder = AlertDialog.Builder(activity)
-            alertDialogBuilder.setTitle(getString(R.string.notice))
-            alertDialogBuilder
-                .setMessage(getString(R.string.msg_exit_shift))
-                .setCancelable(false)
-                .setPositiveButton(getString(R.string.confirm), DialogInterface.OnClickListener { dialog, id ->
-                    (activity as MainActivity).changeFragment(0)
-                    (activity as MainActivity).endWork()
-                })
-                .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
-                    dialog.cancel()
-                })
-            val alertDialog = alertDialogBuilder.create()
-            alertDialog.show()
+            Toast.makeText(activity, "Not yet available", Toast.LENGTH_SHORT).show()
+//            val work_idx = "" + AppGlobal.instance.get_work_idx()
+//            if (work_idx == "") {
+//                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
+//                return@setOnClickListener
+//            }
+//            val alertDialogBuilder = AlertDialog.Builder(activity)
+//            alertDialogBuilder.setTitle(getString(R.string.notice))
+//            alertDialogBuilder
+//                .setMessage(getString(R.string.msg_exit_shift))
+//                .setCancelable(false)
+//                .setPositiveButton(getString(R.string.confirm), DialogInterface.OnClickListener { dialog, id ->
+//                    (activity as MainActivity).changeFragment(0)
+//                    (activity as MainActivity).endWork()
+//                })
+//                .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
+//                    dialog.cancel()
+//                })
+//            val alertDialog = alertDialogBuilder.create()
+//            alertDialog.show()
         }
 
         // button click
@@ -194,7 +194,7 @@ class CountViewFragment : BaseFragment() {
 
     // 해당 시간에만 카운트 값을 변경하기 위한 변수
     // 타이밍 값을 미리 계산해 놓는다.
-    var _current_cycle_time = 0
+    var _current_cycle_time = 86400     // 1일
 
     // Total target을 표시할 사이클 타임을 계산한다.
     private fun computeCycleTime() {
@@ -220,7 +220,6 @@ class CountViewFragment : BaseFragment() {
                 // 작업 시간이 아니므로 값을 초기화 한다.
                 _current_cycle_time = 15
                 _total_target = 0
-                AppGlobal.instance.set_current_shift_actual_cnt(0)
                 return
             }
 
@@ -348,6 +347,8 @@ class CountViewFragment : BaseFragment() {
     // 값에 변화가 생길때만 화면을 리프레쉬 하기 위한 변수
     var _current_target_count = -1
     var _current_actual_count = -1
+    var _current_compo_target_count = -1
+    var _current_compo_actual_count = -1
 
     private fun updateView() {
 
@@ -398,6 +399,8 @@ class CountViewFragment : BaseFragment() {
                 tv_count_view_cactual.text = "0"
                 tv_count_view_crate.text = "N/A"
                 line_progress1.progress = 0
+                _current_compo_target_count = -1
+                _current_compo_actual_count = -1
             } else {
                 var ratio = 1
                 var ratio_txt = "N/A"
@@ -406,11 +409,13 @@ class CountViewFragment : BaseFragment() {
                 if (item != null && item.toString() != "") {
                     val target = item["target"].toString().toInt()
                     val actual = (item["actual"].toString().toInt())
+                    _current_compo_target_count = target
+                    _current_compo_actual_count = actual
 
                     if (target > 0) {
                         ratio = (actual.toFloat() / target.toFloat() * 100).toInt()
+                        ratio_txt = if (ratio > 999) "999%" else "" + ratio + "%"
                         if (ratio > 100) ratio = 100
-                        ratio_txt = "" + ratio + "%"
                     }
 
                     tv_count_view_cactual.text = "" + actual
@@ -439,10 +444,14 @@ class CountViewFragment : BaseFragment() {
                 tv_component_view_actual.text = "0"
                 tv_component_view_ratio.text = "0%"
 
+                _current_compo_target_count = -1
+                _current_compo_actual_count = -1
+
                 _selected_component_pos = -1
                 _list_for_wos.removeAll(_list_for_wos)
                 _list_for_wos_adapter?.select(_selected_component_pos)
                 _list_for_wos_adapter?.notifyDataSetChanged()
+
             } else {
                 var ratio = 0
                 var ratio_txt = "N/A"
@@ -455,6 +464,8 @@ class CountViewFragment : BaseFragment() {
                 if (item != null && item.toString() != "") {
                     val target = item["target"].toString().toInt()
                     val actual = (item["actual"].toString().toInt())
+                    _current_compo_target_count = target
+                    _current_compo_actual_count = actual
 
                     if (target > 0) {
                         ratio = (actual.toFloat() / target.toFloat() * 100).toInt()
@@ -525,11 +536,12 @@ class CountViewFragment : BaseFragment() {
     }
 
     var handle_cnt = 0
-    fun startHandler () {
+    fun startHandler() {
         val handler = Handler()
         handler.postDelayed({
             if (is_loop) {
                 updateView()
+                checkBlink()
                 if (handle_cnt++ > 15) {
                     handle_cnt = 0
                     computeCycleTime()
@@ -537,6 +549,45 @@ class CountViewFragment : BaseFragment() {
                 startHandler()
             }
         }, 1000)
+    }
+
+    var blink_cnt = 0
+    private fun checkBlink() {
+        var is_toggle = false
+        if (AppGlobal.instance.get_screen_blink()) {
+            if (_current_compo_target_count != -1 || _current_compo_actual_count != -1) {
+                if (_current_compo_target_count - _current_compo_actual_count <= AppGlobal.instance.get_remain_number()) {
+                    blink_cnt = 1 - blink_cnt
+                    is_toggle = true
+                }
+            }
+        }
+        if (is_toggle && blink_cnt==1) {
+            if ((activity as MainActivity).countViewType == 1) {
+                ll_btn_wos_count.setBackgroundResource(R.color.colorRed2)
+            } else {
+                ll_component_count.setBackgroundResource(R.color.colorRed2)
+            }
+        } else {
+            if ((activity as MainActivity).countViewType == 1) {
+                ll_btn_wos_count.setBackgroundResource(R.color.colorBlack2)
+            } else {
+                ll_component_count.setBackgroundResource(R.color.colorBackground)
+            }
+        }
+//        if (AppGlobal.instance.get_current_shift_idx().toInt() > 0) {
+//            if (AppGlobal.instance.get_screen_blink()) {
+//                if (_total_target - AppGlobal.instance.get_current_shift_actual_cnt() <= AppGlobal.instance.get_remain_number()) {
+//                    if (blink_cnt == 0) {
+//                        blink_cnt = 1
+//                        ll_total_count.setBackgroundResource(R.color.colorOrange)
+//                    } else {
+//                        blink_cnt = 0
+//                        ll_total_count.setBackgroundResource(R.color.colorBackground)
+//                    }
+//                }
+//            }
+//        }
     }
 
     // Get Color code

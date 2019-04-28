@@ -132,12 +132,13 @@
     <string name="msg_no_setting">Setting not found</string>
     <string name="msg_data_not_found">Data not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>
-    <string name="msg_cannot_input_wos">Cannot input wos</string>
+    <string name="msg_cannot_input_wos">Cannot input WOS</string>
     <string name="msg_has_notselected">Nothing Selected</string>
     <string name="msg_not_start_work">Checking Working Time</string>
     <string name="msg_exit_shift">Do you want to exit?</string>
     <string name="msg_has_not_server_info">Cannot find server</string>
     <string name="msg_no_downtime">Downtime message not found</string>
+    <string name="msg_remain_out_of_range">Remaining value is out of range.</string>
 
     <string name="msg_exit_automatically">Workday ends automatically</string>
 

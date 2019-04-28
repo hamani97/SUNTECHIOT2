@@ -99,6 +99,9 @@ class SettingActivity : BaseActivity() {
         sw_sound_at_count.isChecked = AppGlobal.instance.get_sound_at_count()
         sw_screen_blink_effect.isChecked = AppGlobal.instance.get_screen_blink()
 
+        val remain = if (AppGlobal.instance.get_remain_number()==0) "10" else AppGlobal.instance.get_remain_number().toString()
+        et_remain_number.setText(remain)
+
         // count setting
         // set hidden value
         _selected_layer_0 = AppGlobal.instance.get_layer_pairs("0")     // 1 layer = 0.5 pair
@@ -230,6 +233,11 @@ class SettingActivity : BaseActivity() {
                 return
             }
         }
+        val remain_num = if (et_remain_number.text.toString()=="") 10 else et_remain_number.text.toString().toInt()
+        if (remain_num < 5 || remain_num > 30) {
+            Toast.makeText(this, getString(R.string.msg_remain_out_of_range), Toast.LENGTH_SHORT).show()
+            return
+        }
 
         // setting value
         AppGlobal.instance.set_factory_idx(_selected_factory_idx)
@@ -249,7 +257,9 @@ class SettingActivity : BaseActivity() {
         AppGlobal.instance.set_server_port(et_setting_port.text.toString())
         AppGlobal.instance.set_long_touch(sw_long_touch.isChecked)
         AppGlobal.instance.set_sound_at_count(sw_sound_at_count.isChecked)
+
         AppGlobal.instance.set_screen_blink(sw_screen_blink_effect.isChecked)
+        AppGlobal.instance.set_remain_number(remain_num)
 
         // count layer
         AppGlobal.instance.set_layer_pairs("0", _selected_layer_0)
