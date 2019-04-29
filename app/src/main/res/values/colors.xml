@@ -19,6 +19,7 @@
     <!-- common -->
     <color name="transparent">#00ff0000</color>
     <color name="colorBackground">#1c2c39</color>
+    <color name="colorBackground2">#16222a</color>
     <color name="colorBackgroundTop">#192533</color>
     <color name="colorBackgroundSide">#192533</color>
 
