@@ -11,9 +11,12 @@ import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import kotlinx.android.synthetic.main.activity_production_report.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
+import org.joda.time.DateTime
 import java.util.*
 
 class ProductionReportActivity : BaseActivity() {
+
+    var _current_time = DateTime()
 
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -62,6 +65,18 @@ class ProductionReportActivity : BaseActivity() {
     private fun initView() {
         tv_title.text = "PRODUCTION REPORT"
 
+        tv_current_date.text = _current_time.toString("yyyy-MM-dd")
+
+        ib_arrow_l.setOnClickListener {
+            _current_time = _current_time.plusDays(-1)
+            tv_current_date.text = _current_time.toString("yyyy-MM-dd")
+            updateView()
+        }
+        ib_arrow_r.setOnClickListener {
+            _current_time = _current_time.plusDays(+1)
+            tv_current_date.text = _current_time.toString("yyyy-MM-dd")
+            updateView()
+        }
         btn_production_report_exit.setOnClickListener { finish() }
     }
 

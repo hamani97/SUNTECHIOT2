@@ -147,8 +147,9 @@
                             <Button
                                     android:id="@+id/btn_exit"
                                     style="@style/btn_default"
+                                    android:layout_width="240dp"
                                     android:stateListAnimator="@null"
-                                    android:text="END WORK" />
+                                    android:text="MANAGER CALL" />
 
                         </LinearLayout>
 

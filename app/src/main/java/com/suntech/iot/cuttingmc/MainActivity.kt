@@ -325,7 +325,12 @@ Log.e("params", "" + params)
                 var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
 
                 if (shift_stime <= now_millis && now_millis < shift_etime) {
-                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+//                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+                    tv_title.setText(item["shift_name"].toString() +
+                            "   " +
+                            OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") +
+                            " - " +
+                            OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
 
                     AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
                     AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())

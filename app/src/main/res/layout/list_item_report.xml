@@ -20,34 +20,11 @@
                 android:layout_height="match_parent"
                 android:background="#fff"/>
         <TextView
-                android:layout_width="120dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:text="Hourly"
-                android:textSize="21sp"
-                android:textColor="#fff"
-                android:textStyle="bold"/>
-        <View
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:background="#fff"/>
-        <TextView
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Target"
-                android:textSize="21sp"
-                android:textColor="#fff"
-                android:textStyle="bold"/>
-        <View
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:background="#fff"/>
-        <TextView
-                android:layout_width="120dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Product"
+                android:text="TIME"
                 android:textSize="21sp"
                 android:textColor="#fff"
                 android:textStyle="bold"/>
@@ -60,7 +37,33 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Rate"
+                android:text="TARGET"
+                android:textSize="21sp"
+                android:textColor="#fff"
+                android:textStyle="bold"/>
+        <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="#fff"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="ACTUAL"
+                android:textSize="21sp"
+                android:textColor="#fff"
+                android:textStyle="bold"/>
+        <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="#fff"/>
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="RATE"
                 android:textSize="21sp"
                 android:textColor="#fff"
                 android:textStyle="bold"/>

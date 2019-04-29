@@ -16,6 +16,7 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
+import com.suntech.iot.cuttingmc.util.OEEUtil
 import com.suntech.iot.cuttingmc.util.UtilString.addPairText
 import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
@@ -87,7 +88,12 @@ class ComponentInfoActivity : BaseActivity() {
         if (item == null) {
             tv_title.setText("No shift")
         } else {
-            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+//            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+            tv_title.setText(item["shift_name"].toString() +
+                    "   " +
+                    OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") +
+                    " - " +
+                    OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
         }
 
         _list_for_wos_adapter = ListWosAdapter(this, _list_for_wos)
