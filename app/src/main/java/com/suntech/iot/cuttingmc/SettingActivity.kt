@@ -21,6 +21,7 @@ class SettingActivity : BaseActivity() {
 
     private var tab_pos: Int = 1
     private var _selected_target_type: String = "device"
+    private var _selected_blink_color: String = AppGlobal.instance.get_blink_color()
 
     private var _selected_factory_idx: String = ""
     private var _selected_room_idx: String = ""
@@ -99,8 +100,25 @@ class SettingActivity : BaseActivity() {
         sw_sound_at_count.isChecked = AppGlobal.instance.get_sound_at_count()
         sw_screen_blink_effect.isChecked = AppGlobal.instance.get_screen_blink()
 
+        // 깜박임 기능. 0일때는 10으로 초기화
         val remain = if (AppGlobal.instance.get_remain_number()==0) "10" else AppGlobal.instance.get_remain_number().toString()
         et_remain_number.setText(remain)
+
+        if (_selected_blink_color == "") _selected_blink_color = "ff0000"
+        blinkColorChange(_selected_blink_color)
+
+        blink_color_f8ad13.setOnClickListener {
+            blinkColorChange("f8ad13")
+        }
+        blink_color_ff0000.setOnClickListener {
+            blinkColorChange("ff0000")
+        }
+        blink_color_0079BA.setOnClickListener {
+            blinkColorChange("0079BA")
+        }
+        blink_color_888888.setOnClickListener {
+            blinkColorChange("888888")
+        }
 
         // count setting
         // set hidden value
@@ -260,6 +278,7 @@ class SettingActivity : BaseActivity() {
 
         AppGlobal.instance.set_screen_blink(sw_screen_blink_effect.isChecked)
         AppGlobal.instance.set_remain_number(remain_num)
+        AppGlobal.instance.set_blink_color(_selected_blink_color)
 
         // count layer
         AppGlobal.instance.set_layer_pairs("0", _selected_layer_0)
@@ -589,6 +608,22 @@ class SettingActivity : BaseActivity() {
         when (_selected_target_type.substring(0, 6)) {
             "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
             "device" -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+        }
+    }
+
+    private fun blinkColorChange(v : String) {
+        when (_selected_blink_color) {
+            "f8ad13" -> blink_color_f8ad13.text = ""
+            "ff0000" -> blink_color_ff0000.text = ""
+            "0079BA" -> blink_color_0079BA.text = ""
+            "888888" -> blink_color_888888.text = ""
+        }
+        _selected_blink_color = v
+        when (_selected_blink_color) {
+            "f8ad13" -> blink_color_f8ad13.text = "V"
+            "ff0000" -> blink_color_ff0000.text = "V"
+            "0079BA" -> blink_color_0079BA.text = "V"
+            "888888" -> blink_color_888888.text = "V"
         }
     }
 }

@@ -81,6 +81,14 @@ class ComponentInfoActivity : BaseActivity() {
 
         if (AppGlobal.instance.isOnline(this)) btn_wifi_state.isSelected = true
         else btn_wifi_state.isSelected = false
+
+        if (AppGlobal.instance.get_compo_sort_key() == "BALANCE") {
+            tv_btn_size.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            tv_btn_balance.setTextColor(ContextCompat.getColor(this, R.color.colorButtonOrange))
+        } else {
+            tv_btn_size.setTextColor(ContextCompat.getColor(this, R.color.colorButtonOrange))
+            tv_btn_balance.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+        }
     }
 
     private fun initView() {
@@ -146,6 +154,19 @@ class ComponentInfoActivity : BaseActivity() {
         tv_compo_component.setOnClickListener { fetchComponentData() }
         tv_compo_size.setOnClickListener { fetchSizeData() }
         tv_compo_layer.setOnClickListener { fetchLayerData() }
+
+        tv_btn_size.setOnClickListener {
+            AppGlobal.instance.set_compo_sort_key("SIZE")
+            tv_btn_size.setTextColor(ContextCompat.getColor(this, R.color.colorButtonOrange))
+            tv_btn_balance.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            outputWosList()
+        }
+        tv_btn_balance.setOnClickListener {
+            AppGlobal.instance.set_compo_sort_key("BALANCE")
+            tv_btn_size.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            tv_btn_balance.setTextColor(ContextCompat.getColor(this, R.color.colorButtonOrange))
+            outputWosList()
+        }
     }
 
     private fun saveSettingData() {
@@ -177,13 +198,52 @@ class ComponentInfoActivity : BaseActivity() {
         }
     }
 
+    private fun outputWosList() {
+
+        // balance로 정렬
+        if (AppGlobal.instance.get_compo_sort_key() == "BALANCE") {
+            var sortedList = _list_for_wos.sortedWith(compareBy({ it.get("balance").toString().toInt() }))
+            _list_for_wos.removeAll(_list_for_wos)
+            _list_for_wos.addAll(sortedList)
+        } else {
+            var sortedList = _list_for_wos.sortedWith(compareBy({ it.get("size").toString().toInt() }))
+            _list_for_wos.removeAll(_list_for_wos)
+            _list_for_wos.addAll(sortedList)
+        }
+
+        val size = tv_compo_size.text.toString().trim()
+
+        if (size == "") {
+            _selected_wos_index = -1
+            tv_compo_model.text = ""
+            tv_compo_style.text = ""
+            tv_compo_target.text = ""
+            tv_compo_actual.text = "-"
+
+        } else {
+            // 선택된 항목 찾기
+            for (i in 0..(_list_for_wos.size - 1)) {
+                val item = _list_for_wos.get(i)
+                if (size == item["size"]) {
+                    _selected_wos_index = i
+                    tv_compo_model.text = item["model"]
+                    tv_compo_style.text = item["styleno"]
+                    tv_compo_target.text = item["target"]
+                    tv_compo_actual.text = item["actual"]
+                    break
+                }
+            }
+        }
+        _list_for_wos_adapter?.select(_selected_wos_index)
+        _list_for_wos_adapter?.notifyDataSetChanged()
+    }
+
     private fun filterWosData() {
         _list_for_wos.removeAll(_list_for_wos)
         _selected_wos_index = -1
         _list_for_wos_adapter?.select(-1)
 
         val wosno = tv_compo_wos.text.toString()
-        val size = tv_compo_size.text.toString().trim()
 
         if (wosno != "") {
             var db = DBHelperForComponent(this)
@@ -205,26 +265,29 @@ class ComponentInfoActivity : BaseActivity() {
                         val row = db.get(wosno, item.getString("size"))
                         if (row != null) actual = row["actual"].toString()
 
+                        val balance = item.getString("target").toInt() - actual.toInt()
+
                         var map = hashMapOf(
                             "wosno" to item.getString("wosno"),
                             "styleno" to item.getString("styleno"),
                             "model" to item.getString("model"),
                             "size" to item.getString("size"),
                             "target" to item.getString("target"),
-                            "actual" to actual
+                            "actual" to actual,
+                            "balance" to balance.toString()
                         )
                         _list_for_wos.add(map)
 
-                        if (size != "" && size == item.getString("size")) {
-                            _selected_wos_index = i
-                            tv_compo_model.text = item.getString("model")
-                            tv_compo_style.text = item.getString("styleno")
-                            tv_compo_target.text = item.getString("target")
-                            tv_compo_actual.text = actual
-                        }
+//                        if (size != "" && size == item.getString("size")) {
+//                            _selected_wos_index = i
+//                            tv_compo_model.text = item.getString("model")
+//                            tv_compo_style.text = item.getString("styleno")
+//                            tv_compo_target.text = item.getString("target")
+//                            tv_compo_actual.text = actual
+//                        }
                     }
-                    _list_for_wos_adapter?.select(_selected_wos_index)
-                    _list_for_wos_adapter?.notifyDataSetChanged()
+                    outputWosList()
+
                 } else {
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                 }

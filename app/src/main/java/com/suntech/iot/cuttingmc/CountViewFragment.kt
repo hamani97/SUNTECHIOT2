@@ -1,7 +1,9 @@
 package com.suntech.iot.cuttingmc
 
-import android.app.AlertDialog
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -101,6 +103,27 @@ class CountViewFragment : BaseFragment() {
         tv_component_view_target.text = "0"
         tv_component_view_actual.text = "0"
         tv_component_view_ratio.text = "0%"
+
+        if (AppGlobal.instance.get_compo_sort_key() == "BALANCE") {
+            tv_btn_size2.setTextColor(ContextCompat.getColor(activity, R.color.colorWhite2))
+            tv_btn_balance2.setTextColor(ContextCompat.getColor(activity, R.color.colorButtonOrange))
+        } else {
+            tv_btn_size2.setTextColor(ContextCompat.getColor(activity, R.color.colorButtonOrange))
+            tv_btn_balance2.setTextColor(ContextCompat.getColor(activity, R.color.colorWhite2))
+        }
+
+        tv_btn_size2.setOnClickListener {
+            AppGlobal.instance.set_compo_sort_key("SIZE")
+            tv_btn_size2.setTextColor(ContextCompat.getColor(activity, R.color.colorButtonOrange))
+            tv_btn_balance2.setTextColor(ContextCompat.getColor(activity, R.color.colorWhite2))
+            outputWosList()
+        }
+        tv_btn_balance2.setOnClickListener {
+            AppGlobal.instance.set_compo_sort_key("BALANCE")
+            tv_btn_size2.setTextColor(ContextCompat.getColor(activity, R.color.colorWhite2))
+            tv_btn_balance2.setTextColor(ContextCompat.getColor(activity, R.color.colorButtonOrange))
+            outputWosList()
+        }
 
         // Total count view
 //        btn_start.setOnClickListener {
@@ -564,9 +587,9 @@ class CountViewFragment : BaseFragment() {
         }
         if (is_toggle && blink_cnt==1) {
             if ((activity as MainActivity).countViewType == 1) {
-                ll_btn_wos_count.setBackgroundResource(R.color.colorRed2)
+                ll_btn_wos_count.setBackgroundColor(Color.parseColor("#" + AppGlobal.instance.get_blink_color()))
             } else {
-                ll_component_count.setBackgroundResource(R.color.colorRed2)
+                ll_component_count.setBackgroundColor(Color.parseColor("#" + AppGlobal.instance.get_blink_color()))
             }
         } else {
             if ((activity as MainActivity).countViewType == 1) {
@@ -607,7 +630,47 @@ class CountViewFragment : BaseFragment() {
         }
     }
 
+    private fun outputWosList() {
+
+        // 정렬
+        val sort_key = AppGlobal.instance.get_compo_sort_key()
+        var sortedList = _list_for_wos.sortedWith(compareBy({ it.get(if (sort_key=="BALANCE") "balance" else "size").toString().toInt() }))
+
+        _list_for_wos.removeAll(_list_for_wos)
+        _selected_component_pos = -1
+
+        val wosno = AppGlobal.instance.get_compo_wos()
+        val size = AppGlobal.instance.get_compo_size()
+
+        if (size == "") {
+            _list_for_wos.addAll(sortedList)
+        } else {
+            // 선택된 항목을 맨앞으로 뺀다.
+            for (i in 0..(sortedList.size - 1)) {
+                val item = sortedList.get(i)
+                if (wosno == item["wosno"] && size == item["size"]) {
+                    _list_for_wos.add(item)
+                    _selected_component_pos = 0
+                    break
+                }
+            }
+            for (i in 0..(sortedList.size - 1)) {
+                val item = sortedList.get(i)
+                if (wosno != item["wosno"] || size != item["size"]) {
+                    _list_for_wos.add(item)
+                }
+            }
+        }
+        _list_for_wos_adapter?.select(_selected_component_pos)
+        _list_for_wos_adapter?.notifyDataSetChanged()
+    }
+
     private fun fetchFilterWos() {
+
+        _list_for_wos.removeAll(_list_for_wos)
+        _selected_component_pos = -1
+        _list_for_wos_adapter?.select(-1)
+        _list_for_wos_adapter?.notifyDataSetChanged()
 
         val def_wosno = AppGlobal.instance.get_compo_wos().trim()
         val def_size = AppGlobal.instance.get_compo_size().trim()
@@ -629,55 +692,76 @@ class CountViewFragment : BaseFragment() {
                 _list_for_wos.removeAll(_list_for_wos)
 
                 var list = result.getJSONArray("item")
-
-                // 선택된 항목을 맨앞으로 뺀다.
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
-                    val wosno = item.getString("wosno")
-                    val size = item.getString("size")
+                    var actual = "0"
 
-                    if (wosno == def_wosno && size == def_size) {
-                        val row = db.get(wosno, size)
-                        var actual = "0"
-                        if (row != null) actual = row["actual"].toString()
+                    val row = db.get(item.getString("wosno"), item.getString("size"))
+                    if (row != null) actual = row["actual"].toString()
 
-                        var map = hashMapOf(
-                            "wosno" to item.getString("wosno"),
-                            "styleno" to item.getString("styleno"),
-                            "model" to item.getString("model"),
-                            "size" to item.getString("size"),
-                            "target" to item.getString("target"),
-                            "actual" to actual
-                        )
-                        _list_for_wos.add(map)
-                        _selected_component_pos = 0
-                        break;
-                    }
+                    val balance = item.getString("target").toInt() - actual.toInt()
+
+                    var map = hashMapOf(
+                        "wosno" to item.getString("wosno"),
+                        "styleno" to item.getString("styleno"),
+                        "model" to item.getString("model"),
+                        "size" to item.getString("size"),
+                        "target" to item.getString("target"),
+                        "actual" to actual,
+                        "balance" to balance.toString()
+                    )
+                    _list_for_wos.add(map)
                 }
+                outputWosList()
 
-                for (i in 0..(list.length() - 1)) {
-                    val item = list.getJSONObject(i)
-                    val wosno = item.getString("wosno")
-                    val size = item.getString("size")
-
-                    if (wosno != def_wosno || size != def_size) {
-                        val row = db.get(wosno, size)
-                        var actual = "0"
-                        if (row != null) actual = row["actual"].toString()
-
-                        var map = hashMapOf(
-                            "wosno" to item.getString("wosno"),
-                            "styleno" to item.getString("styleno"),
-                            "model" to item.getString("model"),
-                            "size" to item.getString("size"),
-                            "target" to item.getString("target"),
-                            "actual" to actual
-                        )
-                        _list_for_wos.add(map)
-                    }
-                }
-                _list_for_wos_adapter?.select(_selected_component_pos)
-                _list_for_wos_adapter?.notifyDataSetChanged()
+//                // 선택된 항목을 맨앞으로 뺀다.
+//                for (i in 0..(list.length() - 1)) {
+//                    val item = list.getJSONObject(i)
+//                    val wosno = item.getString("wosno")
+//                    val size = item.getString("size")
+//
+//                    if (wosno == def_wosno && size == def_size) {
+//                        val row = db.get(wosno, size)
+//                        var actual = "0"
+//                        if (row != null) actual = row["actual"].toString()
+//
+//                        var map = hashMapOf(
+//                            "wosno" to item.getString("wosno"),
+//                            "styleno" to item.getString("styleno"),
+//                            "model" to item.getString("model"),
+//                            "size" to item.getString("size"),
+//                            "target" to item.getString("target"),
+//                            "actual" to actual
+//                        )
+//                        _list_for_wos.add(map)
+//                        _selected_component_pos = 0
+//                        break;
+//                    }
+//                }
+//
+//                for (i in 0..(list.length() - 1)) {
+//                    val item = list.getJSONObject(i)
+//                    val wosno = item.getString("wosno")
+//                    val size = item.getString("size")
+//
+//                    if (wosno != def_wosno || size != def_size) {
+//                        val row = db.get(wosno, size)
+//                        var actual = "0"
+//                        if (row != null) actual = row["actual"].toString()
+//
+//                        var map = hashMapOf(
+//                            "wosno" to item.getString("wosno"),
+//                            "styleno" to item.getString("styleno"),
+//                            "model" to item.getString("model"),
+//                            "size" to item.getString("size"),
+//                            "target" to item.getString("target"),
+//                            "actual" to actual
+//                        )
+//                        _list_for_wos.add(map)
+//                    }
+//                }
+//                _list_for_wos_adapter?.select(_selected_component_pos)
+//                _list_for_wos_adapter?.notifyDataSetChanged()
             } else {
                 Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
             }

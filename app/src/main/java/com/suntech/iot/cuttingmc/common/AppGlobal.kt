@@ -66,6 +66,8 @@ class AppGlobal private constructor() {
     fun get_screen_blink() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_screen_blink") }
     fun set_remain_number(value: Int) { UtilLocalStorage.setInt(instance._context!!, "current_remain_number", value) }
     fun get_remain_number() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_remain_number") }
+    fun set_blink_color(value: String) { UtilLocalStorage.setString(instance._context!!, "current_blink_color", value) }
+    fun get_blink_color() : String { return UtilLocalStorage.getString(instance._context!!, "current_blink_color") }
 
     fun set_server_ip(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_server_ip", idx) }
     fun get_server_ip() : String { return UtilLocalStorage.getString(instance._context!!, "current_server_ip") }
@@ -74,6 +76,9 @@ class AppGlobal private constructor() {
 
 
     // Component 필터 세팅값
+    fun set_compo_sort_key(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_sort_key", value) }
+    fun get_compo_sort_key() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_sort_key") }
+
     fun set_compo_wos_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_wos_idx", idx) }
     fun get_compo_wos_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_compo_wos_idx") }
     fun set_compo_wos(value: String) { UtilLocalStorage.setString(instance._context!!, "current_compo_wos", value) }
