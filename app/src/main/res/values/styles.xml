@@ -84,7 +84,7 @@
     </style>
     <style name="tab_btn_disable" parent="tab_btn">
         <item name="android:textColor">@color/colorReadonly</item>
-        <item name="android:background">@color/colorBackground</item>
+        <item name="android:background">@color/colorBackground2</item>
     </style>
     <!-- Tab block end -->
 

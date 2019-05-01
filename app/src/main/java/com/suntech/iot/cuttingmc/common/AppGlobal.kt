@@ -197,6 +197,22 @@ class AppGlobal private constructor() {
     fun set_target_manual_shift(shift_no: String, value: String) { UtilLocalStorage.setString(instance._context!!, "current_target_shift_" + shift_no, value) }
     fun get_target_manual_shift(shift_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_target_shift_" + shift_no) }
 
+    fun get_current_shift_target_cnt() : String {
+        var total_target = "0"
+        var target_type = get_target_type()
+        if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+            // 서버에서 가져온 값이 있어야 함
+        } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+            val shift_idx = AppGlobal.instance.get_current_shift_time_idx()
+            when (shift_idx) {
+                1 -> total_target = get_target_manual_shift("1")
+                2 -> total_target = get_target_manual_shift("2")
+                3 -> total_target = get_target_manual_shift("3")
+            }
+        }
+        return total_target
+    }
+
     fun set_current_shift_actual_cnt(actual: Int) { UtilLocalStorage.setInt(instance._context!!, "current_shift_actual_cnt", actual) }
     fun get_current_shift_actual_cnt() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_shift_actual_cnt") }
 
@@ -238,14 +254,14 @@ class AppGlobal private constructor() {
     fun get_current_shift_time_idx() : Int {
         val list = get_current_work_time()
         if (list.length() == 0) return -1
-        val now = DateTime()
+        val now = DateTime().millis
         var current_shift_idx = -1
 
         for (i in 0..(list.length() - 1)) {
             val item = list.getJSONObject(i)
             var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
             var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-            if (shift_stime.millis <= now.millis && now.millis < shift_etime.millis) {
+            if (shift_stime.millis <= now && now < shift_etime.millis) {
                 current_shift_idx = i
                 break
             }

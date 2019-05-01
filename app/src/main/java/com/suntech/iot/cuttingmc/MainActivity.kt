@@ -19,10 +19,7 @@ import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
-import com.suntech.iot.cuttingmc.db.DBHelperForComponent
-import com.suntech.iot.cuttingmc.db.DBHelperForCount
-import com.suntech.iot.cuttingmc.db.DBHelperForDownTime
-import com.suntech.iot.cuttingmc.db.SimpleDatabaseHelperBackup
+import com.suntech.iot.cuttingmc.db.*
 import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
 import com.suntech.iot.cuttingmc.popup.DefectiveActivity
 import com.suntech.iot.cuttingmc.popup.DownTimeActivity
@@ -43,7 +40,8 @@ class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
-    var _stitch_db = DBHelperForCount(this)
+    val _stitch_db = DBHelperForCount(this)
+    val _target_db = DBHelperForTarget(this)
 
     private var _doubleBackToExitPressedOnce = false
     private var _last_count_received_time = DateTime()
@@ -252,7 +250,7 @@ Log.e("params", "" + params)
                 }
                 list1 = handleWorkData(list1)
                 AppGlobal.instance.set_today_work_time(list1)
-
+//Log.e("today shift", list1.toString())
                 _load_work_data_cnt++
                 if (_load_work_data_cnt >= 2) compute_work_shift()
             } else {
@@ -289,7 +287,7 @@ Log.e("params", "" + params)
                 }
                 list2 = handleWorkData(list2)
                 AppGlobal.instance.set_prev_work_time(list2)
-
+//Log.e("yester shift", list2.toString())
                 _load_work_data_cnt++
                 if (_load_work_data_cnt >= 2) compute_work_shift()
             } else {
@@ -314,6 +312,7 @@ Log.e("params", "" + params)
         is_loop = true
 
         val list = AppGlobal.instance.get_current_work_time()
+Log.e("current work time", list.toString())
 
         // 현재 쉬프트의 종료 시간을 구한다. 자동 종료를 위해
         // 종료 시간이 있으면 다음 시작 시간을 구할 필요없음. 종료되면 이 로직이 실행되므로 자동으로 구해지기 때문..
@@ -324,12 +323,23 @@ Log.e("params", "" + params)
                 var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString()).millis
                 var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
 
+                // DB에 Shift 정보를 저장한다.
+//Log.e("db info params", "date = " + item["date"].toString() + ", shift_idx = " + item["shift_idx"].toString())
+
+                val row = _target_db.get(item["date"].toString(), item["shift_idx"].toString())
+                val target = AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
+                if (row == null) { // insert
+                    Log.e("db info", "null")
+                    _target_db.add(item["date"].toString(), item["shift_idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
+                } else { // update
+                    Log.e("db info", "==> " + item["shift_idx"].toString() + " : " + row.toString())
+                    _target_db.update(row["idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
+                }
+
                 if (shift_stime <= now_millis && now_millis < shift_etime) {
 //                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-                    tv_title.setText(item["shift_name"].toString() +
-                            "   " +
-                            OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") +
-                            " - " +
+                    tv_title.setText(item["shift_name"].toString() + "   " +
+                            OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") + " - " +
                             OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
 
                     AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
@@ -517,7 +527,8 @@ Log.e("params", "" + params)
         })
     }
 
-    // 10초마다 현재 target 서버에 저장
+    // 10초마다 현재 target을 서버에 저장
+    // 작업 시간이 아닐경우는 Pass
     private fun updateCurrentWorkTarget() {
         var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
         if (item != null) {
@@ -678,11 +689,12 @@ Log.e("params", "" + params)
 
     /////// 쓰레드
     private val _downtime_timer = Timer()
-    private val _timer_task1 = Timer()          // 서버 접속 체크 ping test. 현재 shift의 target 전송
-    private val _timer_task2 = Timer()          // 작업시간, 디자인, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
+    private val _timer_task1 = Timer()          // 서버 접속 체크 Ping test. Shift의 Target 정보
+    private val _timer_task2 = Timer()          // 작업시간, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
 
     private fun start_timer() {
 
+        // 매초
         val downtime_task = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
@@ -694,6 +706,7 @@ Log.e("params", "" + params)
         }
         _downtime_timer.schedule(downtime_task, 500, 1000)
 
+        // 10초마다
         val task1 = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
@@ -704,6 +717,7 @@ Log.e("params", "" + params)
         }
         _timer_task1.schedule(task1, 2000, 10000)
 
+        // 10분마다
         val task2 = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
