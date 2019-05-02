@@ -145,9 +145,15 @@
                                     <!--android:stateListAnimator="@null"-->
                                     <!--android:text="START" />-->
                             <Button
+                                    android:id="@+id/btn_init_actual"
+                                    style="@style/btn_default"
+                                    android:layout_width="180dp"
+                                    android:stateListAnimator="@null"
+                                    android:text="INIT ACTUAL" />
+                            <Button
                                     android:id="@+id/btn_exit"
                                     style="@style/btn_default"
-                                    android:layout_width="240dp"
+                                    android:layout_width="220dp"
                                     android:stateListAnimator="@null"
                                     android:text="MANAGER CALL" />
 

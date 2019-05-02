@@ -3,7 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="#1c2c39">
+              android:background="@color/colorBackground">
 
     <LinearLayout
             android:id="@+id/ll_report_head"
@@ -40,21 +40,21 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/colorButtonDefaultFocus"
                 android:orientation="vertical">
             <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
-
                 <View
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
-                        android:background="#fff"/>
+                        android:background="@color/colorWhite2"/>
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -62,12 +62,12 @@
                         android:gravity="center"
                         android:text="TIME"
                         android:textSize="21sp"
-                        android:textColor="#fff"
+                        android:textColor="@color/colorWhite"
                         android:textStyle="bold"/>
                 <View
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
-                        android:background="#fff"/>
+                        android:background="@color/colorWhite2"/>
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -75,12 +75,12 @@
                         android:gravity="center"
                         android:text="ACTUAL"
                         android:textSize="21sp"
-                        android:textColor="#fff"
+                        android:textColor="@color/colorWhite"
                         android:textStyle="bold"/>
                 <View
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
-                        android:background="#fff"/>
+                        android:background="@color/colorWhite2"/>
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -88,12 +88,12 @@
                         android:gravity="center"
                         android:text="+ ACTUAL"
                         android:textSize="21sp"
-                        android:textColor="#fff"
+                        android:textColor="@color/colorWhite"
                         android:textStyle="bold"/>
                 <View
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
-                        android:background="#fff"/>
+                        android:background="@color/colorWhite2"/>
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -101,19 +101,18 @@
                         android:gravity="center"
                         android:text="RATE"
                         android:textSize="21sp"
-                        android:textColor="#fff"
+                        android:textColor="@color/colorWhite"
                         android:textStyle="bold"/>
 
                 <View
                         android:layout_width="2dp"
                         android:layout_height="match_parent"
-                        android:background="#fff"/>
+                        android:background="@color/colorWhite2"/>
             </LinearLayout>
-
             <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -122,20 +121,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-        <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#fff"/>
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-
             <View
                     android:layout_width="2dp"
                     android:layout_height="match_parent"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
             <TextView
                     android:id="@+id/tv_report_item_time"
                     android:layout_width="0dp"
@@ -144,12 +138,12 @@
                     android:gravity="center"
                     android:text="Total"
                     android:textSize="21sp"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
             <View
                     android:layout_width="2dp"
                     android:layout_height="match_parent"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
             <TextView
                     android:id="@+id/tv_report_item_target"
                     android:layout_width="0dp"
@@ -158,12 +152,12 @@
                     android:gravity="center"
                     android:text="0"
                     android:textSize="21sp"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
             <View
                     android:layout_width="2dp"
                     android:layout_height="match_parent"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
             <TextView
                     android:id="@+id/tv_report_item_product"
                     android:layout_width="0dp"
@@ -172,12 +166,12 @@
                     android:gravity="center"
                     android:text="0"
                     android:textSize="21sp"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
             <View
                     android:layout_width="2dp"
                     android:layout_height="match_parent"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
             <TextView
                     android:id="@+id/tv_report_item_rate"
                     android:layout_width="0dp"
@@ -186,19 +180,51 @@
                     android:gravity="center"
                     android:text="0%"
                     android:textSize="21sp"
-                    android:textColor="#fff"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
-
             <View
                     android:layout_width="2dp"
                     android:layout_height="match_parent"
-                    android:background="#fff"/>
+                    android:background="@color/colorWhite2"/>
         </LinearLayout>
-
         <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:background="#fff"/>
+                android:background="@color/colorWhite2"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/ll_report_nodata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+            <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorWhite2"/>
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="30dp"
+                    android:gravity="center"
+                    android:text="No Data"
+                    android:textSize="23sp"
+                    android:textColor="@color/colorWhite" />
+            <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorWhite2"/>
+        </LinearLayout>
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorWhite2"/>
     </LinearLayout>
 
 </LinearLayout>

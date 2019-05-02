@@ -1,9 +1,7 @@
 package com.suntech.iot.cuttingmc
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.AlertDialog
+import android.content.*
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -155,6 +153,27 @@ class CountViewFragment : BaseFragment() {
 //            alertDialog.show()
         }
 
+        btn_init_actual.setOnClickListener {
+            val work_idx = "" + AppGlobal.instance.get_work_idx()
+            if (work_idx == "") {
+                Toast.makeText(activity, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            val alertDialogBuilder = AlertDialog.Builder(activity)
+            alertDialogBuilder.setTitle(getString(R.string.notice))
+            alertDialogBuilder
+                .setMessage("Reset Actual?")
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.confirm), DialogInterface.OnClickListener { dialog, id ->
+                    AppGlobal.instance.set_current_shift_actual_cnt(0)
+                    updateView()
+                })
+                .setNegativeButton(getString(R.string.cancel), DialogInterface.OnClickListener { dialog, id ->
+                    dialog.cancel()
+                })
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
         // button click
         tv_btn_wos_count.setOnClickListener {
             (activity as MainActivity).countViewType = 2

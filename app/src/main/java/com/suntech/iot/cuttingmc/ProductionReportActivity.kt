@@ -82,35 +82,14 @@ class ProductionReportActivity : BaseActivity() {
         _list.removeAll(_list)
         _list2.removeAll(_list2)
 
-        val time_row = hashMapOf(
-            "type" to "HEAD",
-            "name" to "SHIFT 1",
-            "target" to "Target : 0",
-            "actual" to "",
-            "accumulate" to "",
-            "rate" to ""
-        )
+        val time_row3 = hashMapOf("type" to "NODATA", "name" to "", "target" to "0", "actual" to "", "accumulate" to "", "rate" to "")
+
+        val time_row = hashMapOf("type" to "HEAD", "name" to "SHIFT 1", "target" to "Target : 0", "actual" to "", "accumulate" to "", "rate" to "")
         _list.add(time_row)
-
-        val time_row2 = hashMapOf(
-            "type" to "HEAD",
-            "name" to "SHIFT 2",
-            "target" to "Target : 0",
-            "actual" to "",
-            "accumulate" to "",
-            "rate" to ""
-        )
-        _list2.add(time_row2)
-
-        val time_row3 = hashMapOf(
-            "type" to "DATA",
-            "name" to "",
-            "target" to "0",
-            "actual" to "",
-            "accumulate" to "",
-            "rate" to ""
-        )
         _list.add(time_row3)
+
+        val time_row2 = hashMapOf("type" to "HEAD", "name" to "SHIFT 2", "target" to "Target : 0", "actual" to "","accumulate" to "", "rate" to "")
+        _list2.add(time_row2)
         _list2.add(time_row3)
 
         list_adapter = ListAdapter(this, _list)
@@ -127,8 +106,9 @@ class ProductionReportActivity : BaseActivity() {
         var current_tommorow_dt = _current_time.plusDays(1).toString("yyyy-MM-dd")
 
         val target_data = _target_db.gets(current_dt)
+        val target_size = target_data?.size ?: 0
 
-        if ((target_data?.size ?: 0) == 0) {
+        if (target_size == 0) {
             outputBlank()
             return
         }
@@ -138,7 +118,7 @@ class ProductionReportActivity : BaseActivity() {
 
         var index = 0
 
-        for (i in 0..((target_data?.size ?: 0)-1)) {
+        for (i in 0..(target_size-1)) {
             val item = target_data?.get(i)
 
             if (item != null) {
@@ -148,16 +128,18 @@ class ProductionReportActivity : BaseActivity() {
                     "type" to "HEAD",
                     "name" to item.get("shift_name").toString(),
                     "target" to "Target : " + target_txt,
-                    "actual" to "",
-                    "accumulate" to "",
-                    "rate" to ""
+                    "actual" to "", "accumulate" to "", "rate" to ""
                 )
 
-                if (index < 11) {
-                    _list.add(time_row)
+                // Shift가 두개만 있으면 각 Shift가 좌우로 표시되고 세개면 계산해서 12개씩 표시한다.
+                if (target_size==2) {
+                    if (i==0) _list.add(time_row)
+                    else _list2.add(time_row)
                 } else {
-                    _list2.add(time_row)
+                    if (index < 11) _list.add(time_row)
+                    else _list2.add(time_row)
                 }
+
                 index += 2
 
                 val now_millis = DateTime().millis
@@ -195,10 +177,13 @@ class ProductionReportActivity : BaseActivity() {
                         "rate" to if (blank_yn) "" else rate
                     )
 
-                    if (index < 12) {
-                        _list.add(time_row)
+                    // Shift가 두개만 있으면 각 Shift가 좌우로 표시되고 세개면 계산해서 12개씩 표시한다.
+                    if (target_size==2) {
+                        if (i==0) _list.add(time_row)
+                        else _list2.add(time_row)
                     } else {
-                        _list2.add(time_row)
+                        if (index < 12) _list.add(time_row)
+                        else _list2.add(time_row)
                     }
                     index++
                 }
@@ -295,18 +280,25 @@ class ProductionReportActivity : BaseActivity() {
             if (_list[position]["type"]=="HEAD") {
                 vh.ll_report_head.visibility = View.VISIBLE
                 vh.ll_report_data.visibility = View.GONE
+                vh.ll_report_nodata.visibility = View.GONE
 
                 vh.tv_shift_name.text = _list[position]["name"]
                 vh.tv_shift_target.text = _list[position]["target"]
 
-            } else {
+            } else if (_list[position]["type"]=="DATA") {
                 vh.ll_report_head.visibility = View.GONE
                 vh.ll_report_data.visibility = View.VISIBLE
+                vh.ll_report_nodata.visibility = View.GONE
 
                 vh.tv_report_item_time.text = _list[position]["name"]
                 vh.tv_report_item_target.text = _list[position]["actual"]
                 vh.tv_report_item_product.text = _list[position]["accumulate"]
                 vh.tv_report_item_rate.text = _list[position]["rate"]
+
+            } else {
+                vh.ll_report_head.visibility = View.GONE
+                vh.ll_report_data.visibility = View.GONE
+                vh.ll_report_nodata.visibility = View.VISIBLE
             }
 
             return view
@@ -315,6 +307,7 @@ class ProductionReportActivity : BaseActivity() {
         private class ViewHolder(row: View?) {
             val ll_report_head: LinearLayout
             val ll_report_data: LinearLayout
+            val ll_report_nodata: LinearLayout
             val tv_shift_name: TextView
             val tv_shift_target: TextView
             val tv_report_item_time: TextView
@@ -325,6 +318,7 @@ class ProductionReportActivity : BaseActivity() {
             init {
                 this.ll_report_head = row?.findViewById<LinearLayout>(R.id.ll_report_head) as LinearLayout
                 this.ll_report_data = row?.findViewById<LinearLayout>(R.id.ll_report_data) as LinearLayout
+                this.ll_report_nodata = row?.findViewById<LinearLayout>(R.id.ll_report_nodata) as LinearLayout
                 this.tv_shift_name = row?.findViewById<TextView>(R.id.tv_shift_name) as TextView
                 this.tv_shift_target = row?.findViewById<TextView>(R.id.tv_shift_target) as TextView
                 this.tv_report_item_time = row?.findViewById<TextView>(R.id.tv_report_item_time) as TextView
