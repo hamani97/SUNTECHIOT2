@@ -215,8 +215,8 @@ class ComponentInfoActivity : BaseActivity() {
 
         if (size == "") {
             _selected_wos_index = -1
-            tv_compo_model.text = ""
-            tv_compo_style.text = ""
+//            tv_compo_model.text = ""
+//            tv_compo_style.text = ""
             tv_compo_target.text = ""
             tv_compo_actual.text = "-"
 
