@@ -40,8 +40,9 @@ class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
-    val _stitch_db = DBHelperForCount(this)
-    val _target_db = DBHelperForTarget(this)
+    val _stitch_db = DBHelperForCount(this)     // Count 정보
+    val _target_db = DBHelperForTarget(this)    // 날짜의 Shift별 정보, Target 수량 정보 저장
+    val _report_db = DBHelperForReport(this)    // 날짜의 Shift별 한시간 간격의 Actual 수량 저장
 
     private var _doubleBackToExitPressedOnce = false
     private var _last_count_received_time = DateTime()
