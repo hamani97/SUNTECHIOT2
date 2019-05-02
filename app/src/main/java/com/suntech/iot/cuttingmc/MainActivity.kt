@@ -840,8 +840,8 @@ Log.e("current work time", list.toString())
             if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
             // 작업 시간인지 확인
-            var shift_idx = AppGlobal.instance.get_current_shift_idx().toInt()
-            if (shift_idx <= 0) {
+            var shift_idx = AppGlobal.instance.get_current_shift_idx()
+            if (shift_idx.toInt() <= 0) {
                 Toast.makeText(this, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
                 return
             }
@@ -894,6 +894,19 @@ Log.e("current work time", list.toString())
             sendCountData(value.toString(), inc_count)
 
             _stitch_db.add(work_idx, value.toString())
+
+            val now = DateTime()
+            val date = now.toString("yyyy-MM-dd")
+            val houly = now.toString("HH")
+
+            val rep = _report_db.get(date, houly, shift_idx)
+            if (rep == null) {
+                _report_db.add(date, houly, shift_idx, inc_count)
+            } else {
+                val idx = rep!!["idx"].toString()
+                val actual = rep!!["actual"].toString().toInt() + inc_count
+                _report_db.updateActual(idx, actual)
+            }
         }
     }
 

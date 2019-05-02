@@ -76,15 +76,14 @@ class DBHelperForReport
         return row
     }
 
-    operator fun get(date: String, shift_idx: String): ContentValues? {
+    operator fun get(date: String, houly:String, shift_idx: String): ContentValues? {
         val db = _openHelper.readableDatabase ?: return null
         val row = ContentValues()
         val sql = "select _id, houly, actual " +
-                "from report where date = ? and shift_idx = ?"
-        val cur = db.rawQuery(sql, arrayOf(date.toString(), shift_idx.toString()))
+                "from report where date = ? and houly = ? and shift_idx = ?"
+        val cur = db.rawQuery(sql, arrayOf(date.toString(), houly.toString(), shift_idx.toString()))
         if (cur.moveToNext()) {
             row.put("idx", cur.getString(0))
-            row.put("houly", cur.getString(1))
             row.put("actual", cur.getInt(2))
             cur.close()
             db.close()
@@ -141,7 +140,7 @@ class DBHelperForReport
      * @param priority The priority value for the new row
      * @return The unique id of the newly added row
      */
-    fun add(date:String, houly:String, shift_idx:String, actual:String): Long {
+    fun add(date:String, houly:String, shift_idx:String, actual:Int): Long {
         val db = _openHelper.writableDatabase ?: return 0
         val row = ContentValues()
         row.put("date", date)
@@ -154,7 +153,7 @@ class DBHelperForReport
         return id
     }
 
-    fun updateActual(_idx: String, actual:String) {
+    fun updateActual(_idx: String, actual:Int) {
         val db = _openHelper.writableDatabase ?: return
         val row = ContentValues()
         row.put("actual", actual)
