@@ -40,7 +40,7 @@ class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
-    val _stitch_db = DBHelperForCount(this)     // Count 정보
+//    val _stitch_db = DBHelperForCount(this)     // Count 정보
     val _target_db = DBHelperForTarget(this)    // 날짜의 Shift별 정보, Target 수량 정보 저장
     val _report_db = DBHelperForReport(this)    // 날짜의 Shift별 한시간 간격의 Actual 수량 저장
 
@@ -313,29 +313,34 @@ Log.e("params", "" + params)
         is_loop = true
 
         val list = AppGlobal.instance.get_current_work_time()
-Log.e("current work time", list.toString())
+//Log.e("current work time", list.toString())
 
         // 현재 쉬프트의 종료 시간을 구한다. 자동 종료를 위해
         // 종료 시간이 있으면 다음 시작 시간을 구할 필요없음. 종료되면 이 로직이 실행되므로 자동으로 구해지기 때문..
         if (list.length() > 0) {
+
+            // DB에 Shift 정보를 저장한다.
+            for (i in 0..(list.length() - 1)) {
+                val item = list.getJSONObject(i)
+
+                val target = AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
+                val row = _target_db.get(item["date"].toString(), item["shift_idx"].toString())
+
+                if (row == null) { // insert
+//                    Log.e("db info", "===> " + item["date"].toString() + " : " + item["shift_idx"].toString() + " : null")
+                    _target_db.add(item["date"].toString(), item["shift_idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
+                } else { // update
+//                    Log.e("db info", "===> " + item["date"].toString() + " : " + item["shift_idx"].toString() + " : " + row.toString())
+                    _target_db.update(row["idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
+                }
+            }
+
             val now_millis = DateTime().millis
+
             for (i in 0..(list.length() - 1)) {
                 val item = list.getJSONObject(i)
                 var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString()).millis
                 var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
-
-                // DB에 Shift 정보를 저장한다.
-//Log.e("db info params", "date = " + item["date"].toString() + ", shift_idx = " + item["shift_idx"].toString())
-
-                val row = _target_db.get(item["date"].toString(), item["shift_idx"].toString())
-                val target = AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
-                if (row == null) { // insert
-                    Log.e("db info", "null")
-                    _target_db.add(item["date"].toString(), item["shift_idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
-                } else { // update
-                    Log.e("db info", "==> " + item["shift_idx"].toString() + " : " + row.toString())
-                    _target_db.update(row["idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
-                }
 
                 if (shift_stime <= now_millis && now_millis < shift_etime) {
 //                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
@@ -343,8 +348,8 @@ Log.e("current work time", list.toString())
                             OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") + " - " +
                             OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
 
-                    AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
-                    AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
+//                    AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
+//                    AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
 
                     _current_shift_etime_millis = shift_etime
                     _next_shift_stime_millis = 0L
@@ -374,8 +379,8 @@ Log.e("current work time", list.toString())
 
         tv_title.setText("No shift")
 
-        AppGlobal.instance.set_current_shift_idx("-1")
-        AppGlobal.instance.set_current_shift_name("No-shift")
+//        AppGlobal.instance.set_current_shift_idx("-1")
+//        AppGlobal.instance.set_current_shift_name("No-shift")
 
         _current_shift_etime_millis = 0L
         _next_shift_stime_millis = 0L
@@ -549,7 +554,8 @@ Log.e("current work time", list.toString())
                 val uri = "/sendtarget.php"
                 var params = listOf(
                     "mac_addr" to AppGlobal.instance.getMACAddress(),
-                    "date" to DateTime().toString("yyyy-MM-dd"),
+                    //"date" to DateTime().toString("yyyy-MM-dd"),
+                    "date" to item["date"],
                     "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
                     "target_count" to _total_target)
 
@@ -832,19 +838,24 @@ Log.e("current work time", list.toString())
         return true
     }
     private fun saveRowData(cmd: String, value: JsonElement) {
-        var db = DBHelperForComponent(this)
-//        var db = SimpleDatabaseHelper(this)
 
         if (cmd=="count") {
+            var db = DBHelperForComponent(this)
+//          var db = SimpleDatabaseHelper(this)
 
             if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
             // 작업 시간인지 확인
-            var shift_idx = AppGlobal.instance.get_current_shift_idx()
-            if (shift_idx.toInt() <= 0) {
+            val cur_shift: JSONObject ?= AppGlobal.instance.get_current_shift_time()
+            if (cur_shift == null) {
                 Toast.makeText(this, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
                 return
             }
+            val shift_idx = cur_shift["shift_idx"]      // 현재 작업중인 Shift
+
+            // 선택한 Component 제품이 있는지 확인
+            val work_idx = AppGlobal.instance.get_work_idx()
+            if (work_idx == "") return
 
             // Pairs 선택 확인
             val layer_value = AppGlobal.instance.get_compo_pairs()
@@ -880,9 +891,6 @@ Log.e("current work time", list.toString())
             AppGlobal.instance.set_current_shift_actual_cnt(cnt)
 
             // component total count
-            val work_idx = AppGlobal.instance.get_work_idx()
-            if (work_idx == "") return
-
             val row = db.get(work_idx)
             if (row != null) {
                 val actual = (row!!["actual"].toString().toInt() + inc_count)
@@ -891,17 +899,18 @@ Log.e("current work time", list.toString())
 
             _last_count_received_time = DateTime()      // downtime 시간 초기화
 
-            sendCountData(value.toString(), inc_count)
+            sendCountData(value.toString(), inc_count)  // 서버에 카운트 정보 전송
 
-            _stitch_db.add(work_idx, value.toString())
+//            _stitch_db.add(work_idx, value.toString())
 
-            val now = DateTime()
-            val date = now.toString("yyyy-MM-dd")
-            val houly = now.toString("HH")
+            //val now = DateTime()
+            val now = cur_shift["date"]
+            val date = now.toString()
+            val houly = DateTime().toString("HH")
 
-            val rep = _report_db.get(date, houly, shift_idx)
+            val rep = _report_db.get(date, houly, shift_idx.toString())
             if (rep == null) {
-                _report_db.add(date, houly, shift_idx, inc_count)
+                _report_db.add(date, houly, shift_idx.toString(), inc_count)
             } else {
                 val idx = rep!!["idx"].toString()
                 val actual = rep!!["actual"].toString().toInt() + inc_count

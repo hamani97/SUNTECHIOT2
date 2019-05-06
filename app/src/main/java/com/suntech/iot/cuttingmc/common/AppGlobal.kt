@@ -142,10 +142,6 @@ class AppGlobal private constructor() {
     }
 
 
-    // 작업 워크 고유값 설정
-    fun set_work_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "work_idx", idx) }
-    fun get_work_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
-
     // 작업 프로덕트 고유값 설정
 //    fun reset_product_idx() {
 //        UtilLocalStorage.setString(instance._context!!, "work_idx", "")
@@ -169,6 +165,77 @@ class AppGlobal private constructor() {
 
     fun set_cycle_time(idx: Int) { UtilLocalStorage.setInt(instance._context!!, "current_cycle_time", idx) }
     fun get_cycle_time() : Int { return UtilLocalStorage.getInt(instance._context!!, "current_cycle_time") }
+
+
+    // 작업 워크 고유값 설정
+    fun set_work_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "work_idx", idx) }
+    fun get_work_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
+
+    // 작업시간 설정
+    fun set_today_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_work_time", data) }      // 오늘의 shift 정보
+    fun get_today_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_work_time") }
+    fun set_prev_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_prev_work_time", data) }  // 어제의 shift 정보
+    fun get_prev_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_prev_work_time") }
+
+    fun set_work_time_manual(data: JSONObject) { UtilLocalStorage.setJSONObject(instance._context!!, "current_work_time_manual", data) }
+    fun get_work_time_manual() : JSONObject? { return UtilLocalStorage.getJSONObject(instance._context!!, "current_work_time_manual") }
+
+    fun set_current_work_day(data: String) { UtilLocalStorage.setString(instance._context!!, "set_current_work_time", data) }
+    fun get_current_work_day() : String { return UtilLocalStorage.getString(instance._context!!, "set_current_work_time") }
+
+    // 어제시간과 오늘시간 중에 지나지 않은 날짜의 JSON을 선택해서 반환
+    fun get_current_work_time() : JSONArray {
+        val today = get_today_work_time()
+        val yesterday = get_prev_work_time()
+        if (yesterday.length() > 0) {
+            val item = yesterday.getJSONObject(yesterday.length()-1)
+            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+            if (shift_etime.millis > DateTime().millis) return yesterday
+        }
+        return today
+    }
+    // 현재 작업중인 Shift의 JSON object 반환
+    fun get_current_shift_time() : JSONObject? {
+        val list = get_current_work_time()
+        if (list.length() == 0) return null
+        val now = DateTime().millis
+        for (i in 0..(list.length() - 1)) {
+            val item = list.getJSONObject(i)
+            var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+            if (shift_stime.millis <= now && now < shift_etime.millis) return item  // =list.getJSONObject(i)
+        }
+        return null
+    }
+    // 현재 작업중인 Shift Idx 값 반환. 작업중이 아니면 "" 리턴
+    fun get_current_shift_idx() : String {
+        val list = get_current_work_time()
+        if (list.length() == 0) return ""
+        val now = DateTime().millis
+        for (i in 0..(list.length() - 1)) {
+            val item = list.getJSONObject(i)
+            var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+            if (shift_stime.millis <= now && now < shift_etime.millis) return item["shift_idx"].toString()
+        }
+        return ""
+    }
+    fun get_current_shift_name() : String {
+        var item: JSONObject = get_current_shift_time() ?: return "No-shift"
+        return item["shift_name"].toString()
+    }
+
+    // Shift info
+//    fun set_current_shift_name(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_name", value) }
+//    fun get_current_shift_name() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_name") }
+
+//    fun set_current_shift_idx(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_idx", value) }
+//    fun get_current_shift_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_idx") }
+//    fun get_current_shift_idx() : String {
+//        var item: JSONObject = get_current_shift_time() ?: return ""
+//        return item["shift_idx"].toString()
+//    }
+
 
 
     // 다운 타임
@@ -203,11 +270,11 @@ class AppGlobal private constructor() {
         if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
             // 서버에서 가져온 값이 있어야 함
         } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-            val shift_idx = AppGlobal.instance.get_current_shift_time_idx()
+            val shift_idx = get_current_shift_idx()
             when (shift_idx) {
-                1 -> total_target = get_target_manual_shift("1")
-                2 -> total_target = get_target_manual_shift("2")
-                3 -> total_target = get_target_manual_shift("3")
+                "1" -> total_target = get_target_manual_shift("1")
+                "2" -> total_target = get_target_manual_shift("2")
+                "3" -> total_target = get_target_manual_shift("3")
             }
         }
         return total_target
@@ -222,71 +289,7 @@ class AppGlobal private constructor() {
     fun get_accumulated_count() : Int { return UtilLocalStorage.getInt(instance._context!!, "accumulated_count") }
 
 
-    // 어제시간과 오늘시간 중에 지나지 않은 날짜의 JSON을 선택해서 반환
-    fun get_current_work_time() : JSONArray {
-        val today = get_today_work_time()
-        val yesterday = get_prev_work_time()
-        if (yesterday.length()>0) {
-            val now = DateTime()
-            val item = yesterday.getJSONObject(yesterday.length()-1)
-            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-            if (shift_etime.millis > now.millis) {
-                return yesterday
-            }
-        }
-        return today
-    }
 
-    // Shift info
-    fun set_current_shift_name(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_name", value) }
-    fun get_current_shift_name() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_name") }
-
-    fun set_current_shift_idx(value: String) { UtilLocalStorage.setString(instance._context!!, "current_shift_idx", value) }
-    fun get_current_shift_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_shift_idx") }
-//    fun get_current_shift_idx() : String {
-//        var item: JSONObject = get_current_shift_time() ?: return ""
-//        return item["shift_idx"].toString()
-//    }
-//    fun get_current_shift_name() : String {
-//        var item: JSONObject = get_current_shift_time() ?: return "No-shift"
-//        return item["shift_name"].toString()
-//    }
-    fun get_current_shift_time_idx() : Int {
-        val list = get_current_work_time()
-        if (list.length() == 0) return -1
-        val now = DateTime().millis
-        var current_shift_idx = -1
-
-        for (i in 0..(list.length() - 1)) {
-            val item = list.getJSONObject(i)
-            var shift_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-            var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-            if (shift_stime.millis <= now && now < shift_etime.millis) {
-                current_shift_idx = i
-                break
-            }
-        }
-        return current_shift_idx
-    }
-    fun get_current_shift_time() : JSONObject? {
-        val list = get_current_work_time()
-        if (list.length() == 0) return null
-        val idx = get_current_shift_time_idx()
-        if (idx < 0) return null
-        return list.getJSONObject(idx)
-    }
-
-    // 작업시간 설정
-    fun set_current_work_day(data: String) { UtilLocalStorage.setString(instance._context!!, "set_current_work_time", data) }
-    fun get_current_work_day() : String { return UtilLocalStorage.getString(instance._context!!, "set_current_work_time") }
-
-    fun set_today_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_work_time", data) }      // 오늘의 shift 정보
-    fun get_today_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_work_time") }
-    fun set_prev_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_prev_work_time", data) }  // 어제의 shift 정보
-    fun get_prev_work_time() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "current_prev_work_time") }
-
-    fun set_work_time_manual(data: JSONObject) { UtilLocalStorage.setJSONObject(instance._context!!, "current_work_time_manual", data) }
-    fun get_work_time_manual() : JSONObject? { return UtilLocalStorage.getJSONObject(instance._context!!, "current_work_time_manual") }
 
 
     // 현재 쉬프트의 누적 시간을 구함

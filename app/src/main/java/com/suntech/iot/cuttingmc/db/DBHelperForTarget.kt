@@ -89,7 +89,7 @@ class DBHelperForTarget
         val sql = "select " +
                 "_id, shift_name, target, work_stime, work_etime, start_flag, end_flag " +
                 "from target where date = ? and shift_idx = ?"
-        val cur = db.rawQuery(sql, arrayOf(date.toString(), shift_idx.toString()))
+        val cur = db.rawQuery(sql, arrayOf(date, shift_idx))
         if (cur.moveToNext()) {
             row.put("idx", cur.getString(0))
             row.put("shift_name", cur.getString(1))
@@ -106,6 +106,32 @@ class DBHelperForTarget
             db.close()
             return null
         }
+    }
+
+    fun gets():  ArrayList<HashMap<String, String>>? {
+        var arr = ArrayList<HashMap<String, String>>()
+        val db = _openHelper.readableDatabase ?: return null
+        val sql = "select " +
+                "_id, date, shift_idx, shift_name, target, work_stime, work_etime, start_flag, end_flag, dt " +
+                "from target order by shift_idx"
+        val cur = db.rawQuery(sql, arrayOf())
+        while (cur.moveToNext()) {
+            val row = HashMap<String, String>()
+            row.put("idx", cur.getString(0))
+            row.put("date", cur.getString(1))
+            row.put("shift_idx", cur.getString(2))
+            row.put("shift_name", cur.getString(3))
+            row.put("target", "" + cur.getInt(4))
+            row.put("work_stime", cur.getString(5))
+            row.put("work_etime", cur.getString(6))
+            row.put("start_flag", "" + cur.getInt(7))
+            row.put("end_flag", "" + cur.getInt(8))
+            row.put("dt", cur.getString(9))
+            arr.add(row)
+        }
+        cur.close()
+        db.close()
+        return arr
     }
 
     fun gets(date: String):  ArrayList<HashMap<String, String>>? {

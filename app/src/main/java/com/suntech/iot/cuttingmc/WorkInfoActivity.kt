@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,7 @@ class WorkInfoActivity : BaseActivity() {
     private var _list: ArrayList<HashMap<String, String>> = arrayListOf()
     var _selected_index = -1
 
-    private var _list_json: JSONArray? = null
+//    private var _list_json: JSONArray? = null
 
     private var list_for_operator_adapter: ListOperatorAdapter? = null
     private var _list_for_operator: ArrayList<HashMap<String, String>> = arrayListOf()
@@ -92,11 +93,14 @@ class WorkInfoActivity : BaseActivity() {
 
         tv_title.text = "OPERATOR DETAIL"
 
+        // Shift info
         list_adapter = ListAdapter(this, _list)
         lv_available_info.adapter = list_adapter
 
-        _selected_index = AppGlobal.instance.get_current_shift_time_idx()
+        val idx = AppGlobal.instance.get_current_shift_idx()
+        _selected_index = if (idx == "") -1 else (idx.toInt()-1)
 
+        // worker info
         list_for_operator_adapter = ListOperatorAdapter(this, _filtered_list_for_operator)
         lv_operator_info.adapter = list_for_operator_adapter
 
@@ -105,6 +109,7 @@ class WorkInfoActivity : BaseActivity() {
             list_for_operator_adapter?.notifyDataSetChanged()
         }
 
+        // last worker info
         list_for_last_worker_adapter = ListOperatorAdapter(this, _list_for_last_worker)
         lv_last_worker.adapter = list_for_last_worker_adapter
 
@@ -218,7 +223,7 @@ class WorkInfoActivity : BaseActivity() {
 
     private fun fetchShiftData() {
         val list = AppGlobal.instance.get_current_work_time()
-        _list_json = list
+//        _list_json = list
 
         if (list == null) return
 

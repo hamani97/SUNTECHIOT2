@@ -81,7 +81,7 @@ class DBHelperForReport
         val row = ContentValues()
         val sql = "select _id, houly, actual " +
                 "from report where date = ? and houly = ? and shift_idx = ?"
-        val cur = db.rawQuery(sql, arrayOf(date.toString(), houly.toString(), shift_idx.toString()))
+        val cur = db.rawQuery(sql, arrayOf(date, houly, shift_idx))
         if (cur.moveToNext()) {
             row.put("idx", cur.getString(0))
             row.put("actual", cur.getInt(2))
