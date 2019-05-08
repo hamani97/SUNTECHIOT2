@@ -230,7 +230,7 @@ class CountViewFragment : BaseFragment() {
         tv_style_no.text = AppGlobal.instance.get_compo_style()
 
         tv_count_view_csize.text = AppGlobal.instance.get_compo_size()
-        tv_count_view_clayer.text = AppGlobal.instance.get_compo_pairs()
+        tv_count_view_clayer.text = AppGlobal.instance.get_compo_layer()
         tv_count_view_ctarget.text = "" + AppGlobal.instance.get_compo_target()
     }
 
@@ -272,8 +272,8 @@ class CountViewFragment : BaseFragment() {
                 _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
                 if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
 
-                Log.e("computeCycleTime", "shift_total_time = " + shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
-                Log.e("computeCycleTime", "shift_now_time = " + shift_now_time)          // 현재 작업이 진행된 시간 (초)
+//                Log.e("computeCycleTime", "shift_total_time = " + shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
+//                Log.e("computeCycleTime", "shift_now_time = " + shift_now_time)          // 현재 작업이 진행된 시간 (초)
 
             } else if (target_type=="device_per_hourly") {
                 _current_cycle_time = 86400
@@ -282,7 +282,7 @@ class CountViewFragment : BaseFragment() {
                 _current_cycle_time = 86400
             }
         }
-        Log.e("computeCycleTime", "cycle_time = " + _current_cycle_time)
+//        Log.e("computeCycleTime", "cycle_time = " + _current_cycle_time)
     }
 
 //    private fun countTarget() {
@@ -345,9 +345,9 @@ class CountViewFragment : BaseFragment() {
         if (shift_now_time <= 0 && force_count == false) return
 
         if (shift_now_time % _current_cycle_time == 0 || force_count) {
-            Log.e("countTarget", "Count refresh start ===========> shift_now_time = " + shift_now_time)
-            Log.e("test -----", "shift_now_time % _current_cycle_time = " + shift_now_time % _current_cycle_time)
-            Log.e("test -----", "force_count = " + force_count)
+//            Log.e("countTarget", "Count refresh start ===========> shift_now_time = " + shift_now_time)
+//            Log.e("test -----", "shift_now_time % _current_cycle_time = " + shift_now_time % _current_cycle_time)
+//            Log.e("test -----", "force_count = " + force_count)
             force_count = false
             var target_type = AppGlobal.instance.get_target_type()
             if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
@@ -382,7 +382,7 @@ class CountViewFragment : BaseFragment() {
                     _total_target = total_target
                 }
             }
-            Log.e("countTarget", "Count refresh end ===========> shift_now_time = " + shift_now_time)
+//            Log.e("countTarget", "Count refresh end ===========> shift_now_time = " + shift_now_time)
         }
     }
 

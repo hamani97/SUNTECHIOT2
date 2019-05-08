@@ -555,7 +555,7 @@ Log.e("params", "" + params)
                 var params = listOf(
                     "mac_addr" to AppGlobal.instance.getMACAddress(),
                     //"date" to DateTime().toString("yyyy-MM-dd"),
-                    "date" to item["date"],
+                    "date" to item["date"].toString(),
                     "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
                     "target_count" to _total_target)
 
