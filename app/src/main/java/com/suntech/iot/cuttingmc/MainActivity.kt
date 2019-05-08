@@ -851,51 +851,51 @@ Log.e("params", "" + params)
                 Toast.makeText(this, getString(R.string.msg_not_start_work), Toast.LENGTH_SHORT).show()
                 return
             }
+
             val shift_idx = cur_shift["shift_idx"]      // 현재 작업중인 Shift
-
-            // 선택한 Component 제품이 있는지 확인
-            val work_idx = AppGlobal.instance.get_work_idx()
-            if (work_idx == "") return
-
-            // Pairs 선택 확인
-            val layer_value = AppGlobal.instance.get_compo_pairs()
-            if (layer_value == "") {
-                Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            // Operator 선택 확인
-            val no = AppGlobal.instance.get_worker_no()
-            val name = AppGlobal.instance.get_worker_name()
-            if (no== "" || name == "") {
-                Toast.makeText(this, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
-                return
-            }
-
             var inc_count = 1
 
-            if (layer_value == "0.5") {
-                val accumulated_count = AppGlobal.instance.get_accumulated_count() + 1
-                if (accumulated_count <= 1) {
-                    AppGlobal.instance.set_accumulated_count(1)
-                    return
-                } else {
-                    AppGlobal.instance.set_accumulated_count(0)
+            // 콤포넌트 선택되어야만 실행되는 경우
+            if (AppGlobal.instance.get_without_component() == false) {
+
+                // 선택한 Component 제품이 있는지 확인
+                val work_idx = AppGlobal.instance.get_work_idx()
+                if (work_idx == "") {
+                    Toast.makeText(this, getString(R.string.msg_select_component), Toast.LENGTH_SHORT).show(); return
                 }
-            } else {
-                inc_count = layer_value.toInt()
+
+                // Pairs 선택 확인
+                val layer_value = AppGlobal.instance.get_compo_pairs()
+                if (layer_value == "") {
+                    Toast.makeText(this, getString(R.string.msg_layer_not_selected), Toast.LENGTH_SHORT).show(); return
+                }
+
+                // Operator 선택 확인
+                if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
+                    Toast.makeText(this, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show(); return
+                }
+
+                if (layer_value == "0.5") {
+                    if ((AppGlobal.instance.get_accumulated_count()+1) <= 1) {
+                        AppGlobal.instance.set_accumulated_count(1); return
+                    } else {
+                        AppGlobal.instance.set_accumulated_count(0)
+                    }
+                } else {
+                    inc_count = layer_value.toInt()
+                }
+
+                // component total count
+                val row = db.get(work_idx)
+                if (row != null) {
+                    val actual = (row!!["actual"].toString().toInt() + inc_count)
+                    db.updateWorkActual(work_idx, actual)
+                }
             }
 
             // total count
             var cnt = AppGlobal.instance.get_current_shift_actual_cnt() + inc_count
             AppGlobal.instance.set_current_shift_actual_cnt(cnt)
-
-            // component total count
-            val row = db.get(work_idx)
-            if (row != null) {
-                val actual = (row!!["actual"].toString().toInt() + inc_count)
-                db.updateWorkActual(work_idx, actual)
-            }
 
             _last_count_received_time = DateTime()      // downtime 시간 초기화
 
