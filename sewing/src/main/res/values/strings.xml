@@ -1,6 +1,37 @@
 <resources>
     <string name="app_name">sewing</string>
 
+    <!-- 홈화면 -->
+    <string name="bottom_label_machine_info">MACHINE INFO</string>
+    <string name="bottom_label_operator_info">OPERATOR INFO</string>
+    <string name="bottom_label_employee_number">Employee Number : \u0020</string>
+    <string name="bottom_label_employee_name">Name : \u0020</string>
+    <string name="bottom_label_factory">FACTORY : \u0020</string>
+    <string name="bottom_label_room">ZONE : \u0020</string>
+    <string name="bottom_label_line">LINE : \u0020</string>
+    <string name="bottom_label_number">M/C NUMBER : \u0020</string>
+    <string name="bottom_label_mc_model">MODEL : \u0020</string>
+
+    <!-- COUNT VIEW 화면 -->
+    <string name="label_target">TARGET</string>
+    <string name="label_actual">ACTUAL</string>
+    <string name="label_rate">RATE</string>
+
+    <!-- COMPONENT COUNT VIEW 화면 -->
+    <string name="list_item_wos">WOS</string>
+    <string name="list_item_model">MODEL</string>
+    <string name="list_item_size">SIZE</string>
+    <string name="list_item_target">TARGET</string>
+    <string name="list_item_actual">ACTUAL</string>
+    <string name="list_item_balance">BALANCE</string>
+
+    <!-- Buttons -->
+    <string name="button_total_count_view">Total Count View</string>
+    <string name="button_component_count_view">Component Count View</string>
+    <string name="button_select_component">Select Component</string>
+
     <!-- Message -->
     <string name="msg_connection_fail">The connection to the server failed.</string>
+    <string name="msg_no_setting">Setting not found</string>
+
 </resources>

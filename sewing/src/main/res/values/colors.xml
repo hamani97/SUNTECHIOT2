@@ -28,4 +28,21 @@
     <color name="colorSelector">#8d4dab</color>
     <color name="colorEditor1">#87c947</color>
     <color name="colorEditor2">#333E4D</color>
+
+    <color name="colorButtonDefault">#2f3f51</color>
+    <color name="colorButtonDefaultFocus">#333E4D</color>
+    <color name="colorButtonGray">#535353</color>
+    <color name="colorButtonGrayFocus">#727272</color>
+    <color name="colorButtonOrange">#FF9900</color>
+    <color name="colorButtonOrangeFocus">#eaae40</color>
+    <color name="colorButtonGreen">#87c947</color>
+    <color name="colorButtonGreenFocus">#70A042</color>
+    <color name="colorButtonBlue">#0079BA</color>
+    <color name="colorButtonBlueFocus">#026CA5</color>
+
+    <color name="list_item_bg_color">#090c0f</color>
+    <color name="list_item_text_color">#fff</color>
+    <color name="list_item_highlight_text_color">#f00</color>
+    <color name="list_item_filtering_text_color">#1397DF</color>
+    <color name="list_item_complete_text_color">#f8ad13</color>
 </resources>
