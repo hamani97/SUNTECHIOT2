@@ -215,7 +215,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="gone">title_target_type
 
                 <TextView style="@style/table_title" android:text="@string/title_count_info" />
 

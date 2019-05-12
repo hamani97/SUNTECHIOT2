@@ -5,10 +5,10 @@
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="44dp"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:background="@color/colorBackground">
 
         <LinearLayout
@@ -20,70 +20,70 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
+                    android:layout_marginLeft="20dp"
                     android:text="@string/bottom_label_machine_info"
-                    android:textSize="16sp"
+                    android:textSize="10sp"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_factory"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_factory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_room"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_room"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_line"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_line"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_number"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_mc_no"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <!--<TextView-->
@@ -91,14 +91,14 @@
             <!--android:layout_height="wrap_content"-->
             <!--android:layout_marginLeft="20dp"-->
             <!--android:text="@string/bottom_label_mc_model"-->
-            <!--android:textSize="10sp"-->
+            <!--android:textSize="9sp"-->
             <!--android:textColor="@color/colorWhite"/>-->
             <!--<TextView-->
             <!--android:id="@+id/tv_mc_model"-->
             <!--android:layout_width="wrap_content"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:text="-"-->
-            <!--android:textSize="10sp"-->
+            <!--android:textSize="9sp"-->
             <!--android:textColor="@color/colorOrange"/>-->
         </LinearLayout>
 
@@ -112,38 +112,38 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dp"
                     android:text="@string/bottom_label_operator_info"
-                    android:textSize="16sp"
+                    android:textSize="10sp"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_employee_number"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_employee_no"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="15dp"
                     android:text="@string/bottom_label_employee_name"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorWhite"/>
             <TextView
                     android:id="@+id/tv_employee_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
             <TextView
@@ -152,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="20dp"
                     android:text="-"
-                    android:textSize="10sp"
+                    android:textSize="9sp"
                     android:textColor="@color/colorOrange"/>
 
         </LinearLayout>

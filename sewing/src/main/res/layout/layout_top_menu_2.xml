@@ -4,7 +4,6 @@
               android:layout_height="wrap_content">
 
     <LinearLayout
-            android:id="@+id/ll_top_menu"
             android:layout_width="match_parent"
             android:layout_height="36dp"
             android:paddingLeft="20dp"
@@ -32,12 +31,11 @@
                     android:layout_width="520dp"
                     android:layout_height="50dp"
                     android:gravity="center"
-                    android:text=""
-                    android:textSize="40sp"
-                    android:textColor="@color/colorOrange"
+                    android:text="INFO"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"
-                    android:background="@color/transparent"
-                    android:visibility="gone" />
+                    android:background="@color/transparent" />
         </LinearLayout>
 
         <LinearLayout
@@ -46,36 +44,17 @@
                 android:gravity="end|center_vertical"
                 android:background="@color/transparent"
                 android:orientation="horizontal">
-
-            <RelativeLayout
-                    android:layout_width="70dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/transparent">
-
-                <ImageButton
-                        android:id="@+id/btn_server_state"
-                        android:layout_width="19dp"
-                        android:layout_height="19dp"
-                        android:layout_centerInParent="true"
-                        android:background="@drawable/btn_icon_server_state"/>
-                <TextView
-                        android:id="@+id/tv_ms"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:layout_alignParentBottom="true"
-                        android:layout_marginBottom="0dp"
-                        android:text="ms"
-                        android:textSize="8sp"
-                        android:textColor="@color/colorOrange"/>
-            </RelativeLayout>
-
+            <ImageButton
+                    android:id="@+id/btn_server_state"
+                    android:layout_width="19dp"
+                    android:layout_height="19dp"
+                    android:layout_marginRight="26dp"
+                    android:background="@drawable/btn_icon_server_state"/>
             <ImageButton
                     android:id="@+id/btn_wifi_state"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:background="@drawable/btn_icon_wifi_state"/>
-
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

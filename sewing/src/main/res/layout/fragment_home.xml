@@ -22,10 +22,9 @@
                     android:id="@+id/ll_main_menu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="30dp"
-                    android:paddingRight="30dp"
-                    android:orientation="vertical"
-                    android:visibility="visible">
+                    android:paddingLeft="80dp"
+                    android:paddingRight="80dp"
+                    android:orientation="vertical">
 
                 <LinearLayout
                         android:layout_width="match_parent"
@@ -35,10 +34,10 @@
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="8dp"
-                            android:layout_marginBottom="2dp"
+                            android:layout_marginLeft="1dp"
+                            android:layout_marginBottom="9dp"
                             android:text="SUNTECH IoT System"
-                            android:textSize="20sp"
+                            android:textSize="15sp"
                             android:textColor="#fff"
                             android:textStyle="bold"/>
 
@@ -46,9 +45,9 @@
                             android:id="@+id/tv_app_version"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="30dp"
+                            android:layout_marginLeft="10dp"
                             android:text="."
-                            android:textSize="16sp"
+                            android:textSize="12sp"
                             android:textColor="@color/colorWhite"/>
 
                 </LinearLayout>
@@ -57,33 +56,34 @@
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
                         android:orientation="horizontal"
                         android:layout_gravity="center">
 
                     <Button
                             android:id="@+id/btn_count_view"
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
+                            android:layout_height="76dp"
                             android:layout_weight="1"
-                            android:layout_margin="8dp"
+                            android:layout_marginRight="4dp"
                             android:background="#db4030"
                             android:stateListAnimator="@null"
                             android:text="COUNT VIEW"
-                            android:textSize="18sp"
+                            android:textSize="14sp"
                             android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
                     <Button
                             android:id="@+id/btn_component_info"
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
+                            android:layout_height="76dp"
                             android:layout_weight="1"
-                            android:layout_margin="8dp"
+                            android:layout_marginLeft="4dp"
                             android:background="#f8ad13"
                             android:stateListAnimator="@null"
                             android:text="WORK INFO"
                             android:textColor="@color/colorWhite"
-                            android:textSize="18sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
 
                 </LinearLayout>
@@ -97,26 +97,26 @@
                     <Button
                             android:id="@+id/btn_work_info"
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
+                            android:layout_height="76dp"
                             android:layout_weight="1"
-                            android:layout_margin="8dp"
+                            android:layout_marginRight="4dp"
                             android:background="#3f8cd6"
                             android:stateListAnimator="@null"
                             android:text="OPERATOR DETAIL"
-                            android:textSize="18sp"
+                            android:textSize="14sp"
                             android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
                     <Button
                             android:id="@+id/btn_setting_view"
                             android:layout_width="0dp"
-                            android:layout_height="100dp"
+                            android:layout_height="76dp"
                             android:layout_weight="1"
-                            android:layout_margin="8dp"
+                            android:layout_marginLeft="4dp"
                             android:background="#61c536"
                             android:stateListAnimator="@null"
                             android:text="SETTING"
-                            android:textSize="18sp"
+                            android:textSize="14sp"
                             android:textColor="@color/colorWhite"
                             android:textStyle="bold"/>
 
