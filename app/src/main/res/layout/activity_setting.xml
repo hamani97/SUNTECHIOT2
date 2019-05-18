@@ -428,28 +428,28 @@
                                 android:layout_width="200dp"
                                 android:background="@color/colorBackgroundTop"
                                 android:text="@string/label_from_server"
-                                android:textColor="@color/colorReadonly"
+                                android:textColor="@color/colorGray"
                                 android:textStyle="bold" />
                     </LinearLayout>
 
                     <LinearLayout style="@style/tab_block" android:layout_marginTop="8dp">
                         <Button
                                 android:id="@+id/btn_server_accumulate"
-                                style="@style/tab_btn_disable"
+                                style="@style/tab_btn_off"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:stateListAnimator="@null"
                                 android:text="Accumulation by Start" />
                         <Button
                                 android:id="@+id/btn_server_hourly"
-                                style="@style/tab_btn_disable"
+                                style="@style/tab_btn_off"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:stateListAnimator="@null"
                                 android:text="Accumulation by Hourly" />
                         <Button
                                 android:id="@+id/btn_server_shifttotal"
-                                style="@style/tab_btn_disable"
+                                style="@style/tab_btn_off"
                                 android:layout_width="0dp"
                                 android:layout_weight="1"
                                 android:stateListAnimator="@null"

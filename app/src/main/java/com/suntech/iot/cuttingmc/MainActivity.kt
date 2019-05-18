@@ -75,9 +75,9 @@ class MainActivity : BaseActivity() {
         // button click event
         if (AppGlobal.instance.get_long_touch()) {
             btn_home.setOnLongClickListener { changeFragment(0); true }
-            btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java));true }
+            btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java)); true }
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
-//            btn_downtime.setOnLongClickListener { startDowntimeActivity();true }
+//            btn_downtime.setOnLongClickListener { startDowntimeActivity(); true }
             btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
             btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
             btn_production_report.setOnLongClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)); true }
@@ -167,7 +167,8 @@ class MainActivity : BaseActivity() {
     // 서버에 작업시간, 다운타임 기본시간, 색삭값을 호출
     private fun fetchRequiredData() {
         if (AppGlobal.instance.get_server_ip().trim() != "") {
-            fetchWorkData()
+            fetchWorkData()         // 작업시간
+            fetchServerTarget()     // 목표수량
             fetchDownTimeType()
             fetchColorData()
         }
@@ -208,6 +209,94 @@ class MainActivity : BaseActivity() {
         }
         return null
     }
+
+    /*
+     *  당일 작업 Shift 별 목표수량 가져오기
+     */
+    private fun fetchServerTarget() {
+        val today = DateTime().toString("yyyy-MM-dd")
+        val mac = AppGlobal.instance.getMACAddress()
+        val uri = "/getlist1.php"
+        var params = listOf("code" to "target",
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  "1",
+            "date" to today,
+            "mac_addr" to mac
+        )
+        request(this, uri, false, params, { result ->
+            val code = result.getString("code")
+            if (code == "00") {
+                val daytargetsum = result.getString("daytargetsum")
+                AppGlobal.instance.set_target_server_shift("1", daytargetsum)
+            } else {
+                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
+            }
+        })
+        params = listOf("code" to "target",
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  "2",
+            "date" to today,
+            "mac_addr" to mac
+        )
+        request(this, uri, false, params, { result ->
+            val code = result.getString("code")
+            if (code == "00") {
+                val daytargetsum = result.getString("daytargetsum")
+                AppGlobal.instance.set_target_server_shift("2", daytargetsum)
+            } else {
+                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
+            }
+        })
+        params = listOf("code" to "target",
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "shift_idx" to  "3",
+            "date" to today,
+            "mac_addr" to mac
+        )
+        request(this, uri, false, params, { result ->
+            val code = result.getString("code")
+            if (code == "00") {
+                val daytargetsum = result.getString("daytargetsum")
+                AppGlobal.instance.set_target_server_shift("3", daytargetsum)
+            } else {
+                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+//    private fun fetchServerTarget() {
+////        val work_idx = AppGlobal.instance.get_product_idx()
+////        var db = SimpleDatabaseHelper(activity)
+////        val row = db.get(work_idx)
+//        var total_target = 0
+//
+//        val uri = "/getlist1.php"
+//        var params = listOf("code" to "target",
+//            "line_idx" to AppGlobal.instance.get_line_idx(),
+//            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+//            "date" to DateTime().toString("yyyy-MM-dd"),
+//            "mac_addr" to AppGlobal.instance.getMACAddress()
+//        )
+//
+//        request(this, uri, false, params, { result ->
+//            var code = result.getString("code")
+//            var msg = result.getString("msg")
+//            if (code == "00") {
+//Log.e("server target", ""+result.toString())
+//                var target = result.getString("target")
+//                var targetsum = result.getString("targetsum")
+//                var daytargetsum = result.getString("daytargetsum")
+//                total_target = targetsum.toInt()
+//
+//                var target_type = AppGlobal.instance.get_target_type()
+//                if (target_type=="server_per_hourly") total_target = target.toInt()
+//                else if (target_type=="server_per_accumulate") total_target = targetsum.toInt()
+//                else if (target_type=="server_per_day_total") total_target = daytargetsum.toInt()
+//
+//            } else {
+//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//    }
 
     /*
      *  당일 작업시간 가져오기. 새벽이 지난 시간은 1일을 더한다.
@@ -320,16 +409,19 @@ Log.e("params", "" + params)
         if (list.length() > 0) {
 
             // DB에 Shift 정보를 저장한다.
+            // Production report 때문에 그날의 정보를 모두 저장해야 함.
+            var target_type = AppGlobal.instance.get_target_type()
             for (i in 0..(list.length() - 1)) {
                 val item = list.getJSONObject(i)
+                var target = if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total")
+                        AppGlobal.instance.get_target_server_shift(item["shift_idx"].toString()) else AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
+                if (target == null || target == "") target = "0"
 
-                val target = AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
                 val row = _target_db.get(item["date"].toString(), item["shift_idx"].toString())
-
                 if (row == null) { // insert
 //                    Log.e("db info", "===> " + item["date"].toString() + " : " + item["shift_idx"].toString() + " : null")
                     _target_db.add(item["date"].toString(), item["shift_idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
-                } else { // update
+                } else {           // update
 //                    Log.e("db info", "===> " + item["date"].toString() + " : " + item["shift_idx"].toString() + " : " + row.toString())
                     _target_db.update(row["idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
                 }
@@ -343,13 +435,17 @@ Log.e("params", "" + params)
                 var shift_etime = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
 
                 if (shift_stime <= now_millis && now_millis < shift_etime) {
-//                    tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
+                    // 타이틀 변경
                     tv_title.setText(item["shift_name"].toString() + "   " +
                             OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") + " - " +
                             OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
 
-//                    AppGlobal.instance.set_current_shift_idx(item["shift_idx"].toString())
-//                    AppGlobal.instance.set_current_shift_name(item["shift_name"].toString())
+                    // 이전 Shift와 현재 Shift가 다르다면 Actual 초기화
+                    val shift_info = item["date"].toString() + item["shift_idx"].toString()
+                    if (shift_info != AppGlobal.instance.get_last_shift_info()) {
+                        AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
+                        AppGlobal.instance.set_last_shift_info(shift_info)      // 현재 Shift 정보 저장
+                    }
 
                     _current_shift_etime_millis = shift_etime
                     _next_shift_stime_millis = 0L
@@ -378,6 +474,8 @@ Log.e("params", "" + params)
         // 다음날 Shift 시작 정보는 10분마다 로딩하므로 구할 필요없음
 
         tv_title.setText("No shift")
+
+        AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
 
 //        AppGlobal.instance.set_current_shift_idx("-1")
 //        AppGlobal.instance.set_current_shift_name("No-shift")
@@ -541,7 +639,11 @@ Log.e("params", "" + params)
             var _total_target = 0
             var target_type = AppGlobal.instance.get_target_type()
             if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
-
+                when (item["shift_idx"]) {
+                    "1" -> _total_target = AppGlobal.instance.get_target_server_shift("1").toInt()
+                    "2" -> _total_target = AppGlobal.instance.get_target_server_shift("2").toInt()
+                    "3" -> _total_target = AppGlobal.instance.get_target_server_shift("3").toInt()
+                }
             } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
                 when (item["shift_idx"]) {
                     "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
@@ -554,7 +656,6 @@ Log.e("params", "" + params)
                 val uri = "/sendtarget.php"
                 var params = listOf(
                     "mac_addr" to AppGlobal.instance.getMACAddress(),
-                    //"date" to DateTime().toString("yyyy-MM-dd"),
                     "date" to item["date"].toString(),
                     "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
                     "target_count" to _total_target)
@@ -665,7 +766,7 @@ Log.e("params", "" + params)
     }
 
     /*
-     *  Shift 전환을 위한 실시간 검사
+     *  Shift 전환을 위한 실시간 검사. 매초마다 실행됨
      *  현재 작업중인 Shift 가 있으면 종료되는 시간을 검사해서 종료 시간이 되었다면 다음 쉬프트를 계산한다. (_current_shift_etime_millis)
      *  현재 작업중인 Shift 가 없으면 일하는 시간이 아니므로 다음 시작 시간을 검사하고, 시작 시간이라면 Shift의 종료시간을 계산한다. (_next_shift_stime_millis)
      */

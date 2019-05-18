@@ -240,50 +240,71 @@ class CountViewFragment : BaseFragment() {
 
     // Total target을 표시할 사이클 타임을 계산한다.
     private fun computeCycleTime() {
-
         force_count = true
-
-        var target_type = AppGlobal.instance.get_target_type()
-
-        if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
-            fetchServerTarget()
-
-        } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-            var total_target = 0
-
-            var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
-            if (item != null) {
-                when (item["shift_idx"]) {
-                    "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
-                    "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
-                    "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
-                }
-            } else {
-                // 작업 시간이 아니므로 값을 초기화 한다.
-                _current_cycle_time = 15
-                _total_target = 0
-                return
-            }
-
-            if (target_type=="device_per_accumulate") {
-                val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
-                val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
-
-                _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
-                if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
-
-//                Log.e("computeCycleTime", "shift_total_time = " + shift_total_time)      // 휴식 시간을 뺀 총 근무시간 (초)
-//                Log.e("computeCycleTime", "shift_now_time = " + shift_now_time)          // 현재 작업이 진행된 시간 (초)
-
-            } else if (target_type=="device_per_hourly") {
-                _current_cycle_time = 86400
-
-            } else if (target_type=="device_per_day_total") {
-                _current_cycle_time = 86400
-            }
+        val target = AppGlobal.instance.get_current_shift_target_cnt()
+        if (target == null || target == "") {
+            // 작업 시간이 아니므로 값을 초기화 한다.
+            _current_cycle_time = 15
+            _total_target = 0
+            return
         }
-//        Log.e("computeCycleTime", "cycle_time = " + _current_cycle_time)
+
+        val total_target = target.toInt()
+        val target_type = AppGlobal.instance.get_target_type()
+
+        if (target_type=="device_per_accumulate" || target_type=="server_per_accumulate") {
+            val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
+            _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
+            if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
+
+        } else if (target_type=="device_per_hourly" || target_type=="server_per_hourly") {
+            _current_cycle_time = 86400
+
+        } else if (target_type=="device_per_day_total" || target_type=="server_per_day_total") {
+            _current_cycle_time = 86400
+        }
     }
+//    private fun computeCycleTime() {
+//
+//        force_count = true
+//
+//        var target_type = AppGlobal.instance.get_target_type()
+//
+//        if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+//            fetchServerTarget()
+//
+//        } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+//            var total_target = 0
+//
+//            var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+//            if (item != null) {
+//                when (item["shift_idx"]) {
+//                    "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+//                    "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+//                    "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+//                }
+//            } else {
+//                // 작업 시간이 아니므로 값을 초기화 한다.
+//                _current_cycle_time = 15
+//                _total_target = 0
+//                return
+//            }
+//
+//            if (target_type=="device_per_accumulate") {
+//                val shift_total_time = AppGlobal.instance.get_current_shift_total_time()
+//                val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+//
+//                _current_cycle_time = if (total_target > 0) (shift_total_time / total_target) else 0
+//                if (_current_cycle_time < 5) _current_cycle_time = 5        // 너무 자주 리프레시 되는걸 막기위함
+//
+//            } else if (target_type=="device_per_hourly") {
+//                _current_cycle_time = 86400
+//
+//            } else if (target_type=="device_per_day_total") {
+//                _current_cycle_time = 86400
+//            }
+//        }
+//    }
 
 //    private fun countTarget() {
 ////        val now_time = DateTime()
@@ -349,39 +370,63 @@ class CountViewFragment : BaseFragment() {
 //            Log.e("test -----", "shift_now_time % _current_cycle_time = " + shift_now_time % _current_cycle_time)
 //            Log.e("test -----", "force_count = " + force_count)
             force_count = false
-            var target_type = AppGlobal.instance.get_target_type()
-            if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
-                fetchServerTarget()
 
-            } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-                var total_target = 0
+            var target = AppGlobal.instance.get_current_shift_target_cnt()
+            if (target == null || target == "") target = "0"
 
-                var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
-                if (item != null) {
-                    when (item["shift_idx"]) {
-                        "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
-                        "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
-                        "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
-                    }
-                }
+            var total_target = target.toInt()
 
-                if (target_type=="device_per_accumulate") {
-//                    val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
-                    val target = (shift_now_time / _current_cycle_time).toInt() + 1
-                    _total_target = if (target > total_target) total_target else target
+            val target_type = AppGlobal.instance.get_target_type()
 
-                } else if (target_type=="device_per_hourly") {
-                    val shift_total_time = AppGlobal.instance.get_current_shift_total_time()    // 현시프트의 총 시간
-                    val target_per_hour = total_target.toFloat() / shift_total_time.toFloat() * 3600    // 시간당 만들어야 할 갯수
-                    val target = ((shift_now_time / 3600).toInt() * target_per_hour + target_per_hour).toInt()    // 현 시간에 만들어야 할 갯수
-                    _total_target = if (target > total_target) total_target else target
+            if (target_type=="device_per_accumulate" || target_type=="server_per_accumulate") {
+                val target = (shift_now_time / _current_cycle_time).toInt() + 1
+                _total_target = if (target > total_target) total_target else target
 
-                    Log.e("test -----", "target_per_hour = " + target_per_hour + ", _total_target = " + _total_target + ", _current_cycle_time = " + _current_cycle_time)
+            } else if (target_type=="device_per_hourly" || target_type=="server_per_hourly") {
+                val shift_total_time = AppGlobal.instance.get_current_shift_total_time()    // 현시프트의 총 시간
+                val target_per_hour = total_target.toFloat() / shift_total_time.toFloat() * 3600    // 시간당 만들어야 할 갯수
+                val target = ((shift_now_time / 3600).toInt() * target_per_hour + target_per_hour).toInt()    // 현 시간에 만들어야 할 갯수
+                _total_target = if (target > total_target) total_target else target
 
-                } else if (target_type=="device_per_day_total") {
-                    _total_target = total_target
-                }
+                Log.e("test -----", "target_per_hour = " + target_per_hour + ", _total_target = " + _total_target + ", _current_cycle_time = " + _current_cycle_time)
+
+            } else if (target_type=="device_per_day_total" || target_type=="server_per_day_total") {
+                _total_target = total_target
             }
+
+
+//            if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+//                fetchServerTarget()
+//
+//            } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+//                var total_target = 0
+//
+//                var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
+//                if (item != null) {
+//                    when (item["shift_idx"]) {
+//                        "1" -> total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
+//                        "2" -> total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
+//                        "3" -> total_target = AppGlobal.instance.get_target_manual_shift("3").toInt()
+//                    }
+//                }
+//
+//                if (target_type=="device_per_accumulate") {
+////                    val shift_now_time = AppGlobal.instance.get_current_shift_accumulated_time()
+//                    val target = (shift_now_time / _current_cycle_time).toInt() + 1
+//                    _total_target = if (target > total_target) total_target else target
+//
+//                } else if (target_type=="device_per_hourly") {
+//                    val shift_total_time = AppGlobal.instance.get_current_shift_total_time()    // 현시프트의 총 시간
+//                    val target_per_hour = total_target.toFloat() / shift_total_time.toFloat() * 3600    // 시간당 만들어야 할 갯수
+//                    val target = ((shift_now_time / 3600).toInt() * target_per_hour + target_per_hour).toInt()    // 현 시간에 만들어야 할 갯수
+//                    _total_target = if (target > total_target) total_target else target
+//
+//                    Log.e("test -----", "target_per_hour = " + target_per_hour + ", _total_target = " + _total_target + ", _current_cycle_time = " + _current_cycle_time)
+//
+//                } else if (target_type=="device_per_day_total") {
+//                    _total_target = total_target
+//                }
+//            }
 //            Log.e("countTarget", "Count refresh end ===========> shift_now_time = " + shift_now_time)
         }
     }
@@ -545,37 +590,37 @@ class CountViewFragment : BaseFragment() {
         }
     }
 
-    private fun fetchServerTarget() {
-//        val work_idx = AppGlobal.instance.get_work_idx()
-//        var db = SimpleDatabaseHelper(activity)
-//        val row = db.get(work_idx)
-
-        val uri = "/getlist1.php"
-        var params = listOf(
-            "code" to "target",
-            "line_idx" to AppGlobal.instance.get_line_idx(),
-            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
-            "date" to DateTime().toString("yyyy-MM-dd"),
-            "mac_addr" to AppGlobal.instance.getMACAddress()
-        )
-
-        getBaseActivity().request(activity, uri, false, params, { result ->
-            var code = result.getString("code")
-            var msg = result.getString("msg")
-            if(code == "00"){
-                var target_type = AppGlobal.instance.get_target_type()
-
-                if (target_type=="server_per_hourly") _total_target = result.getString("target").toInt()
-                else if (target_type=="server_per_accumulate") _total_target = result.getString("targetsum").toInt()
-                else if (target_type=="server_per_day_total") _total_target = result.getString("daytargetsum").toInt()
-                else _total_target = result.getString("targetsum").toInt()
-
-                updateView()
-            }else{
-                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
+//    private fun fetchServerTarget() {
+////        val work_idx = AppGlobal.instance.get_work_idx()
+////        var db = SimpleDatabaseHelper(activity)
+////        val row = db.get(work_idx)
+//
+//        val uri = "/getlist1.php"
+//        var params = listOf(
+//            "code" to "target",
+//            "line_idx" to AppGlobal.instance.get_line_idx(),
+//            "shift_idx" to  AppGlobal.instance.get_current_shift_idx(),
+//            "date" to DateTime().toString("yyyy-MM-dd"),
+//            "mac_addr" to AppGlobal.instance.getMACAddress()
+//        )
+//
+//        getBaseActivity().request(activity, uri, false, params, { result ->
+//            var code = result.getString("code")
+//            var msg = result.getString("msg")
+//            if(code == "00"){
+//                var target_type = AppGlobal.instance.get_target_type()
+//
+//                if (target_type=="server_per_hourly") _total_target = result.getString("target").toInt()
+//                else if (target_type=="server_per_accumulate") _total_target = result.getString("targetsum").toInt()
+//                else if (target_type=="server_per_day_total") _total_target = result.getString("daytargetsum").toInt()
+//                else _total_target = result.getString("targetsum").toInt()
+//
+//                updateView()
+//            }else{
+//                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//    }
 
     var handle_cnt = 0
     fun startHandler() {
