@@ -177,20 +177,23 @@ class CountViewFragment : BaseFragment() {
         // button click
         tv_btn_wos_count.setOnClickListener {
             (activity as MainActivity).countViewType = 2
-            ll_total_count.visibility = View.GONE
-            ll_component_count.visibility = View.VISIBLE
+            onSelected()
+//            ll_total_count.visibility = View.GONE
+//            ll_component_count.visibility = View.VISIBLE
         }
         ll_btn_wos_count.setOnClickListener {
             (activity as MainActivity).countViewType = 2
-            ll_total_count.visibility = View.GONE
-            ll_component_count.visibility = View.VISIBLE
+            onSelected()
+//            ll_total_count.visibility = View.GONE
+//            ll_component_count.visibility = View.VISIBLE
         }
 
         // Component count view buttons
         btn_total_count_view.setOnClickListener {
             (activity as MainActivity).countViewType = 1
-            ll_total_count.visibility = View.VISIBLE
-            ll_component_count.visibility = View.GONE
+            onSelected()
+//            ll_total_count.visibility = View.VISIBLE
+//            ll_component_count.visibility = View.GONE
         }
         btn_select_component.setOnClickListener {
             val intent = Intent(activity, ComponentInfoActivity::class.java)
