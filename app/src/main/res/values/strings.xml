@@ -41,6 +41,7 @@
     <string name="label_mc_serial">MC SERIAL</string>
     <string name="label_server_ip">SERVER IP</string>
     <string name="label_server_port">PORT</string>
+    <string name="label_wos_name">WOS name to display</string>
 
     <!-- COMPONENT 화면 -->
     <string name="label_wos">WOS</string>

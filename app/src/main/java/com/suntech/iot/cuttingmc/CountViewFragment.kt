@@ -20,7 +20,6 @@ import kotlinx.android.synthetic.main.fragment_count_view.*
 import kotlinx.android.synthetic.main.layout_bottom_info_3.*
 import kotlinx.android.synthetic.main.layout_top_menu.*
 import org.joda.time.DateTime
-import org.json.JSONObject
 
 class CountViewFragment : BaseFragment() {
 
@@ -72,6 +71,9 @@ class CountViewFragment : BaseFragment() {
         } else {
             ll_total_count.visibility = View.GONE
             ll_component_count.visibility = View.VISIBLE
+
+            tv_count_wos_name.text = AppGlobal.instance.get_wos_name()  // 표 안의 WOS name 변경
+
             fetchFilterWos()    // 기존 선택된 WOS 가 있으면 로드해서 화면에 표시한다.
         }
 
@@ -227,11 +229,14 @@ class CountViewFragment : BaseFragment() {
 
     fun viewWosData() {
         // WOS INFO
+        // 하단 bottom
+        tv_wos_name.text = AppGlobal.instance.get_wos_name() + " NO :  "
         tv_wosno.text = AppGlobal.instance.get_compo_wos()
         tv_model.text = AppGlobal.instance.get_compo_model()
         tv_component.text = AppGlobal.instance.get_compo_component()
         tv_style_no.text = AppGlobal.instance.get_compo_style()
 
+        // 우측 쪽창
         tv_count_view_csize.text = AppGlobal.instance.get_compo_size()
         tv_count_view_clayer.text = AppGlobal.instance.get_compo_layer()
         tv_count_view_ctarget.text = "" + AppGlobal.instance.get_compo_target()

@@ -176,7 +176,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="WOS COUNT"
+                            android:text="COMP COUNT"
                             android:textSize="30sp"
                             android:paddingTop="16dp"
                             android:paddingBottom="16dp"
@@ -431,6 +431,7 @@
                             android:orientation="horizontal"
                             android:background="#304053">
                         <TextView
+                                android:id="@+id/tv_count_wos_name"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="4"

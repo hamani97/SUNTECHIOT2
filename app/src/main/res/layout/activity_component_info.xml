@@ -47,6 +47,7 @@
                         <!-- WOS -->
                         <LinearLayout style="@style/table_row">
                             <TextView
+                                    android:id="@+id/tv_wos_name"
                                     style="@style/table_row_title"
                                     android:layout_width="200dp"
                                     android:text="@string/label_wos" />
@@ -142,6 +143,7 @@
 
                 <LinearLayout style="@style/grid_header">
                     <TextView
+                            android:id="@+id/tv_wos_name2"
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
                             android:layout_weight="4"
