@@ -62,8 +62,14 @@ class AppGlobal private constructor() {
     fun set_sound_at_count(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_sound_count", state) }
     fun get_sound_at_count() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_sound_count") }
 
-    fun set_without_component(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_without_component", state) }
-    fun get_without_component() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_without_component") }
+    fun set_with_component(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_with_component", state) }
+    fun get_with_component() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_with_component") }
+
+    fun set_wos_name(name: String) { UtilLocalStorage.setString(instance._context!!, "current_wos_name", name) }
+    fun get_wos_name() : String {
+        val name = UtilLocalStorage.getString(instance._context!!, "current_wos_name")
+        return if (name != "") name else "WOS"
+    }
 
     fun set_screen_blink(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_screen_blink", state) }
     fun get_screen_blink() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_screen_blink") }
@@ -255,25 +261,58 @@ class AppGlobal private constructor() {
     fun set_color_code(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "color_code", data) }
     fun get_color_code() : JSONArray { return UtilLocalStorage.getJSONArray(instance._context!!, "color_code") }
 
+    fun set_availability(value: String) { UtilLocalStorage.setString(instance._context!!, "current_availability", value) }
+    fun get_availability() : String { return UtilLocalStorage.getString(instance._context!!, "current_availability") }
+    fun set_performance(value: String) { UtilLocalStorage.setString(instance._context!!, "current_performance", value) }
+    fun get_performance() : String { return UtilLocalStorage.getString(instance._context!!, "current_performance") }
+    fun set_quality(value: String) { UtilLocalStorage.setString(instance._context!!, "current_quality", value) }
+    fun get_quality() : String { return UtilLocalStorage.getString(instance._context!!, "current_quality") }
+
+    // count type
+    fun set_count_type(value: String) { UtilLocalStorage.setString(instance._context!!, "count_type", value) }
+    fun get_count_type() : String { return UtilLocalStorage.getString(instance._context!!, "count_type") }
 
     // Layer정보 = pair 수
     fun set_layer_pairs(layer_no: String, pair: String) { UtilLocalStorage.setString(instance._context!!, "current_layer_" + layer_no, pair) }
     fun get_layer_pairs(layer_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_layer_" + layer_no) }
+    fun set_trim_qty(value: String) { UtilLocalStorage.setString(instance._context!!, "current_trim_qty", value) }
+    fun get_trim_qty() : String { return UtilLocalStorage.getString(instance._context!!, "current_trim_qty") }
+    fun set_trim_pairs(pair: String) { UtilLocalStorage.setString(instance._context!!, "current_trim_pair", pair) }
+    fun get_trim_pairs() : String { return UtilLocalStorage.getString(instance._context!!, "current_trim_pair") }
+
+    fun set_stitch_qty_start(value: String) { UtilLocalStorage.setString(instance._context!!, "current_stitch_start", value) }
+    fun get_stitch_qty_start() : String { return UtilLocalStorage.getString(instance._context!!, "current_stitch_start") }
+    fun set_stitch_qty_end(value: String) { UtilLocalStorage.setString(instance._context!!, "current_stitch_end", value) }
+    fun get_stitch_qty_end() : String { return UtilLocalStorage.getString(instance._context!!, "current_stitch_end") }
+    fun set_stitch_delay_time(value: String) { UtilLocalStorage.setString(instance._context!!, "current_stitch_delay_time", value) }
+    fun get_stitch_delay_time() : String { return UtilLocalStorage.getString(instance._context!!, "current_stitch_delay_time") }
+    fun set_stitch_pairs(pair: String) { UtilLocalStorage.setString(instance._context!!, "current_stitch_pair", pair) }
+    fun get_stitch_pairs() : String { return UtilLocalStorage.getString(instance._context!!, "current_stitch_pair") }
 
     // server, manual 방식
     fun set_target_type(value: String) { UtilLocalStorage.setString(instance._context!!, "target_type", value) }
     fun get_target_type() : String { return UtilLocalStorage.getString(instance._context!!, "target_type") }
 
+    fun set_last_shift_info(info: String) { UtilLocalStorage.setString(instance._context!!, "last_shift_info", info) }
+    fun get_last_shift_info() : String { return UtilLocalStorage.getString(instance._context!!, "last_shift_info") }
+
+    fun set_target_server_shift(shift_no: String, value: String) { UtilLocalStorage.setString(instance._context!!, "current_server_target_shift_" + shift_no, value) }
+    fun get_target_server_shift(shift_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_server_target_shift_" + shift_no) }
+
     fun set_target_manual_shift(shift_no: String, value: String) { UtilLocalStorage.setString(instance._context!!, "current_target_shift_" + shift_no, value) }
     fun get_target_manual_shift(shift_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_target_shift_" + shift_no) }
 
     fun get_current_shift_target_cnt() : String {
-        var total_target = "0"
+        var total_target = ""
         var target_type = get_target_type()
+        val shift_idx = get_current_shift_idx()
         if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
-            // 서버에서 가져온 값이 있어야 함
+            when (shift_idx) {
+                "1" -> total_target = get_target_server_shift("1")
+                "2" -> total_target = get_target_server_shift("2")
+                "3" -> total_target = get_target_server_shift("3")
+            }
         } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-            val shift_idx = get_current_shift_idx()
             when (shift_idx) {
                 "1" -> total_target = get_target_manual_shift("1")
                 "2" -> total_target = get_target_manual_shift("2")

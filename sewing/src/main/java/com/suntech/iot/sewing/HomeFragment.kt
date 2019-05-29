@@ -41,13 +41,18 @@ class HomeFragment : BaseFragment() {
     override fun initViews() {
         tv_app_version.text = "v " + activity.packageManager.getPackageInfo(activity.packageName, 0).versionName
 
+        // Click event
         btn_count_view.setOnClickListener {
             (activity as MainActivity).countViewType = 1
             (activity as MainActivity).changeFragment(1)
         }
         btn_component_info.setOnClickListener {
-            (activity as MainActivity).countViewType = 2
-            (activity as MainActivity).changeFragment(1)
+            if (AppGlobal.instance.get_with_component()) {
+                (activity as MainActivity).countViewType = 2
+                (activity as MainActivity).changeFragment(1)
+            } else {
+                Toast.makeText(activity, getString(R.string.msg_component_not_enabled), Toast.LENGTH_SHORT).show()
+            }
         }
         btn_work_info.setOnClickListener {
             if (AppGlobal.instance.get_factory() == "" || AppGlobal.instance.get_room() == "" || AppGlobal.instance.get_line() == "") {
