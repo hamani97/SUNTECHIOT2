@@ -373,18 +373,19 @@ class MainActivity : BaseActivity() {
     private fun sendCountData(count:String, inc_count:Int, sum_count:Int) {
         if (AppGlobal.instance.get_server_ip()=="") return
 
-//        val work_idx = AppGlobal.instance.get_work_idx()
-//        if (work_idx == "") return
-
         var shift_idx = AppGlobal.instance.get_current_shift_idx()
         if (shift_idx == "") shift_idx = "0"
 
-//        var db = DBHelperForComponent(this)
-//        val row = db.get(work_idx)
-//        val actual = row!!["actual"].toString().toInt()
-//        val seq = row!!["seq"].toString().toInt()
+        var seq = 1
 
-        val seq = "1"
+        // Cutting 과는 다르게 콤포넌트가 필수 선택사항이 아니므로
+        // 선택되었을 경우에만 seq 값을 구하고 아니면, 디폴트 1을 전송한다.
+        val work_idx = AppGlobal.instance.get_work_idx()
+        if (work_idx != "") {
+            var db = DBHelperForComponent(this)
+            val row = db.get(work_idx)
+            seq = row!!["seq"].toString().toInt()
+        }
 
         val uri = "/senddata1.php"
         var params = listOf(
@@ -423,7 +424,10 @@ class MainActivity : BaseActivity() {
         val row = db.get(wosno, size)
 
         if (row == null) {
-            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0)
+            val s = db.gets_all_wos()
+            val seq = (s?.size ?: 0) + 1
+
+            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0, seq)
             val row2 = db.get(wosno, size)
             if (row2 == null) {
                 Log.e("work_idx", "none")

@@ -1031,7 +1031,10 @@ Log.e("params", "" + params)
         val row = db.get(wosno, size)
 
         if (row == null) {
-            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0)
+            val s = db.gets_all_wos()
+            val seq = (s?.size ?: 0) + 1
+
+            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0, seq)
             val row2 = db.get(wosno, size)
             if (row2 == null) {
                 Log.e("work_idx", "none")
@@ -1260,8 +1263,8 @@ Log.e("params", "" + params)
         var db = DBHelperForComponent(this)
         val row = db.get(work_idx)
         val actual = row!!["actual"].toString().toInt()
-//        val seq = row!!["seq"].toString().toInt()
-        val seq = "1"
+        val seq = row!!["seq"].toString().toInt()
+//        val seq = "1"
 
         val uri = "/senddata1.php"
         var params = listOf(
