@@ -799,6 +799,7 @@ Log.e("params", "" + params)
     private val _downtime_timer = Timer()
     private val _timer_task1 = Timer()          // 서버 접속 체크 Ping test. Shift의 Target 정보
     private val _timer_task2 = Timer()          // 작업시간, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
+    private val _timer_task4 = Timer()          // 30분마다. 서버로 타겟값 전송
 
     private fun start_timer() {
 
@@ -819,7 +820,7 @@ Log.e("params", "" + params)
             override fun run() {
                 runOnUiThread {
                     sendPing()
-                    updateCurrentWorkTarget()
+//                    updateCurrentWorkTarget() // 30분으로 이동
                 }
             }
         }
@@ -834,11 +835,22 @@ Log.e("params", "" + params)
             }
         }
         _timer_task2.schedule(task2, 600000, 600000)
+
+        // 30분마다
+        val task4 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    updateCurrentWorkTarget()
+                }
+            }
+        }
+        _timer_task4.schedule(task4, 600000, 1800000)
     }
     private fun cancel_timer () {
         _downtime_timer.cancel()
         _timer_task1.cancel()
         _timer_task2.cancel()
+        _timer_task4.cancel()
     }
 
     ////////// USB

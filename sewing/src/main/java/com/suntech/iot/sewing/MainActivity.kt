@@ -270,6 +270,10 @@ class MainActivity : BaseActivity() {
     var trim_qty = 0
     var trim_pairs = 0
 
+    var stitch_qty = 0
+    var stitch_pairs = 0
+    var last_time = 0L           // 마지막으로 신호가 들어온 시간 (stitch 로 설정된 경우만 해당)
+
     private fun saveRowData(cmd: String, value: JsonElement) {
         if (AppGlobal.instance.get_sound_at_count()) AppGlobal.instance.playSound(this)
 
@@ -328,45 +332,140 @@ class MainActivity : BaseActivity() {
             if (inc_count <= 0) return
 
             // total count
-            val cnt = AppGlobal.instance.get_current_shift_actual_cnt() + inc_count
-            AppGlobal.instance.set_current_shift_actual_cnt(cnt)
-
-            // 콤포넌트 선택인 경우
-            if (AppGlobal.instance.get_with_component()) {
-                // component total count
-                val db = DBHelperForComponent(this)
-                val row = db.get(work_idx)
-                if (row != null) {
-                    val actual = (row!!["actual"].toString().toInt() + inc_count)
-                    db.updateWorkActual(work_idx, actual)
-                    sendCountData(value.toString(), inc_count, actual)  // 서버에 카운트 정보 전송
-                } else {
-                    sendCountData(value.toString(), inc_count, inc_count)  // 서버에 카운트 정보 전송
-                }
-            } else {
-                sendCountData(value.toString(), inc_count, cnt)  // 서버에 카운트 정보 전송
-            }
-
-            _last_count_received_time = DateTime()      // downtime 시간 초기화
-
-//            _stitch_db.add(work_idx, value.toString())
-
-            // Production Report를 위한 DB저장
-            //val now = DateTime()
-            val now = cur_shift["date"]
-            val date = now.toString()
-            val houly = DateTime().toString("HH")
-
-            val rep = _report_db.get(date, houly, shift_idx.toString())
-            if (rep == null) {
-                _report_db.add(date, houly, shift_idx.toString(), inc_count, 0)
-            } else {
-                val idx = rep!!["idx"].toString()
-                val actual = rep!!["actual"].toString().toInt() + inc_count
-                _report_db.updateActual(idx, actual)
-            }
+//            val cnt = AppGlobal.instance.get_current_shift_actual_cnt() + inc_count
+//            AppGlobal.instance.set_current_shift_actual_cnt(cnt)
+//
+//            // 콤포넌트 선택인 경우
+//            if (AppGlobal.instance.get_with_component()) {
+//                // component total count
+//                val db = DBHelperForComponent(this)
+//                val row = db.get(work_idx)
+//                if (row != null) {
+//                    val actual = (row!!["actual"].toString().toInt() + inc_count)
+//                    db.updateWorkActual(work_idx, actual)
+//                    sendCountData(value.toString(), inc_count, actual)  // 서버에 카운트 정보 전송
+//                } else {
+//                    sendCountData(value.toString(), inc_count, inc_count)  // 서버에 카운트 정보 전송
+//                }
+//            } else {
+//                sendCountData(value.toString(), inc_count, cnt)  // 서버에 카운트 정보 전송
+//            }
+//
+//            _last_count_received_time = DateTime()      // downtime 시간 초기화
+//
+////            _stitch_db.add(work_idx, value.toString())
+//
+//            // Production Report를 위한 DB저장
+//            //val now = DateTime()
+//            val now = cur_shift["date"]
+//            val date = now.toString()
+//            val houly = DateTime().toString("HH")
+//
+//            val rep = _report_db.get(date, houly, shift_idx.toString())
+//            if (rep == null) {
+//                _report_db.add(date, houly, shift_idx.toString(), inc_count, 0)
+//            } else {
+//                val idx = rep!!["idx"].toString()
+//                val actual = rep!!["actual"].toString().toInt() + inc_count
+//                _report_db.updateActual(idx, actual)
+//            }
         } else if (cmd == "S") {
-            Toast.makeText(this, "This mode is not yet supported.", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "This mode is not yet supported.", Toast.LENGTH_SHORT).show()
+            val delay_time = AppGlobal.instance.get_stitch_delay_time()
+
+            // Delay time 계산
+            val delay_float: Float = delay_time.toFloat()
+            val delay_long: Long = (delay_float * 1000).toLong()
+
+            if (delay_long <= 0) {
+                Toast.makeText(this, "There is a delay time problem.", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val now = DateTime().millis
+            if (last_time == 0L) last_time = now
+
+            val qty_start = AppGlobal.instance.get_stitch_qty_start().toInt()
+//            val qty_end = AppGlobal.instance.get_stitch_qty_end()
+            val pairs = AppGlobal.instance.get_stitch_pairs()
+
+            var real_count = false
+
+            // 목표 수량에 도달하지 못했으면 무조건 더한다.
+            if (stitch_qty < qty_start) {
+                real_count = true
+                stitch_qty += inc_count
+            } else {
+                // 설정한 딜레이 타임이 넘어갔으면 초기화를 한다.
+                val sub = now - last_time
+                if (sub > delay_long) {
+                    stitch_qty = inc_count
+                } else {
+                    stitch_qty += inc_count
+                }
+            }
+
+            inc_count = 0
+
+            // 조건을 검사해야 하는 조건이 참인 경우
+            if (real_count) {
+                if (stitch_qty >= qty_start) {
+                    var pairs_int = 1
+                    when (pairs) {
+                        "1/2" -> pairs_int = 2
+                        "1/4" -> pairs_int = 4
+                        "1/8" -> pairs_int = 8
+                    }
+
+                    stitch_pairs++
+
+                    while (stitch_pairs >= pairs_int) {
+                        inc_count = 1
+                        stitch_pairs = 0
+                    }
+                }
+            }
+
+            Log.e("==> Stitch count", "last_time=" + last_time + ", now time=" + now + " =========> sesonds = " + (now - last_time))
+
+            last_time = now
+
+            if (inc_count <= 0) return
+        }
+
+        // total count
+        val cnt = AppGlobal.instance.get_current_shift_actual_cnt() + inc_count
+        AppGlobal.instance.set_current_shift_actual_cnt(cnt)
+
+        // 콤포넌트 선택인 경우
+        if (AppGlobal.instance.get_with_component()) {
+            // component total count
+            val db = DBHelperForComponent(this)
+            val row = db.get(work_idx)
+            if (row != null) {
+                val actual = (row!!["actual"].toString().toInt() + inc_count)
+                db.updateWorkActual(work_idx, actual)
+                sendCountData(value.toString(), inc_count, actual)  // 서버에 카운트 정보 전송
+            } else {
+                sendCountData(value.toString(), inc_count, inc_count)  // 서버에 카운트 정보 전송
+            }
+        } else {
+            sendCountData(value.toString(), inc_count, cnt)  // 서버에 카운트 정보 전송
+        }
+
+        _last_count_received_time = DateTime()      // downtime 시간 초기화
+
+        val now = cur_shift["date"]
+        val date = now.toString()
+        val houly = DateTime().toString("HH")
+
+        val rep = _report_db.get(date, houly, shift_idx.toString())
+        if (rep == null) {
+            _report_db.add(date, houly, shift_idx.toString(), inc_count, 0)
+        } else {
+            val idx = rep!!["idx"].toString()
+            val actual = rep!!["actual"].toString().toInt() + inc_count
+            _report_db.updateActual(idx, actual)
         }
     }
 
@@ -479,6 +578,7 @@ class MainActivity : BaseActivity() {
         val today = DateTime().toString("yyyy-MM-dd")
         val mac = AppGlobal.instance.getMACAddress()
         val uri = "/getlist1.php"
+Log.e("debug", "line_idx="+AppGlobal.instance.get_line_idx()+"&date="+today+"&mac_addr="+mac)
         var params = listOf("code" to "target",
             "line_idx" to AppGlobal.instance.get_line_idx(),
             "shift_idx" to  "1",
@@ -967,6 +1067,7 @@ class MainActivity : BaseActivity() {
     private val _timer_task1 = Timer()          // 10초마다. 서버 접속 체크 Ping test. Shift의 Target 정보
     private val _timer_task2 = Timer()          // 10분마다. 작업시간, 다운타입, 칼라 Data 가져오기 (workdata, designdata, downtimetype, color)
     private val _timer_task3 = Timer()          // 30초마다. 그래프 그리기 위한 태스크
+    private val _timer_task4 = Timer()          // 30분마다. 서버로 타겟값 전송
 
     private fun start_timer() {
 
@@ -985,7 +1086,7 @@ class MainActivity : BaseActivity() {
             override fun run() {
                 runOnUiThread {
                     sendPing()
-                    updateCurrentWorkTarget()
+//                    updateCurrentWorkTarget() // 30분으로 이동
                 }
             }
         }
@@ -1010,12 +1111,23 @@ class MainActivity : BaseActivity() {
             }
         }
         _timer_task3.schedule(task3, 3000, 30000)
+
+        // 30분마다
+        val task4 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    updateCurrentWorkTarget()
+                }
+            }
+        }
+        _timer_task4.schedule(task4, 600000, 1800000)
     }
     private fun cancel_timer() {
 //        _downtime_timer.cancel()
         _timer_task1.cancel()
         _timer_task2.cancel()
         _timer_task3.cancel()
+        _timer_task4.cancel()
     }
 
     private class TabAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
