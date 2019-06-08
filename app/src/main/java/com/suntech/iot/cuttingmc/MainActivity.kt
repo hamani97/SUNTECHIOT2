@@ -1128,7 +1128,7 @@ Log.e("params", "" + params)
             "code" to "start",
             "mac_addr" to AppGlobal.instance.getMACAddress(),
 //            "didx" to AppGlobal.instance.get_design_info_idx(),
-            "didx" to "0",
+            "didx" to "1001",
             "sdate" to dt.toString("yyyy-MM-dd"),
             "stime" to dt.toString("HH:mm:ss"),
             "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
@@ -1145,7 +1145,7 @@ Log.e("params", "" + params)
                 AppGlobal.instance.set_downtime_idx(idx)
 
 //                val didx = AppGlobal.instance.get_design_info_idx()
-                val didx = "0"
+                val didx = "1001"
                 val work_info = AppGlobal.instance.get_current_shift_time()
                 val shift_idx = work_info?.getString("shift_idx") ?: ""
                 val shift_name = work_info?.getString("shift_name") ?: ""
@@ -1272,16 +1272,18 @@ Log.e("params", "" + params)
         var shift_idx = AppGlobal.instance.get_current_shift_idx()
         if (shift_idx == "") shift_idx = "0"
 
+        val actual = AppGlobal.instance.get_current_shift_actual_cnt()
+
         var db = DBHelperForComponent(this)
         val row = db.get(work_idx)
-        val actual = row!!["actual"].toString().toInt()
+//        val actual = row!!["actual"].toString().toInt()
         val seq = row!!["seq"].toString().toInt()
 //        val seq = "1"
 
         val uri = "/senddata1.php"
         var params = listOf(
             "mac_addr" to AppGlobal.instance.getMACAddress(),
-            "didx" to "0",
+            "didx" to "1001",
             "count" to inc_count.toString(),
             "total_count" to actual,
             "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
