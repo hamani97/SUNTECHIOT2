@@ -108,8 +108,6 @@ class ActualCountEditInputActivity : BaseActivity() {
 
             request(this, uri, true,false, params, { result ->
                 var code = result.getString("code")
-                var msg = result.getString("msg")
-
                 if (code == "00") {
                     // DB의 Actual 값 갱신
                     db.updateWorkActual(work_idx, actual)
@@ -117,11 +115,11 @@ class ActualCountEditInputActivity : BaseActivity() {
                     // Total count 의 Actual 값 갱신
                     AppGlobal.instance.set_current_shift_actual_cnt(if (new_actual>0) new_actual else 0)
 
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    ToastOut(this, result.getString("msg"))
                     finish(true, 0, "ok", null)
 
                 } else {
-                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
                 }
             })
         }
