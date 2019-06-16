@@ -164,7 +164,7 @@ class MainActivity : BaseActivity() {
 
     // 시작시 호출
     // 이후 10분에 한번씩 호출
-    // 서버에 작업시간, 다운타임 기본시간, 색삭값을 호출
+    // 서버에 작업시간, 다운타임 기본시간, 색상값을 호출
     private fun fetchRequiredData() {
         if (AppGlobal.instance.get_server_ip().trim() != "") {
             fetchWorkData()         // 작업시간
@@ -561,18 +561,16 @@ Log.e("params", "" + params)
     private fun fetchDownTimeType() {
         val uri = "/getlist1.php"
         var params = listOf("code" to "check_time")
-
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if (code == "00") {
                 var value = result.getString("value")
                 AppGlobal.instance.set_downtime_sec(value)
-                val s = value.toInt()
-                if (s > 0) {
-                }
+//                val s = value.toInt()
+//                if (s > 0) {
+//                }
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -585,7 +583,6 @@ Log.e("params", "" + params)
     private fun fetchColorData() {
         val uri = "/getlist1.php"
         var params = listOf("code" to "color")
-
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
             var msg = result.getString("msg")
@@ -1112,8 +1109,6 @@ Log.e("params", "" + params)
         val work_idx = "" + AppGlobal.instance.get_work_idx()
         if (work_idx=="") return
 
-        if (_is_call) return
-        _is_call = true
 /*
         var db = SimpleDatabaseHelper(this)
         val row = db.get(work_idx)
@@ -1122,6 +1117,9 @@ Log.e("params", "" + params)
         var down_db = DBHelperForDownTime(this)
         val count = down_db.counts_for_notcompleted()
         if (count > 0) return
+
+        if (_is_call) return
+        _is_call = true
 
         val list = down_db.gets()
 
