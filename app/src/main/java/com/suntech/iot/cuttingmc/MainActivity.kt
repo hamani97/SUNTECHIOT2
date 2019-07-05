@@ -77,16 +77,16 @@ class MainActivity : BaseActivity() {
             btn_home.setOnLongClickListener { changeFragment(0); true }
             btn_push_to_app.setOnLongClickListener { startActivity(Intent(this, PushActivity::class.java)); true }
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
-//            btn_downtime.setOnLongClickListener { startDowntimeActivity(); true }
-            btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
+            btn_downtime.setOnLongClickListener { startDowntimeActivity(); true }
+//            btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
             btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
             btn_production_report.setOnLongClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
             btn_push_to_app.setOnClickListener { startActivity(Intent(this, PushActivity::class.java)) }
             btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
-//            btn_downtime.setOnClickListener { startDowntimeActivity() }
-            btn_downtime.setOnClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show() }
+            btn_downtime.setOnClickListener { startDowntimeActivity() }
+//            btn_downtime.setOnClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show() }
             btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
             btn_production_report.setOnClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)) }
         }
@@ -804,7 +804,7 @@ Log.e("params", "" + params)
             override fun run() {
                 runOnUiThread {
                     checkCurrentShiftEndTime()
-//                    checkDownTime()
+                    checkDownTime()
 //                    checkExit()
                 }
             }
@@ -1072,6 +1072,18 @@ Log.e("params", "" + params)
         _last_count_received_time = DateTime()
 
         // 현재 shift의 첫생산인데 지각인경우 downtime 처리
+        val list = db.gets()
+        if (list?.size == 1) {
+            val item = AppGlobal.instance.get_current_shift_time()
+            if (item == null) return
+
+            var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+            val now = DateTime()
+            if (now.millis - work_stime.millis > Constants.DOWNTIME_FIRST) {
+                sendStartDownTime(work_stime)
+                startDowntimeActivity()
+            }
+        }
     }
 
     fun startNewProduct(didx:String, piece_info:Int, cycle_time:Int, model:String, article:String, material_way:String, component:String) {
@@ -1203,6 +1215,7 @@ Log.e("params", "" + params)
     private fun checkDownTime() {
         var db = DBHelperForDownTime(this)
         val count = db.counts_for_notcompleted()
+//Log.e("iot count",""+count)
 
         if (count > 0) {
             _last_count_received_time = DateTime()
@@ -1213,14 +1226,19 @@ Log.e("params", "" + params)
 //        val work_idx = "" + AppGlobal.instance.get_product_idx()
 //        if (work_idx == "") return
 
-        val work_idx = "" + AppGlobal.instance.get_work_idx()
-        if (work_idx == "") return
+        val work_idx = AppGlobal.instance.get_work_idx()
+//Log.e("iot work_idx","work_idx : "+work_idx)
+        if (work_idx == "") {
+            ToastOut(this, "Component not selected.")
+            return
+        }
 
         val now = DateTime()
         val downtime_time = AppGlobal.instance.get_downtime_sec()
 
         if (downtime_time == "") {
-//            Toast.makeText(this, getString(R.string.msg_no_downtime), Toast.LENGTH_SHORT).show()
+            ToastOut(this, R.string.msg_no_downtime)
+//Log.e("downtime_time",""+downtime_time)
             return
         }
 
@@ -1235,24 +1253,24 @@ Log.e("params", "" + params)
         var planned2_etime_dt = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
 
         val downtime_time_sec = downtime_time.toInt()
+//Log.e("downtime_time_sec",""+downtime_time_sec)
+//Log.e("downtime_time_sec","now.millis - _last_count_received_time.millis : " + (now.millis - _last_count_received_time.millis))
+//Log.e("downtime_time_sec","downtime_time_sec*1000 : " + downtime_time_sec*1000)
         // 워크 타임안에 있으면서 휴식 시간이 아니고,
         // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
         if (work_stime.millis < now.millis && work_etime.millis > now.millis &&
-            !(planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) &&
-            !(planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis ) &&
-            downtime_time_sec > 0 &&
-            now.millis - _last_count_received_time.millis > downtime_time_sec*1000) {
-
+                !(planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) &&
+                !(planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis ) &&
+                downtime_time_sec > 0 && now.millis - _last_count_received_time.millis > downtime_time_sec*1000) {
             sendStartDownTime(_last_count_received_time)
             startDowntimeActivity()
         }
 
         // 워크 타임이 아니거나 휴식 시간 안에 있으면 downtime 시작 시간을 현재 시간으로 초기화
-        if (work_stime.millis > now.millis ||
-            work_etime.millis < now.millis ||
-            (planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) ||
-            (planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis )) {
-            _last_count_received_time = now
+        if (work_stime.millis > now.millis || work_etime.millis < now.millis ||
+                (planned1_stime_dt.millis < now.millis && planned1_etime_dt.millis > now.millis ) ||
+                (planned2_stime_dt.millis < now.millis && planned2_etime_dt.millis > now.millis )) {
+            _last_count_received_time = DateTime()
         }
     }
 
