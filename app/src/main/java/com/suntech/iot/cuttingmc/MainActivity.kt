@@ -1228,10 +1228,7 @@ Log.e("params", "" + params)
 
         val work_idx = AppGlobal.instance.get_work_idx()
 //Log.e("iot work_idx","work_idx : "+work_idx)
-        if (work_idx == "") {
-            ToastOut(this, "Component not selected.")
-            return
-        }
+        if (work_idx == "") return
 
         val now = DateTime()
         val downtime_time = AppGlobal.instance.get_downtime_sec()
