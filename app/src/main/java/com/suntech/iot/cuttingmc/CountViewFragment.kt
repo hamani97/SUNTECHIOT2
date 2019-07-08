@@ -715,6 +715,7 @@ class CountViewFragment : BaseFragment() {
 
         val wosno = AppGlobal.instance.get_compo_wos()
         val size = AppGlobal.instance.get_compo_size()
+        val component = AppGlobal.instance.get_compo_component()
 
         if (size == "") {
             _list_for_wos.addAll(sortedList)
@@ -722,7 +723,7 @@ class CountViewFragment : BaseFragment() {
             // 선택된 항목을 맨앞으로 뺀다.
             for (i in 0..(sortedList.size - 1)) {
                 val item = sortedList.get(i)
-                if (wosno == item["wosno"] && size == item["size"]) {
+                if (wosno == item["wosno"] && size == item["size"] && component == item["component"]) {
                     _list_for_wos.add(item)
                     _selected_component_pos = 0
                     break
@@ -730,7 +731,7 @@ class CountViewFragment : BaseFragment() {
             }
             for (i in 0..(sortedList.size - 1)) {
                 val item = sortedList.get(i)
-                if (wosno != item["wosno"] || size != item["size"]) {
+                if (wosno != item["wosno"] || size != item["size"] || component != item["component"]) {
                     _list_for_wos.add(item)
                 }
             }
@@ -782,7 +783,10 @@ class CountViewFragment : BaseFragment() {
                         "size" to item.getString("size"),
                         "target" to item.getString("target"),
                         "actual" to actual,
-                        "balance" to balance.toString()
+                        "balance" to balance.toString(),
+                        "c_idx" to item.getString("c_idx"),
+                        "c_code" to item.getString("c_code"),
+                        "component" to item.getString("c_name")
                     )
                     _list_for_wos.add(map)
                 }
@@ -878,6 +882,7 @@ class CountViewFragment : BaseFragment() {
 
             vh.tv_item_wosno.text = _list[position]["wosno"]
             vh.tv_item_model.text = _list[position]["model"]
+            vh.tv_item_component.text = _list[position]["component"]
             vh.tv_item_size.text = _list[position]["size"]
             vh.tv_item_target.text = _list[position]["target"]
             vh.tv_item_actual.text = _list[position]["actual"]
@@ -886,6 +891,7 @@ class CountViewFragment : BaseFragment() {
             if (_selected_index == position) {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
@@ -893,6 +899,7 @@ class CountViewFragment : BaseFragment() {
             } else if (balance <= 0) {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
@@ -900,6 +907,7 @@ class CountViewFragment : BaseFragment() {
             } else {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
@@ -912,6 +920,7 @@ class CountViewFragment : BaseFragment() {
         private class ViewHolder(row: View?) {
             val tv_item_wosno: TextView
             val tv_item_model: TextView
+            val tv_item_component: TextView
             val tv_item_size: TextView
             val tv_item_target: TextView
             val tv_item_actual: TextView
@@ -920,6 +929,7 @@ class CountViewFragment : BaseFragment() {
             init {
                 this.tv_item_wosno = row?.findViewById<TextView>(R.id.tv_item_wosno) as TextView
                 this.tv_item_model = row?.findViewById<TextView>(R.id.tv_item_model) as TextView
+                this.tv_item_component = row?.findViewById<TextView>(R.id.tv_item_component) as TextView
                 this.tv_item_size = row?.findViewById<TextView>(R.id.tv_item_size) as TextView
                 this.tv_item_target = row?.findViewById<TextView>(R.id.tv_item_target) as TextView
                 this.tv_item_actual = row?.findViewById<TextView>(R.id.tv_item_actual) as TextView

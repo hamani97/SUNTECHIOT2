@@ -112,6 +112,10 @@ class ComponentInfoActivity : BaseActivity() {
             _list_for_wos_adapter?.select(i)
             _list_for_wos_adapter?.notifyDataSetChanged()
 
+            _selected_component_idx = _list_for_wos[i]["c_idx"]!!
+            _selected_component_code = _list_for_wos[i]["c_code"]!!
+
+            tv_compo_component.text = _list_for_wos[i]["component"]!!
             tv_compo_size.text = _list_for_wos[i]["size"]!!
             tv_compo_target.text = _list_for_wos[i]["target"]!!
             tv_compo_actual.text = _list_for_wos[i]["actual"]!!
@@ -231,6 +235,7 @@ class ComponentInfoActivity : BaseActivity() {
                 if (size == item["size"]) {
                     _selected_wos_index = i
                     tv_compo_model.text = item["model"]
+                    tv_compo_component.text = item["component"]
                     tv_compo_style.text = item["styleno"]
                     tv_compo_target.text = item["target"]
                     tv_compo_actual.text = item["actual"]
@@ -278,7 +283,10 @@ class ComponentInfoActivity : BaseActivity() {
                             "size" to item.getString("size"),
                             "target" to item.getString("target"),
                             "actual" to actual,
-                            "balance" to balance.toString()
+                            "balance" to balance.toString(),
+                            "c_idx" to item.getString("c_idx"),
+                            "c_code" to item.getString("c_code"),
+                            "component" to item.getString("c_name")
                         )
                         _list_for_wos.add(map)
 
@@ -378,6 +386,7 @@ class ComponentInfoActivity : BaseActivity() {
                         _selected_component_idx = lists[c]["idx"] ?: ""
                         _selected_component_code = lists[c]["c_code"] ?: ""
                         tv_compo_component.text = lists[c]["c_name"] ?: ""
+                        selectWosData()
                     }
                 })
             } else {
@@ -433,22 +442,24 @@ class ComponentInfoActivity : BaseActivity() {
         var wos = tv_compo_wos.text.toString()
         var size = tv_compo_size.text.toString()
         var target = tv_compo_target.text.toString()
+        var component = tv_compo_component.text.toString()
 
-        if (wos == "" || size == "" || target == "") return
+        if (wos == "" || size == "" || target == "" || component == "") return
 
-        for (j in 0..(_list_for_wos.size-1)) {
+        for (j in 0..(_list_for_wos.size - 1)) {
             val item = _list_for_wos[j]
             val wos2 = item["wosno"] ?: ""
             val size2 = item["size"] ?: ""
             val target2 = item["target"] ?: ""
-            if (wos == wos2 && size == size2 && target == target2) {
-                _selected_wos_index = j
-                _list_for_wos_adapter?.select(j)
-                _list_for_wos_adapter?.notifyDataSetChanged()
-                lv_wos_info.smoothScrollToPosition(j)
+            val component2 = item["component"] ?: ""
+            if (wos == wos2 && size == size2 && target == target2 && component == component2) {
+                    _selected_wos_index = j
+                    _list_for_wos_adapter?.select(j)
+                    _list_for_wos_adapter?.notifyDataSetChanged()
+                    lv_wos_info.smoothScrollToPosition(j)
 
-                tv_compo_actual.setText(item["actual"] ?: "-")
-                break
+                    tv_compo_actual.setText(item["actual"] ?: "-")
+                    break
             }
         }
     }
@@ -571,6 +582,7 @@ class ComponentInfoActivity : BaseActivity() {
 
             vh.tv_item_wosno.text = _list[position]["wosno"]
             vh.tv_item_model.text = _list[position]["model"]
+            vh.tv_item_component.text = _list[position]["component"]
             vh.tv_item_size.text = _list[position]["size"]
             vh.tv_item_target.text = _list[position]["target"]
             vh.tv_item_actual.text = _list[position]["actual"]
@@ -579,6 +591,7 @@ class ComponentInfoActivity : BaseActivity() {
             if (_selected_index == position) {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_filtering_text_color))
@@ -586,6 +599,7 @@ class ComponentInfoActivity : BaseActivity() {
             } else if (balance <= 0) {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_complete_text_color))
@@ -593,6 +607,7 @@ class ComponentInfoActivity : BaseActivity() {
             } else {
                 vh.tv_item_wosno.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_model.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
+                vh.tv_item_component.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_size.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_target.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
                 vh.tv_item_actual.setTextColor(ContextCompat.getColor(_context, R.color.list_item_text_color))
@@ -605,6 +620,7 @@ class ComponentInfoActivity : BaseActivity() {
         private class ViewHolder(row: View?) {
             val tv_item_wosno: TextView
             val tv_item_model: TextView
+            val tv_item_component: TextView
             val tv_item_size: TextView
             val tv_item_target: TextView
             val tv_item_actual: TextView
@@ -613,6 +629,7 @@ class ComponentInfoActivity : BaseActivity() {
             init {
                 this.tv_item_wosno = row?.findViewById<TextView>(R.id.tv_item_wosno) as TextView
                 this.tv_item_model = row?.findViewById<TextView>(R.id.tv_item_model) as TextView
+                this.tv_item_component = row?.findViewById<TextView>(R.id.tv_item_component) as TextView
                 this.tv_item_size = row?.findViewById<TextView>(R.id.tv_item_size) as TextView
                 this.tv_item_target = row?.findViewById<TextView>(R.id.tv_item_target) as TextView
                 this.tv_item_actual = row?.findViewById<TextView>(R.id.tv_item_actual) as TextView

@@ -27,7 +27,7 @@
                 android:orientation="vertical">
 
             <LinearLayout
-                    android:layout_width="1080dp"
+                    android:layout_width="1160dp"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
@@ -40,9 +40,9 @@
                         android:layout_marginBottom="12dp"
                         android:orientation="horizontal">
                     <LinearLayout
-                            android:layout_width="500dp"
+                            android:layout_width="560dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="20dp"
+                            android:layout_marginRight="26dp"
                             android:orientation="vertical">
                         <!-- WOS -->
                         <LinearLayout style="@style/table_row">
@@ -92,7 +92,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                            android:layout_width="560dp"
+                            android:layout_width="570dp"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
                         <!-- MODEL -->
@@ -151,8 +151,13 @@
                     <TextView
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="7"
+                            android:layout_weight="4"
                             android:text="@string/list_item_model" />
+                    <TextView
+                            style="@style/grid_header_text"
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:text="@string/list_item_component" />
                     <TextView
                             android:id="@+id/tv_btn_size"
                             style="@style/grid_header_text"
@@ -173,7 +178,7 @@
                             android:id="@+id/tv_btn_balance"
                             style="@style/grid_header_text"
                             android:layout_width="0dp"
-                            android:layout_weight="3"
+                            android:layout_weight="2"
                             android:text="@string/list_item_balance" />
                 </LinearLayout>
 
