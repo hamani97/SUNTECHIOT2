@@ -220,8 +220,9 @@ class ComponentInfoActivity : BaseActivity() {
         }
 
         val size = tv_compo_size.text.toString().trim()
+        val component = tv_compo_component.text.toString().trim()
 
-        if (size == "") {
+        if (size == "" || component == "") {
             _selected_wos_index = -1
 //            tv_compo_model.text = ""
 //            tv_compo_style.text = ""
@@ -232,7 +233,7 @@ class ComponentInfoActivity : BaseActivity() {
             // 선택된 항목 찾기
             for (i in 0..(_list_for_wos.size - 1)) {
                 val item = _list_for_wos.get(i)
-                if (size == item["size"]) {
+                if (size == item["size"] && component == item["component"]) {
                     _selected_wos_index = i
                     tv_compo_model.text = item["model"]
                     tv_compo_component.text = item["component"]
