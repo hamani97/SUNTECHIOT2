@@ -1029,7 +1029,7 @@ Log.e("params", "" + params)
         }
     }
 
-    fun startComponent(wosno:String, styleno:String, model:String, size:String, target:String, actual:String) {
+    fun startComponent(wosno:String, styleno:String, model:String, component:String, size:String, target:String, actual:String) {
 
         var db = DBHelperForComponent(this)
 
@@ -1043,7 +1043,7 @@ Log.e("params", "" + params)
             val s = db.gets_all_wos()
             val seq = (s?.size ?: 0) + 1
 
-            db.add(wosno, shift_idx, shift_name, styleno, model, size, target.toInt(), 0, 0, seq)
+            db.add(wosno, shift_idx, shift_name, styleno, model, component, size, target.toInt(), 0, 0, seq)
             val row2 = db.get(wosno, size)
             if (row2 == null) {
                 Log.e("work_idx", "none")

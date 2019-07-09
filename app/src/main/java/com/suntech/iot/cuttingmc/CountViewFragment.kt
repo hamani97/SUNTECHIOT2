@@ -210,6 +210,7 @@ class CountViewFragment : BaseFragment() {
                     val wosno = d!!["wosno"]!!
                     val styleno = d["styleno"]!!.toString()
                     val model = d["model"]!!.toString()
+                    val component = d["component"]!!.toString()
                     val size = d["size"]!!.toString()
                     val target = d["target"]!!.toString()
                     val actual = d["actual"]!!.toString()
@@ -219,7 +220,7 @@ class CountViewFragment : BaseFragment() {
                     viewWosData()
                     fetchFilterWos()
 
-                    (activity as MainActivity).startComponent(wosno, styleno, model, size, target, actual)
+                    (activity as MainActivity).startComponent(wosno, styleno, model, component, size, target, actual)
 //                        (activity as MainActivity).startNewProduct(idx, pieces_info, cycle_time, model, article, material_way, component)
                 }
             })
