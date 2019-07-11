@@ -33,7 +33,7 @@ class DBHelperForComponent
         /**
          * This is an internal class that handles the creation of all database tables
          */
-        internal inner class DBHelperForComponent(context: Context) : SQLiteOpenHelper(context, "main_3.db", null, 1) {
+        internal inner class DBHelperForComponent(context: Context) : SQLiteOpenHelper(context, "main_4.db", null, 1) {
 
             override fun onCreate(db: SQLiteDatabase) {
                 val sql = "create table component (_id integer primary key autoincrement, " +
@@ -50,7 +50,6 @@ class DBHelperForComponent
                         "seq int, " +
                         "start_dt DATE default CURRENT_TIMESTAMP, " +
                         "end_dt DATE)"
-
                 db.execSQL(sql)
             }
 
@@ -94,6 +93,37 @@ class DBHelperForComponent
         val sql = "select _id, wosno, shift_id, shift_name, styleno, model, component, size, target, actual, defective, seq, start_dt, end_dt " +
                 "from component where wosno = ? and size = ?"
         val cur = db.rawQuery(sql, arrayOf(wosno.toString(), size.toString()))
+        if (cur.moveToNext()) {
+            row.put("work_idx", cur.getString(0))
+            row.put("wosno", cur.getString(1))
+            row.put("shift_id", cur.getString(2))
+            row.put("shift_name", cur.getString(3))
+            row.put("styleno", cur.getString(4))
+            row.put("model", cur.getString(5))
+            row.put("component", cur.getString(6))
+            row.put("size", cur.getInt(7))
+            row.put("target", cur.getInt(8))
+            row.put("actual", cur.getInt(9))
+            row.put("defective", cur.getInt(10))
+            row.put("seq", cur.getInt(11))
+            row.put("start_dt", cur.getString(12))
+            row.put("end_dt", cur.getInt(13))
+            cur.close()
+            db.close()
+            return row
+        } else {
+            cur.close()
+            db.close()
+            return null
+        }
+    }
+
+    operator fun get(wosno: String, size: String, component: String): ContentValues? {
+        val db = _openHelper.readableDatabase ?: return null
+        val row = ContentValues()
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, component, size, target, actual, defective, seq, start_dt, end_dt " +
+                "from component where wosno = ? and size = ? and component = ?"
+        val cur = db.rawQuery(sql, arrayOf(wosno.toString(), size.toString(), component.toString()))
         if (cur.moveToNext()) {
             row.put("work_idx", cur.getString(0))
             row.put("wosno", cur.getString(1))

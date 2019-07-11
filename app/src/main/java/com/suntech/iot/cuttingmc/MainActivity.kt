@@ -1037,14 +1037,14 @@ Log.e("params", "" + params)
         val shift_idx = work_info?.getString("shift_idx") ?: ""
         val shift_name = work_info?.getString("shift_name") ?: ""
 
-        val row = db.get(wosno, size)
+        val row = db.get(wosno, size, component)
 
         if (row == null) {
             val s = db.gets_all_wos()
             val seq = (s?.size ?: 0) + 1
 
             db.add(wosno, shift_idx, shift_name, styleno, model, component, size, target.toInt(), 0, 0, seq)
-            val row2 = db.get(wosno, size)
+            val row2 = db.get(wosno, size, component)
             if (row2 == null) {
                 Log.e("work_idx", "none")
                 AppGlobal.instance.set_work_idx("")
@@ -1072,18 +1072,18 @@ Log.e("params", "" + params)
         _last_count_received_time = DateTime()
 
         // 현재 shift의 첫생산인데 지각인경우 downtime 처리
-        val list = db.gets()
-        if (list?.size == 1) {
-            val item = AppGlobal.instance.get_current_shift_time()
-            if (item == null) return
-
-            var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-            val now = DateTime()
-            if (now.millis - work_stime.millis > Constants.DOWNTIME_FIRST) {
-                sendStartDownTime(work_stime)
-                startDowntimeActivity()
-            }
-        }
+//        val list = db.gets()
+//        if (list?.size == 1) {
+//            val item = AppGlobal.instance.get_current_shift_time()
+//            if (item == null) return
+//
+//            var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+//            val now = DateTime()
+//            if (now.millis - work_stime.millis > Constants.DOWNTIME_FIRST) {
+//                sendStartDownTime(work_stime)
+//                startDowntimeActivity()
+//            }
+//        }
     }
 
     fun startNewProduct(didx:String, piece_info:Int, cycle_time:Int, model:String, article:String, material_way:String, component:String) {

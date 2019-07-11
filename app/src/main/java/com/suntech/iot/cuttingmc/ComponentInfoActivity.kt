@@ -272,7 +272,7 @@ class ComponentInfoActivity : BaseActivity() {
                         val item = list.getJSONObject(i)
                         var actual = "0"
 
-                        val row = db.get(wosno, item.getString("size"))
+                        val row = db.get(wosno, item.getString("size"), item.getString("c_name"))
                         if (row != null) actual = row["actual"].toString()
 
                         val balance = item.getString("target").toInt() - actual.toInt()
