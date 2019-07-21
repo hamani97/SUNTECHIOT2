@@ -393,8 +393,8 @@ Log.e("params", "" + params)
      */
     private var is_loop :Boolean = false        // 처리 중일때 중복 처리를 하지 않기 위함
     var _current_shift_etime_millis = 0L        // 현재 Shift 의 종료 시간 저장
-    var _next_shift_stime_millis = 0L           // 다음 Shift 의 시작 시간 저장 (종료 시간이 0L 일때만 세팅된다.)
-    var _last_working = false
+    var _next_shift_stime_millis = 0L           // 다음 Shift 의 시작 시간 저장 (위의 종료 시간이 0L 일때만 세팅된다.)
+    var _last_working = false                   // 금일 마지막 작업인지 확인용
 
     private fun compute_work_shift() {
 
@@ -755,8 +755,10 @@ Log.e("params", "" + params)
         var db3 = DBHelperForCount(this)
         db3.delete()
 
-        var db4 = DBHelperForComponent(this)
-        db4.delete()
+        // 지난 데이터를 확인하고 계속 작업할 수 있도록 하기 위해
+        // 삭제 하지 않음. 19-10-22
+//        var db4 = DBHelperForComponent(this)
+//        db4.delete()
 
         ToastOut(this, R.string.msg_exit_automatically)
     }
@@ -767,11 +769,12 @@ Log.e("params", "" + params)
      *  현재 작업중인 Shift 가 없으면 일하는 시간이 아니므로 다음 시작 시간을 검사하고, 시작 시간이라면 Shift의 종료시간을 계산한다. (_next_shift_stime_millis)
      */
     fun checkCurrentShiftEndTime() {
-        // 현재 Shift 끝남
+        // _current_shift_etime_millis 가 0이 아니면 진행중이라는 의미이므로 Shift가 종료되었는지 검사한다.
         if (_current_shift_etime_millis != 0L) {
-            if (_current_shift_etime_millis <= DateTime().millis) {
+            if (_current_shift_etime_millis <= DateTime().millis) {     // 현재 시간보다 작으면 Shift 끝난거임.
                 Log.e("checkCurrentShiftEnd", "end time . finish shift work =============================> need reload")
                 AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
+                AppGlobal.instance.set_last_received("")                // 다운타임 검사용 변수도 초기화
                 // 마지막 작업이 끝났으면 완전 초기화
                 if (_last_working == true) {
                     endTodayWork()
@@ -780,10 +783,9 @@ Log.e("params", "" + params)
                 compute_work_shift()
             }
 
-        } else {
-            // 다음 Shift 시작됨
-            if (_next_shift_stime_millis != 0L) {
-                if (_next_shift_stime_millis <= DateTime().millis) {
+        } else {        // 여기로 빠졌다면 앞의 Shift는 종료되었으므로 다음 Shift 가 시작되었는지 검사한다.
+            if (_next_shift_stime_millis != 0L) {                       // 다음 Shift가 있다면...
+                if (_next_shift_stime_millis <= DateTime().millis) {    // 현재 시간보다 작으면 Shift가 진행중인 것임
                     Log.e("checkCurrentShiftEnd", "start time . start shift work =============================> need reload")
                     compute_work_shift()
                 }
@@ -1008,6 +1010,7 @@ Log.e("params", "" + params)
             AppGlobal.instance.set_current_shift_actual_cnt(cnt)
 
             _last_count_received_time = DateTime()      // downtime 시간 초기화
+            AppGlobal.instance.set_last_received(DateTime().toString())
 
             sendCountData(value.toString(), inc_count)  // 서버에 카운트 정보 전송
 
@@ -1069,7 +1072,7 @@ Log.e("params", "" + params)
 
         // downtime sec 초기화
         // 새로 선택한 상품이 있으므로 이 값을 초기화 한다. 기존에 없던 부분
-        _last_count_received_time = DateTime()
+        //_last_count_received_time = DateTime()
 
         // 현재 shift의 첫생산인데 지각인경우 downtime 처리
 //        val list = db.gets()
@@ -1212,7 +1215,73 @@ Log.e("params", "" + params)
         })
     }
 
+    // 신버전
     private fun checkDownTime() {
+        var db = DBHelperForDownTime(this)
+        val count = db.counts_for_notcompleted()
+
+        if (count > 0) {
+            AppGlobal.instance.set_last_received(DateTime().toString())
+            return
+        }
+
+        val work_idx = AppGlobal.instance.get_work_idx()
+        if (work_idx == "") return
+
+        val downtime_time = AppGlobal.instance.get_downtime_sec()
+        if (downtime_time == "") {
+            ToastOut(this, R.string.msg_no_downtime)
+            return
+        }
+        val downtime_time_sec = downtime_time.toInt()
+
+        val item = AppGlobal.instance.get_current_shift_time()
+        if (item == null) return
+
+        var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+        var work_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
+        var planned1_stime_dt = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString())
+        var planned1_etime_dt = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString())
+        var planned2_stime_dt = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString())
+        var planned2_etime_dt = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
+
+        val now = DateTime()
+        val now_millis = now.millis
+        var last_count_received = work_stime.millis
+
+        var downtime_chk = AppGlobal.instance.get_last_received()
+
+        if (downtime_chk != "") {
+            last_count_received = OEEUtil.parseDateTime(AppGlobal.instance.get_last_received()).millis
+        }
+
+        // 워크 타임안에 있으면서 휴식 시간이 아니고,
+        // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
+        if (work_stime.millis < now_millis && work_etime.millis > now_millis &&
+            !(planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) &&
+            !(planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis ) &&
+            downtime_time_sec > 0 && now_millis - last_count_received > downtime_time_sec*1000) {
+//            Log.e("downtime chk", "over time")
+            sendStartDownTime(OEEUtil.parseDateTime(downtime_chk))
+            startDowntimeActivity()
+        }
+
+        // 워크 타임이 아니면 downtime 시작 시간을 현재 시간으로 초기화
+        if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
+            AppGlobal.instance.set_last_received(now.toString())
+//            Log.e("downtime chk", "now work")
+        }
+
+        // 휴식 시간이면 downtime 시작 시간을 현재 시간으로 초기화
+        if ((planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) ||
+            (planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis )) {
+            AppGlobal.instance.set_last_received(now.toString())
+//            Log.e("downtime chk", "planned time")
+        }
+    }
+
+    // 구버전
+    private fun checkDownTime2() {
         var db = DBHelperForDownTime(this)
         val count = db.counts_for_notcompleted()
 //Log.e("iot count",""+count)

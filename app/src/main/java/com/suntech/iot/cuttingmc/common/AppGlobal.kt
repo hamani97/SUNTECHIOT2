@@ -28,6 +28,12 @@ class AppGlobal private constructor() {
     }
     fun setContext(ctx : Context) { _context = ctx }
 
+    // millis value for Downtime
+//    fun set_last_received(value: Long) { UtilLocalStorage.setLong(instance._context!!, "last_received", value) }
+//    fun get_last_received() : Long { return UtilLocalStorage.getLong(instance._context!!, "last_received") }
+    fun set_last_received(value: String) { UtilLocalStorage.setString(instance._context!!, "last_received", value) }
+    fun get_last_received() : String { return UtilLocalStorage.getString(instance._context!!, "last_received") }
+
     // Default Setting
     fun set_factory_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "current_factory_idx", idx) }
     fun get_factory_idx() : String { return UtilLocalStorage.getString(instance._context!!, "current_factory_idx") }

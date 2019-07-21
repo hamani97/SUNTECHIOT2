@@ -33,6 +33,15 @@ object UtilLocalStorage {
         return ctx.getSharedPreferences(APP_KEY, Context.MODE_PRIVATE).getInt(key, 0)
     }
 
+    fun setLong(ctx: Context, key: String, data: Long) {
+        val editor = ctx.getSharedPreferences(APP_KEY, Context.MODE_PRIVATE).edit()
+        editor.putLong(key, data)
+        editor.commit()
+    }
+    fun getLong(ctx: Context, key: String): Long {
+        return ctx.getSharedPreferences(APP_KEY, Context.MODE_PRIVATE).getLong(key, 0L)
+    }
+
     fun setFloat(ctx: Context, key: String, data: Float) {
         val editor = ctx.getSharedPreferences(APP_KEY, Context.MODE_PRIVATE).edit()
         editor.putFloat(key, data)
