@@ -471,14 +471,21 @@ class CountViewFragment : BaseFragment() {
             tv_count_view_actual.text = "" + total_actual
             tv_count_view_ratio.text = ratio_txt
 
-            var maxEnumber = 0
+//            var maxEnumber = 0
             var color_code = "ffffff"
 
-            for (i in 0..(_list.size - 1)) {
+//            for (i in 0..(_list.size - 1)) {
+//                val snumber = _list[i]["snumber"]?.toInt() ?: 0
+//                val enumber = _list[i]["enumber"]?.toInt() ?: 0
+////                if (maxEnumber < enumber) maxEnumber = enumber
+//                if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+//            }
+            for (i in (_list.size - 1) downTo 0 step 1) {
                 val snumber = _list[i]["snumber"]?.toInt() ?: 0
-                val enumber = _list[i]["enumber"]?.toInt() ?: 0
-                if (maxEnumber < enumber) maxEnumber = enumber
-                if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+                if (snumber <= ratio) {
+                    color_code = _list[i]["color_code"].toString()
+                    break
+                }
             }
             tv_count_view_target.setTextColor(Color.parseColor("#" + color_code))
             tv_count_view_actual.setTextColor(Color.parseColor("#" + color_code))
@@ -520,15 +527,22 @@ class CountViewFragment : BaseFragment() {
                     tv_count_view_crate.text = ratio_txt
                     line_progress1.progress = ratio
 
-                    var maxEnumber = 0
+//                    var maxEnumber = 0
                     var color_code = "ff0000"
 
-                    for (i in 0..(_list.size - 1)) {
+//                    for (i in 0..(_list.size - 1)) {
+//                        val snumber = _list[i]["snumber"]?.toInt() ?: 0
+//                        val enumber = _list[i]["enumber"]?.toInt() ?: 0
+//                        color_code = _list[i]["color_code"].toString()
+////                        if (maxEnumber < enumber) maxEnumber = enumber
+//                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+//                    }
+                    for (i in (_list.size - 1) downTo 0 step 1) {
                         val snumber = _list[i]["snumber"]?.toInt() ?: 0
-                        val enumber = _list[i]["enumber"]?.toInt() ?: 0
-                        color_code = _list[i]["color_code"].toString()
-                        if (maxEnumber < enumber) maxEnumber = enumber
-                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+                        if (snumber <= ratio) {
+                            color_code = _list[i]["color_code"].toString()
+                            break
+                        }
                     }
                     line_progress1.progressStartColor = Color.parseColor("#" + color_code)
                     line_progress1.progressEndColor = Color.parseColor("#" + color_code)
@@ -575,14 +589,21 @@ class CountViewFragment : BaseFragment() {
                     tv_component_view_actual.text = "" + actual
                     tv_component_view_ratio.text = ratio_txt
 
-                    var maxEnumber = 0
+//                    var maxEnumber = 0
                     var color_code = "ffffff"
 
-                    for (i in 0..(_list.size - 1)) {
+//                    for (i in 0..(_list.size - 1)) {
+//                        val snumber = _list[i]["snumber"]?.toInt() ?: 0
+//                        val enumber = _list[i]["enumber"]?.toInt() ?: 0
+//                        if (maxEnumber < enumber) maxEnumber = enumber
+//                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+//                    }
+                    for (i in (_list.size - 1) downTo 0 step 1) {
                         val snumber = _list[i]["snumber"]?.toInt() ?: 0
-                        val enumber = _list[i]["enumber"]?.toInt() ?: 0
-                        if (maxEnumber < enumber) maxEnumber = enumber
-                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
+                        if (snumber <= ratio) {
+                            color_code = _list[i]["color_code"].toString()
+                            break
+                        }
                     }
                     tv_component_view_target.setTextColor(Color.parseColor("#" + color_code))
                     tv_component_view_actual.setTextColor(Color.parseColor("#" + color_code))
@@ -590,7 +611,7 @@ class CountViewFragment : BaseFragment() {
 
                     // 리스트에서 첫번째 항목이 선택되어 있으면 같이 업데이트 한다.
                     if (_selected_component_pos >= 0) {
-                        var item = _list_for_wos.get(_selected_component_pos)
+//                        var item = _list_for_wos.get(_selected_component_pos)
                         _list_for_wos[_selected_component_pos]["target"] = "" + target
                         _list_for_wos[_selected_component_pos]["actual"] = "" + actual
                         _list_for_wos[_selected_component_pos]["balance"] = "" + (target - actual).toString()

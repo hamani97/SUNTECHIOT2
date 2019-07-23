@@ -49,6 +49,19 @@ class MainActivity : BaseActivity() {
 
     var _is_call = false
 
+    // 부팅시 자동실행
+    companion object {
+        class BootReceiver : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if ("android.intent.action.BOOT_COMPLETED".equals(intent.action)) {
+                    var it = Intent(context, IntroActivity::class.java)
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startService(it)
+                }
+            }
+        }
+    }
+
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
@@ -1010,7 +1023,7 @@ Log.e("params", "" + params)
             AppGlobal.instance.set_current_shift_actual_cnt(cnt)
 
             _last_count_received_time = DateTime()      // downtime 시간 초기화
-            AppGlobal.instance.set_last_received(DateTime().toString())
+            AppGlobal.instance.set_last_received(DateTime().toString("yyyy-MM-dd HH:mm:ss"))
 
             sendCountData(value.toString(), inc_count)  // 서버에 카운트 정보 전송
 
@@ -1221,7 +1234,7 @@ Log.e("params", "" + params)
         val count = db.counts_for_notcompleted()
 
         if (count > 0) {
-            AppGlobal.instance.set_last_received(DateTime().toString())
+            AppGlobal.instance.set_last_received(DateTime().toString("yyyy-MM-dd HH:mm:ss"))
             return
         }
 
@@ -1252,6 +1265,7 @@ Log.e("params", "" + params)
         var downtime_chk = AppGlobal.instance.get_last_received()
 
         if (downtime_chk != "") {
+            Log.e("DownTime value check", "time : "+downtime_chk)
             last_count_received = OEEUtil.parseDateTime(AppGlobal.instance.get_last_received()).millis
         }
 
@@ -1268,14 +1282,14 @@ Log.e("params", "" + params)
 
         // 워크 타임이 아니면 downtime 시작 시간을 현재 시간으로 초기화
         if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
-            AppGlobal.instance.set_last_received(now.toString())
+            AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
 //            Log.e("downtime chk", "now work")
         }
 
         // 휴식 시간이면 downtime 시작 시간을 현재 시간으로 초기화
         if ((planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) ||
             (planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis )) {
-            AppGlobal.instance.set_last_received(now.toString())
+            AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
 //            Log.e("downtime chk", "planned time")
         }
     }
