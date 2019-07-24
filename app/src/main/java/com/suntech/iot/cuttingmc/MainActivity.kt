@@ -50,17 +50,17 @@ class MainActivity : BaseActivity() {
     var _is_call = false
 
     // 부팅시 자동실행
-    companion object {
-        class BootReceiver : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if ("android.intent.action.BOOT_COMPLETED".equals(intent.action)) {
-                    var it = Intent(context, IntroActivity::class.java)
-                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startService(it)
-                }
-            }
-        }
-    }
+//    companion object {
+//        class BootReceiver : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                if ("android.intent.action.BOOT_COMPLETED".equals(intent.action)) {
+//                    var it = Intent(context, IntroActivity::class.java)
+//                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    context.startService(it)
+//                }
+//            }
+//        }
+//    }
 
     private val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -1265,7 +1265,7 @@ Log.e("params", "" + params)
         var downtime_chk = AppGlobal.instance.get_last_received()
 
         if (downtime_chk != "") {
-            Log.e("DownTime value check", "time : "+downtime_chk)
+//            Log.e("DownTime value check", "time : "+downtime_chk)
             last_count_received = OEEUtil.parseDateTime(AppGlobal.instance.get_last_received()).millis
         }
 

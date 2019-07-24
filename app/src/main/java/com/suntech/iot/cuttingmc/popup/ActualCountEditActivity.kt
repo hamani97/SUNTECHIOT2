@@ -2,6 +2,7 @@ package com.suntech.iot.cuttingmc.popup
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import com.suntech.iot.cuttingmc.R
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
@@ -57,8 +58,15 @@ class ActualCountEditActivity : BaseActivity() {
         val def_wosno = AppGlobal.instance.get_compo_wos()
         val def_size = AppGlobal.instance.get_compo_size()
 
+        val item = AppGlobal.instance.get_current_shift_time()
+        var stime = ""
+        if (item != null) stime = item["work_stime"].toString()
+
+//        Log.e("now shift json", "json : " + stime.toString())
+
         var db = DBHelperForComponent(this)
-        _list = db.gets(def_wosno, def_size) ?: _list
+//        _list = db.gets(def_wosno, def_size) ?: _list   // Actual 수량이 0이라도 현재 선택된 콤포넌트까지 로드
+        _list = db.gets(def_wosno, def_size, stime) ?: _list   // Actual 수량이 0이라도 현재 선택된 콤포넌트까지 로드
 
         list_adapter = ProductListActivity.ListAdapter(this, _list)
         lv_products.adapter = list_adapter

@@ -194,12 +194,44 @@ class DBHelperForComponent
         return arr
     }
 
+    // 현재 선택된 콤포넌트의 Actual 수량이 0이라도 같이 로드한다.
     fun gets(wosno: String, size: String):  ArrayList<HashMap<String, String>>? {
         var arr = ArrayList<HashMap<String, String>>()
         val db = _openHelper.readableDatabase ?: return null
         val sql = "select _id, wosno, shift_id, shift_name, styleno, model, component, size, target, actual, defective, seq, start_dt, end_dt " +
                 "from component where actual > 0 or (wosno = ? and size = ?) order by (target-actual) desc"
         val cur = db.rawQuery(sql, arrayOf(wosno.toString(), size.toString()))
+        while (cur.moveToNext()) {
+            val row = HashMap<String, String>()
+            row.put("work_idx", cur.getString(0))
+            row.put("wosno", cur.getString(1))
+            row.put("shift_id", cur.getString(2))
+            row.put("shift_name", cur.getString(3))
+            row.put("styleno", cur.getString(4))
+            row.put("model", cur.getString(5))
+            row.put("component", cur.getString(6))
+            row.put("size", cur.getString(7))
+            row.put("target", cur.getString(8))
+            row.put("actual", cur.getString(9))
+            row.put("defective", cur.getString(10))
+            row.put("seq", cur.getString(11))
+            row.put("start_dt", cur.getString(12))
+            row.put("end_dt", cur.getString(13))
+            arr.add(row)
+        }
+        cur.close()
+        db.close()
+        return arr
+    }
+
+    // 현재 선택된 콤포넌트의 Actual 수량이 0이라도 같이 로드한다.
+    // 지난 콤포넌트를 삭제하지 않기 때문에 현재 작업분만 로드하기 위해 필요해짐.
+    fun gets(wosno: String, size: String, shift_stime: String):  ArrayList<HashMap<String, String>>? {
+        var arr = ArrayList<HashMap<String, String>>()
+        val db = _openHelper.readableDatabase ?: return null
+        val sql = "select _id, wosno, shift_id, shift_name, styleno, model, component, size, target, actual, defective, seq, start_dt, end_dt " +
+                "from component where start_dt >= ? and (actual > 0 or (wosno = ? and size = ?)) order by (target-actual) desc"
+        val cur = db.rawQuery(sql, arrayOf(shift_stime, wosno.toString(), size.toString()))
         while (cur.moveToNext()) {
             val row = HashMap<String, String>()
             row.put("work_idx", cur.getString(0))

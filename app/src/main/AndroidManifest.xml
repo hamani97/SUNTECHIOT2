@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 
 
 
@@ -47,16 +47,16 @@
                 android:enabled="true" />
 
         <!--Auto run-->
-        <receiver
-                android:name=".MainActivity$Companion$BootReceiver"
-                android:enabled="true"
-                android:exported="false"
-                android:label="BootReceiver"
-                android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+        <!--<receiver-->
+                <!--android:name=".MainActivity$Companion$BootReceiver"-->
+                <!--android:enabled="true"-->
+                <!--android:exported="false"-->
+                <!--android:label="BootReceiver"-->
+                <!--android:permission="android.permission.RECEIVE_BOOT_COMPLETED">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <activity android:name=".ComponentInfoActivity" android:screenOrientation="landscape" />
         <activity android:name=".WorkInfoActivity" android:screenOrientation="landscape" />
