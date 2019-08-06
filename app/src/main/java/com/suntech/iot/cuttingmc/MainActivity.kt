@@ -87,9 +87,6 @@ class MainActivity : BaseActivity() {
 
 //        AppGlobal.instance.set_last_received("")
 
-        // 시작시 기존 Actual 값을 좌측에 표시한다.
-        tv_report_count.text = "" + AppGlobal.instance.get_current_shift_actual_cnt()
-
         // button click event
         if (AppGlobal.instance.get_long_touch()) {
             btn_home.setOnLongClickListener { changeFragment(0); true }
@@ -123,6 +120,10 @@ class MainActivity : BaseActivity() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
             override fun onPageScrollStateChanged(position: Int) {}
         })
+
+        // 지난 DownTime이 있으면 삭제한다.
+        RemoveDownTimeData()
+
         start_timer()
     }
 
@@ -145,6 +146,9 @@ class MainActivity : BaseActivity() {
         startService(UsbService::class.java, usbConnection, null) // Start UsbService(if it was not started before) and Bind it
         registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
         registerReceiver(_broadcastReceiver, IntentFilter(Constants.BR_ADD_COUNT))
+
+        // Actual 값을 좌측에 표시
+        tv_report_count.text = "" + AppGlobal.instance.get_current_shift_actual_cnt()
 
         updateView()
         fetchRequiredData()
@@ -838,6 +842,7 @@ Log.e("params", "" + params)
             override fun run() {
                 runOnUiThread {
                     sendPing()
+                    RemoveDownTimeData()    // Shift가 지난 다운타임 데이터를 삭제한다.
 //                    updateCurrentWorkTarget() // 30분으로 이동
                 }
             }
@@ -1237,6 +1242,20 @@ Log.e("params", "" + params)
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    // 작업 시간일때, 작업 시작 시간보다 작은 시간의 DownTime 을 삭제한다.(=지난 Shift의 DownTime)
+    fun RemoveDownTimeData() {
+        val work_idx = AppGlobal.instance.get_work_idx()
+        if (work_idx != "") {
+            val item = AppGlobal.instance.get_current_shift_time()
+            if (item != null) {
+                val db = DBHelperForDownTime(this)
+                val work_stime = item["work_stime"].toString()
+//                var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+                db.deleteLastDate(work_stime)
+            }
+        }
     }
 
     // 신버전
