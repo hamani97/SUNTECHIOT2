@@ -10,6 +10,9 @@ import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import org.joda.time.DateTime
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.FileReader
+import java.io.IOException
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
@@ -438,12 +441,42 @@ class AppGlobal private constructor() {
         return dif.toInt()
     }
 
-    fun get_mac_address(): String? {
-        var mac = getMACAddress()
-        if (mac == "") mac = "NO_MAC_ADDRESS"
+//    fun get_mac_address(): String? {
+//        var mac = getMACAddress()
+//        if (mac == "") mac = "NO_MAC_ADDRESS"
+//        return mac
+//    }
+
+    // 디바이스
+    @Throws(java.io.IOException::class)
+    fun loadFileAsString(filePath: String): String {
+        val data = StringBuffer(1000)
+        val reader = BufferedReader(FileReader(filePath))
+        val buf = CharArray(1024)
+        var numRead = 0
+        while (true) {
+            numRead = reader.read(buf)
+            if (numRead == -1) break
+            val readData = String(buf, 0, numRead)
+            data.append(readData)
+        }
+        reader.close()
+        return data.toString()
+    }
+    fun getMACAddress(): String? {
+        var mac = ""
+        try {
+            mac = loadFileAsString("/sys/class/net/eth0/address").toUpperCase().substring(0, 17)
+        } catch (e: IOException) {
+            //e.printStackTrace()
+        }
+        if (mac == "") {
+            mac = getMACAddress2()
+            if (mac == "") mac = "NO_MAC_ADDRESS"
+        }
         return mac
     }
-    fun getMACAddress(): String {
+    fun getMACAddress2(): String {
         val interfaceName = "wlan0"
         try {
             val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
