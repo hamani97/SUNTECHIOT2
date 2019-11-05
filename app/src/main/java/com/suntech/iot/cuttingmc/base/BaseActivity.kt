@@ -118,13 +118,9 @@ open class BaseActivity : AppCompatActivity() {
 
         val obj = object : Handler<Json> {
             override fun success(request: Request, response: Response, value: Json) {
-
                 if (progress) hideProgressDialog()
-
-                val currentTimeMillisEnd = System.currentTimeMillis()
-                val millis = currentTimeMillisEnd - currentTimeMillisStart
                 try {
-                    if (is_log) Log.d("BaseActivity", "response = " + value.obj().toString() + " , ms = "+ millis)
+                    if (is_log) Log.d("BaseActivity", "response = " + value.obj().toString() + " , ms = "+ (System.currentTimeMillis() - currentTimeMillisStart))
 
                     var r = value.obj().getString("code")
                     if(r == "00" || r == "99") callbackFunc?.invoke(value.obj())
@@ -182,13 +178,13 @@ open class BaseActivity : AppCompatActivity() {
         hideProgressDialog()
     }
 
-    fun ToastOut(context: Context, msg: String) {
-        if (AppGlobal.instance.get_message_enable()) {
+    fun ToastOut(context: Context, msg: String, force: Boolean=false) {
+        if (AppGlobal.instance.get_message_enable() || force) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         }
     }
-    fun ToastOut(context: Context, msg: Int) {
-        if (AppGlobal.instance.get_message_enable()) {
+    fun ToastOut(context: Context, msg: Int, force: Boolean=false) {
+        if (AppGlobal.instance.get_message_enable() || force) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         }
     }

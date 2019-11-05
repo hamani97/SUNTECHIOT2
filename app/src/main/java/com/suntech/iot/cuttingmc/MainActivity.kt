@@ -113,6 +113,7 @@ class MainActivity : BaseActivity() {
         vp_fragments.adapter = adapter
         adapter.notifyDataSetChanged()
 
+        vp_fragments.setPagingEnabled(false)
         vp_fragments.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(state: Int) {
                 (adapter.getItem(state) as BaseFragment).onSelected()

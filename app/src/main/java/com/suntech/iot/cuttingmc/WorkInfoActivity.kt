@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
 import android.widget.TextView
 import android.widget.Toast
@@ -28,6 +29,7 @@ import java.util.*
 class WorkInfoActivity : BaseActivity() {
 
     private var tab_pos : Int = 1
+    private var usb_state = false
 
     private var list_adapter: ListAdapter? = null
     private var _list: ArrayList<HashMap<String, String>> = arrayListOf()
@@ -58,22 +60,32 @@ class WorkInfoActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_work_info)
-        initView()
         fetchShiftData()
         fetchOperatorData()
         initLastWorkers()
+        initView()
         start_timer()
+    }
+
+    fun parentSpaceClick(view: View) {
+        var view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
     public override fun onResume() {
         super.onResume()
         registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
         updateView()
+        is_loop = true
     }
 
     public override fun onPause() {
         super.onPause()
         unregisterReceiver(_broadcastReceiver)
+        is_loop = false
     }
 
     override fun onDestroy() {
@@ -82,6 +94,9 @@ class WorkInfoActivity : BaseActivity() {
     }
 
     private fun updateView() {
+        // USB state
+        btn_usb_state2.isSelected = AppGlobal.instance._usb_state
+
         if (AppGlobal.instance._server_state) btn_server_state.isSelected = true
         else btn_server_state.isSelected = false
 
@@ -91,7 +106,7 @@ class WorkInfoActivity : BaseActivity() {
 
     private fun initView() {
 
-        tv_title.text = "OPERATOR DETAIL"
+        tv_title?.text = "OPERATOR DETAIL"
 
         // Shift info
         list_adapter = ListAdapter(this, _list)
@@ -226,6 +241,7 @@ class WorkInfoActivity : BaseActivity() {
 //        _list_json = list
 
         if (list == null) return
+        _list.removeAll(_list)
 
         for (i in 0..(list.length() - 1)) {
             val item = list.getJSONObject(i)
@@ -359,8 +375,9 @@ class WorkInfoActivity : BaseActivity() {
 
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if (code == "00") {
+                _list_for_operator.removeAll(_list_for_operator)
+
                 var list = result.getJSONArray("item")
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
@@ -373,7 +390,7 @@ class WorkInfoActivity : BaseActivity() {
                 }
                 filterOperatorData()
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
         filterOperatorData()
@@ -409,19 +426,38 @@ class WorkInfoActivity : BaseActivity() {
 
     /////// 쓰레드
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test.
+    private val _timer_task2 = Timer()
+    private var is_loop = true
 
     private fun start_timer() {
         val task1 = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
-                    sendPing()
+                    if (is_loop) sendPing()
                 }
             }
         }
         _timer_task1.schedule(task1, 5000, 10000)
+
+        val task2 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    if (is_loop) checkUSB()
+                }
+            }
+        }
+        _timer_task2.schedule(task2, 500, 1000)
     }
     private fun cancel_timer () {
         _timer_task1.cancel()
+        _timer_task2.cancel()
+    }
+
+    private fun checkUSB() {
+        if (usb_state != AppGlobal.instance._usb_state) {
+            usb_state = AppGlobal.instance._usb_state
+            btn_usb_state2?.isSelected = usb_state
+        }
     }
 
     private class ListAdapter(context: Context, list: ArrayList<HashMap<String, String>>) : BaseAdapter() {

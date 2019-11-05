@@ -6,8 +6,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
@@ -18,6 +20,8 @@ import org.joda.time.DateTime
 import java.util.*
 
 class SettingActivity : BaseActivity() {
+
+    private var usb_state = false
 
     private var tab_pos: Int = 1
     private var _selected_target_type: String = "device"
@@ -35,6 +39,8 @@ class SettingActivity : BaseActivity() {
     private var _selected_layer_3: String = ""
     private var _selected_layer_4: String = ""
     private var _selected_layer_5: String = ""
+
+    private var is_loop = true
 
     val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -60,19 +66,47 @@ class SettingActivity : BaseActivity() {
         initView()
     }
 
+    fun parentSpaceClick(view: View) {
+        var v = this.currentFocus
+        if (v != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(v.windowToken, 0)
+        }
+    }
+
     public override fun onResume() {
         super.onResume()
         registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
+        is_loop = true
+        startHandler()
     }
 
     public override fun onPause() {
         super.onPause()
         unregisterReceiver(_broadcastReceiver)
+        is_loop = false
+    }
+
+    fun startHandler() {
+        val handler = Handler()
+        handler.postDelayed({
+            if (is_loop) {
+                checkUSB()
+                startHandler()
+            }
+        }, 1000)
+    }
+
+    private fun checkUSB() {
+        if (usb_state != AppGlobal.instance._usb_state) {
+            usb_state = AppGlobal.instance._usb_state
+            btn_usb_state2.isSelected = usb_state
+        }
     }
 
     private fun initView() {
 
-        tv_title.setText(R.string.title_setting)
+        tv_title?.setText(R.string.title_setting)
 
         // system setting
         // set hidden value
@@ -171,9 +205,15 @@ class SettingActivity : BaseActivity() {
         tv_layer_5.setOnClickListener { fetchPairData("5") }
 
         // Target setting button listener
-        btn_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
-        btn_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
-        btn_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+        img_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
+        tv_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
+        img_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
+        tv_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
+        img_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+        tv_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
+//        btn_server_accumulate.setOnClickListener { targetTypeChange("server_per_accumulate") }
+//        btn_server_hourly.setOnClickListener { targetTypeChange("server_per_hourly") }
+//        btn_server_shifttotal.setOnClickListener { targetTypeChange("server_per_day_total") }
 //        btn_server_accumulate.setOnClickListener {
 //            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
 //        }
@@ -183,9 +223,15 @@ class SettingActivity : BaseActivity() {
 //        btn_server_shifttotal.setOnClickListener {
 //            Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show()
 //        }
-        btn_manual_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
-        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
-        btn_manual_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
+        img_device_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
+        tv_device_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
+        img_device_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+        tv_device_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+        img_device_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
+        tv_device_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
+//        btn_manual_accumulate.setOnClickListener { targetTypeChange("device_per_accumulate") }
+//        btn_manual_hourly.setOnClickListener { targetTypeChange("device_per_hourly") }
+//        btn_manual_shifttotal.setOnClickListener { targetTypeChange("device_per_day_total") }
 
         // check server button
         btn_setting_check_server.setOnClickListener {
@@ -215,7 +261,12 @@ class SettingActivity : BaseActivity() {
         else btn_server_state.isSelected = false
 
         // TODO: TEST
-        if (et_setting_server_ip.text.toString() == "") et_setting_server_ip.setText("49.247.205.235")     // 10.10.10.90
+        // 10.10.10.90
+        // 49.247.205.235
+        // 115.68.227.31
+        // 183.81.156.206 : inni
+        // 36.66.169.221 (8124)
+        if (et_setting_server_ip.text.toString() == "") et_setting_server_ip.setText("115.68.227.31")
         if (et_setting_port.text.toString() == "") et_setting_port.setText("80")
     }
 
@@ -242,7 +293,8 @@ class SettingActivity : BaseActivity() {
     private fun saveSettingData() {
         // check value
         if (_selected_factory_idx == "" || _selected_room_idx == "" || _selected_line_idx == "" || tv_setting_mac.text.toString().trim() == "") {
-            Toast.makeText(this, getString(R.string.msg_require_info), Toast.LENGTH_SHORT).show()
+            tabChange(1)
+            ToastOut(this, R.string.msg_require_info, true)
             return
         }
 //        if (_selected_layer_1.trim() == "") {
@@ -251,13 +303,15 @@ class SettingActivity : BaseActivity() {
 //        }
         if (_selected_target_type.substring(0, 6) == "device") {
             if (tv_shift_1.text.toString().trim()=="" || tv_shift_2.text.toString().trim()=="" || tv_shift_3.text.toString().trim()=="") {
-                Toast.makeText(this, getString(R.string.msg_require_target_quantity), Toast.LENGTH_SHORT).show()
+                tabChange(3)
+                ToastOut(this, R.string.msg_require_target_quantity, true)
                 return
             }
         }
         val remain_num = if (et_remain_number.text.toString()=="") 10 else et_remain_number.text.toString().toInt()
         if (remain_num < 5 || remain_num > 30) {
-            Toast.makeText(this, getString(R.string.msg_remain_out_of_range), Toast.LENGTH_SHORT).show()
+            tabChange(2)
+            ToastOut(this, R.string.msg_remain_out_of_range, true)
             return
         }
 
@@ -323,7 +377,7 @@ class SettingActivity : BaseActivity() {
                 sendAppStartTime()      // 앱 시작을 알림. 결과에 상관없이 종료
                 finish()
             } else {
-                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -375,7 +429,7 @@ class SettingActivity : BaseActivity() {
                     }
                 })
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -416,7 +470,7 @@ class SettingActivity : BaseActivity() {
                     }
                 })
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -457,7 +511,7 @@ class SettingActivity : BaseActivity() {
                     }
                 })
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -495,7 +549,7 @@ class SettingActivity : BaseActivity() {
                     }
                 })
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -595,25 +649,94 @@ class SettingActivity : BaseActivity() {
     private fun targetTypeChange(v : String) {
         if (_selected_target_type == v) return
         when (_selected_target_type) {
-            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
-            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "server_per_accumulate" -> {
+                img_server_accumulate.isSelected = false
+                tv_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+            "server_per_hourly" -> {
+                img_server_hourly.isSelected = false
+                tv_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+            "server_per_day_total" -> {
+                img_server_shifttotal.isSelected = false
+                tv_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+            "device_per_accumulate" -> {
+                img_device_accumulate.isSelected = false
+                tv_device_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+            "device_per_hourly" -> {
+                img_device_hourly.isSelected = false
+                tv_device_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+            "device_per_day_total" -> {
+                img_device_shifttotal.isSelected = false
+                tv_device_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            }
+//            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+//            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+//            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+//            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+//            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+//            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
         }
         when (_selected_target_type.substring(0, 6)) {
-            "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorReadonly))
-            "device" -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorReadonly))
+            "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            "device" -> tv_setting_target_type_manual.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
         }
+
         _selected_target_type = v
+
+        // Device에 딸려있는 메뉴의 색상 변경
+        if (_selected_target_type.substring(0, 6) != "device") {
+            tv_target_per_shift.setTextColor(ContextCompat.getColor(this, R.color.colorDarkGray))
+            tv_label_shift1.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            tv_label_shift2.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            tv_label_shift3.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+            tv_shift_1.setBackgroundResource(R.color.colorEditor1Readonly)
+            tv_shift_2.setBackgroundResource(R.color.colorEditor1Readonly)
+            tv_shift_3.setBackgroundResource(R.color.colorEditor1Readonly)
+        } else {
+            tv_target_per_shift.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            tv_label_shift1.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            tv_label_shift2.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            tv_label_shift3.setTextColor(ContextCompat.getColor(this, R.color.colorWhite2))
+            tv_shift_1.setBackgroundResource(R.color.colorEditor1)
+            tv_shift_2.setBackgroundResource(R.color.colorEditor1)
+            tv_shift_3.setBackgroundResource(R.color.colorEditor1)
+        }
+
         when (_selected_target_type) {
-            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
-            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            "server_per_accumulate" -> {
+                img_server_accumulate.isSelected = true
+                tv_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+            "server_per_hourly" -> {
+                img_server_hourly.isSelected = true
+                tv_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+            "server_per_day_total" -> {
+                img_server_shifttotal.isSelected = true
+                tv_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+            "device_per_accumulate" -> {
+                img_device_accumulate.isSelected = true
+                tv_device_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+            "device_per_hourly" -> {
+                img_device_hourly.isSelected = true
+                tv_device_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+            "device_per_day_total" -> {
+                img_device_shifttotal.isSelected = true
+                tv_device_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+            }
+//            "server_per_accumulate" -> btn_server_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+//            "server_per_hourly" -> btn_server_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+//            "server_per_day_total" -> btn_server_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+//            "device_per_accumulate" -> btn_manual_accumulate.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+//            "device_per_hourly" -> btn_manual_hourly.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
+//            "device_per_day_total" -> btn_manual_shifttotal.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))
         }
         when (_selected_target_type.substring(0, 6)) {
             "server" -> tv_setting_target_type_server.setTextColor(ContextCompat.getColor(this, R.color.colorOrange))

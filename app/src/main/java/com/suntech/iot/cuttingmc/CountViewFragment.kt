@@ -25,7 +25,7 @@ class CountViewFragment : BaseFragment() {
 
     private var is_loop: Boolean = false
 
-    private var _list: ArrayList<HashMap<String, String>> = arrayListOf()
+    private var _color_list: ArrayList<HashMap<String, String>> = arrayListOf()
     private var _list_for_db: ArrayList<HashMap<String, String>> = arrayListOf()
 
     private var _total_target = 0
@@ -50,8 +50,8 @@ class CountViewFragment : BaseFragment() {
         super.onResume()
         activity.registerReceiver(_need_to_refresh, IntentFilter("need.refresh"))
         is_loop = true
-        computeCycleTime()
         fetchColorData()     // Get Color
+        computeCycleTime()
         updateView()
         startHandler()
     }
@@ -227,7 +227,7 @@ class CountViewFragment : BaseFragment() {
         }
         viewWosData()
 //        updateView()      // onResume() 에서 함
-        fetchColorData()    // Get Color
+//        fetchColorData()    // Get Color
         fetchFilterWos()    // 기존 선택된 WOS 가 있으면 로드해서 화면에 표시한다.
     }
 
@@ -480,10 +480,10 @@ class CountViewFragment : BaseFragment() {
 ////                if (maxEnumber < enumber) maxEnumber = enumber
 //                if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
 //            }
-            for (i in (_list.size - 1) downTo 0 step 1) {
-                val snumber = _list[i]["snumber"]?.toInt() ?: 0
+            for (i in (_color_list.size - 1) downTo 0 step 1) {
+                val snumber = _color_list[i]["snumber"]?.toInt() ?: 0
                 if (snumber <= ratio) {
-                    color_code = _list[i]["color_code"].toString()
+                    color_code = _color_list[i]["color_code"].toString()
                     break
                 }
             }
@@ -537,10 +537,10 @@ class CountViewFragment : BaseFragment() {
 ////                        if (maxEnumber < enumber) maxEnumber = enumber
 //                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
 //                    }
-                    for (i in (_list.size - 1) downTo 0 step 1) {
-                        val snumber = _list[i]["snumber"]?.toInt() ?: 0
+                    for (i in (_color_list.size - 1) downTo 0 step 1) {
+                        val snumber = _color_list[i]["snumber"]?.toInt() ?: 0
                         if (snumber <= ratio) {
-                            color_code = _list[i]["color_code"].toString()
+                            color_code = _color_list[i]["color_code"].toString()
                             break
                         }
                     }
@@ -598,10 +598,10 @@ class CountViewFragment : BaseFragment() {
 //                        if (maxEnumber < enumber) maxEnumber = enumber
 //                        if (snumber <= ratio && enumber >= ratio) color_code = _list[i]["color_code"].toString()
 //                    }
-                    for (i in (_list.size - 1) downTo 0 step 1) {
-                        val snumber = _list[i]["snumber"]?.toInt() ?: 0
+                    for (i in (_color_list.size - 1) downTo 0 step 1) {
+                        val snumber = _color_list[i]["snumber"]?.toInt() ?: 0
                         if (snumber <= ratio) {
-                            color_code = _list[i]["color_code"].toString()
+                            color_code = _color_list[i]["color_code"].toString()
                             break
                         }
                     }
@@ -711,8 +711,8 @@ class CountViewFragment : BaseFragment() {
 
     // Get Color code
     private fun fetchColorData() {
+        _color_list.removeAll(_color_list)
         var list = AppGlobal.instance.get_color_code()
-
         for (i in 0..(list.length() - 1)) {
             val item = list.getJSONObject(i)
             var map=hashMapOf(
@@ -722,7 +722,7 @@ class CountViewFragment : BaseFragment() {
                 "color_name" to item.getString("color_name"),
                 "color_code" to item.getString("color_code")
             )
-            _list.add(map)
+            _color_list.add(map)
         }
     }
 

@@ -1,6 +1,9 @@
 package com.suntech.iot.cuttingmc.popup
 
+import android.content.Context
 import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.suntech.iot.cuttingmc.R
 import com.suntech.iot.cuttingmc.base.BaseActivity
@@ -19,6 +22,14 @@ class ActualCountEditInputActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_actual_count_edit_input)
         initView()
+    }
+
+    fun parentSpaceClick(view: View) {
+        var view = this.currentFocus
+        if (view != null) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
     private fun initView() {

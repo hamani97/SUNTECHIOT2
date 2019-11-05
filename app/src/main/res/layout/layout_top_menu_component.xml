@@ -45,6 +45,12 @@
                 android:background="@color/transparent"
                 android:orientation="horizontal">
             <ImageButton
+                    android:id="@+id/btn_usb_state2"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginRight="70dp"
+                    android:background="@drawable/btn_icon_usb_state"/>
+            <ImageButton
                     android:id="@+id/btn_server_state"
                     android:layout_width="40dp"
                     android:layout_height="40dp"

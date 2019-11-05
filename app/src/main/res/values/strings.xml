@@ -42,6 +42,10 @@
     <string name="label_server_ip">SERVER IP</string>
     <string name="label_server_port">PORT</string>
     <string name="label_wos_name">WOS name to display</string>
+    <string name="label_target_per_shift">TARGET PER SHIFT</string>
+    <string name="label_shift1">1 Shift</string>
+    <string name="label_shift2">2 Shift</string>
+    <string name="label_shift3">3 Shift</string>
 
     <!-- COMPONENT 화면 -->
     <string name="label_wos">WOS</string>
@@ -72,6 +76,11 @@
     <string name="title_down_time_input">Down Time Input</string>
     <string name="title_down_time_list">Down Time Input</string>
     <string name="msg_has_notcompleted">Info not complete</string>
+
+    <!-- Buttons -->
+    <string name="button_accumulation_by_start">Accumulation by Start</string>
+    <string name="button_accumulation_by_hourly">Accumulation by Hourly</string>
+    <string name="button_total_target_per_shift">Total Target per Shift</string>
 
     <!-- 제품목록화면 -->
     <string name="title_product_list">Product List</string>
@@ -134,6 +143,7 @@
     <string name="msg_require_target_quantity">Please enter a target quantity</string>
     <string name="msg_layer_not_selected">Work info not selected</string>
     <string name="msg_no_setting">Setting not found</string>
+    <string name="msg_please_wait_for_loading" translatable="false">Please wait for loading</string>
     <string name="msg_data_not_found">Data not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>
     <string name="msg_cannot_input_wos">Cannot input WOS</string>

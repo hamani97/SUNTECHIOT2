@@ -25,6 +25,8 @@ import java.util.*
 
 class ComponentInfoActivity : BaseActivity() {
 
+    private var usb_state = false
+
     private var _selected_wos_idx : String = ""
     private var _selected_component_idx : String = ""
     private var _selected_component_code : String = ""
@@ -63,11 +65,13 @@ class ComponentInfoActivity : BaseActivity() {
         super.onResume()
         registerReceiver(_broadcastReceiver, IntentFilter(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION))
         updateView()
+        is_loop = true
     }
 
     public override fun onPause() {
         super.onPause()
         unregisterReceiver(_broadcastReceiver)
+        is_loop = false
     }
 
     override fun onDestroy() {
@@ -94,10 +98,10 @@ class ComponentInfoActivity : BaseActivity() {
     private fun initView() {
         var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
         if (item == null) {
-            tv_title.setText("No shift")
+            tv_title?.setText("No shift")
         } else {
 //            tv_title.setText(item["shift_name"].toString() + "   " + item["available_stime"].toString() + " - " + item["available_etime"].toString())
-            tv_title.setText(item["shift_name"].toString() +
+            tv_title?.setText(item["shift_name"].toString() +
                     "   " +
                     OEEUtil.parseDateTime(item["work_stime"].toString()).toString("HH:mm") +
                     " - " +
@@ -122,16 +126,16 @@ class ComponentInfoActivity : BaseActivity() {
         }
 
         // WOS name
-        tv_wos_name.text = AppGlobal.instance.get_wos_name()
-        tv_wos_name2.text = AppGlobal.instance.get_wos_name()
+        tv_wos_name?.text = AppGlobal.instance.get_wos_name()
+        tv_wos_name2?.text = AppGlobal.instance.get_wos_name()
 
-        tv_compo_wos.text = AppGlobal.instance.get_compo_wos()
-        tv_compo_model.text = AppGlobal.instance.get_compo_model()
-        tv_compo_style.text = AppGlobal.instance.get_compo_style()
-        tv_compo_component.text = AppGlobal.instance.get_compo_component()
-        tv_compo_size.text = AppGlobal.instance.get_compo_size()
-        tv_compo_layer.text = AppGlobal.instance.get_compo_layer()
-        tv_compo_target.text = "" + AppGlobal.instance.get_compo_target()
+        tv_compo_wos?.text = AppGlobal.instance.get_compo_wos()
+        tv_compo_model?.text = AppGlobal.instance.get_compo_model()
+        tv_compo_style?.text = AppGlobal.instance.get_compo_style()
+        tv_compo_component?.text = AppGlobal.instance.get_compo_component()
+        tv_compo_size?.text = AppGlobal.instance.get_compo_size()
+        tv_compo_layer?.text = AppGlobal.instance.get_compo_layer()
+        tv_compo_target?.text = "" + AppGlobal.instance.get_compo_target()
 
         // set hidden value
         _selected_wos_idx = AppGlobal.instance.get_compo_wos_idx()
@@ -532,19 +536,38 @@ class ComponentInfoActivity : BaseActivity() {
 
     /////// 쓰레드
     private val _timer_task1 = Timer()          // 서버 접속 체크 ping test.
+    private val _timer_task2 = Timer()
+    private var is_loop = true
 
     private fun start_timer() {
         val task1 = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
-                    sendPing()
+                    if (is_loop) sendPing()
                 }
             }
         }
         _timer_task1.schedule(task1, 5000, 10000)
+
+        val task2 = object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    if (is_loop) checkUSB()
+                }
+            }
+        }
+        _timer_task2.schedule(task2, 500, 1000)
     }
     private fun cancel_timer () {
         _timer_task1.cancel()
+        _timer_task2.cancel()
+    }
+
+    private fun checkUSB() {
+        if (usb_state != AppGlobal.instance._usb_state) {
+            usb_state = AppGlobal.instance._usb_state
+            btn_usb_state2.isSelected = usb_state
+        }
     }
 
     private class ListWosAdapter(context: Context, list: ArrayList<HashMap<String, String>>) : BaseAdapter() {
