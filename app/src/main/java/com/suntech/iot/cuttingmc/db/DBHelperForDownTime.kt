@@ -36,7 +36,7 @@ class DBHelperForDownTime
     /**
      * This is an internal class that handles the creation of all database tables
      */
-    internal inner class DBHelperForDownTime(context: Context) : SQLiteOpenHelper(context, "downtime.db", null, 1) {
+    internal inner class DBHelperForDownTime(context: Context) : SQLiteOpenHelper(context, "downtime.db", null, 3) {
 
         override fun onCreate(db: SQLiteDatabase) {
             val sql = "create table downtime (_id integer primary key autoincrement, " +
@@ -47,13 +47,19 @@ class DBHelperForDownTime
                     "shift_name text, " +
                     "completed text, " +
                     "list text, " +
+                    "millis int default 0, " +          // 초
+                    "real_millis int default 0, " +     // 휴식시간을 뺀 초
+                    "target int default 0, " +          // 현디자인의 ct로 계산된 타겟수
                     "start_dt DATE default CURRENT_TIMESTAMP, " +
                     "end_dt DATE)"
 
             db.execSQL(sql)
         }
 
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            db.execSQL("drop table if exists downtime")
+            onCreate(db)
+        }
     }
 
     /**
@@ -64,7 +70,7 @@ class DBHelperForDownTime
     operator fun get(idx: String): ContentValues? {
         val db = _openHelper.readableDatabase ?: return null
         val row = ContentValues()
-        val sql = "select idx, work_idx, design_idx, shift_id, shift_name, completed, list, start_dt, end_dt " +
+        val sql = "select idx, work_idx, design_idx, shift_id, shift_name, completed, list, start_dt, end_dt, millis, real_millis, target " +
                 "from downtime where idx = ?"
         val cur = db.rawQuery(sql, arrayOf(idx))
         if (cur.moveToNext()) {
@@ -77,6 +83,9 @@ class DBHelperForDownTime
             row.put("list", cur.getString(6))
             row.put("start_dt", cur.getString(7))
             row.put("end_dt", cur.getString(8))
+            row.put("millis", cur.getInt(9))
+            row.put("real_millis", cur.getInt(10))
+            row.put("target", cur.getInt(11))
         }
         cur.close()
         db.close()
@@ -87,7 +96,7 @@ class DBHelperForDownTime
         var arr = ArrayList<HashMap<String, String>>()
         val db = _openHelper.readableDatabase ?: return null
 
-        val sql = "select _id, idx, work_idx, design_idx, shift_id, shift_name, completed, list, start_dt, end_dt " +
+        val sql = "select _id, idx, work_idx, design_idx, shift_id, shift_name, completed, list, start_dt, end_dt, millis, real_millis, target " +
                 "from downtime order by start_dt desc"
         val cur = db.rawQuery(sql, arrayOf())
         while (cur.moveToNext()) {
@@ -102,6 +111,9 @@ class DBHelperForDownTime
             row.put("list", cur.getString(7))
             row.put("start_dt", cur.getString(8))
             row.put("end_dt", cur.getString(9))
+            row.put("millis", cur.getString(10))
+            row.put("real_millis", cur.getString(11))
+            row.put("target", cur.getString(12))
             arr.add(row)
         }
         cur.close()
@@ -145,13 +157,25 @@ class DBHelperForDownTime
         return id
     }
 
-    fun updateEnd(idx: String, list:String) {
-
+//    fun updateEnd(idx: String, list:String) {
+//
+//        val db = _openHelper.writableDatabase ?: return
+//        val row = ContentValues()
+//        row.put("completed", "Y")
+//        row.put("list", list)
+//        row.put("end_dt", DateTime().toString("yyyy-MM-dd HH:mm:ss"))
+//        db.update("downtime", row, "idx = ?", arrayOf(idx))
+//        db.close()
+//    }
+    fun updateEnd(idx: String, list:String, end_dt:String, millis:Int, real_millis:Int, target:Int) {
         val db = _openHelper.writableDatabase ?: return
         val row = ContentValues()
         row.put("completed", "Y")
         row.put("list", list)
-        row.put("end_dt", DateTime().toString("yyyy-MM-dd HH:mm:ss"))
+        row.put("end_dt", end_dt)
+        row.put("millis", millis)
+        row.put("real_millis", real_millis)
+        row.put("target", target)
         db.update("downtime", row, "idx = ?", arrayOf(idx))
         db.close()
     }
@@ -162,7 +186,7 @@ class DBHelperForDownTime
         db.close()
     }
 
-    fun deleteLastDate(date: String) {
+    fun deleteOldData(date: String) {
         val db = _openHelper.writableDatabase ?: return
         db.delete("downtime", "start_dt < ?", arrayOf(date))
         db.close()

@@ -50,6 +50,10 @@ class HomeFragment : BaseFragment() {
 //            }
         }
         btn_component_info.setOnClickListener {
+            if (AppGlobal.instance.get_view_with_component() == false) {
+                (activity as MainActivity).ToastOut(activity, R.string.msg_component_not_available, true)
+                return@setOnClickListener
+            }
 //            if (AppGlobal.instance.get_worker_no() == "" || AppGlobal.instance.get_worker_name() == "") {
 //                Toast.makeText(activity, getString(R.string.msg_no_operator), Toast.LENGTH_SHORT).show()
 //            } else {

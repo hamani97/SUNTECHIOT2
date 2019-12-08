@@ -126,6 +126,7 @@ open class BaseActivity : AppCompatActivity() {
                     if(r == "00" || r == "99") callbackFunc?.invoke(value.obj())
                     else handle_network_error(context, "unknown error = " + uri)
                 } catch (e:Exception) {
+                    Log.e("Exception", e.toString())
                     failedCallbackFunc?.invoke()
                     if (failedCallbackFunc==null) handle_network_error(context, "server parsing error = " + uri)
                 }

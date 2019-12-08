@@ -162,7 +162,168 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- 차트 -->
+                <!-- 토탈 차트 -->
+                <LinearLayout
+                        android:id="@+id/ll_total_charts"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="#222222"
+                        android:visibility="gone">
+                    <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="OEE"
+                            android:textSize="15sp"
+                            android:textColor="@color/colorWhite2"
+                            android:background="#383838" />
+                    <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical">
+                        <com.dinuscxj.progressbar.CircleProgressBar
+                                android:id="@+id/oee_progress"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:layout_centerInParent="true"
+                                app:background_color="@color/colorWhite"
+                                app:progress_start_color="#ff0000"
+                                app:progress_end_color="#ff0000"
+                                app:progress_background_color="@color/colorWhite"
+                                app:progress_text_color="@color/colorBlack"
+                                app:draw_progress_text="false"
+                                app:progress_text_size="24dp"
+                                app:style="solid"
+                                android:progress="0"/>
+                        <TextView
+                                android:id="@+id/tv_oee_rate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="0%"
+                                android:textSize="27sp"
+                                android:textColor="#000"/>
+                    </RelativeLayout>
+
+                    <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/availability"
+                            android:textSize="15sp"
+                            android:textColor="@color/colorWhite2"
+                            android:background="#383838" />
+                    <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical">
+                        <com.dinuscxj.progressbar.CircleProgressBar
+                                android:id="@+id/availability_progress"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:layout_centerInParent="true"
+                                app:background_color="@color/colorWhite"
+                                app:progress_start_color="#ff0000"
+                                app:progress_end_color="#ff0000"
+                                app:progress_background_color="@color/colorWhite"
+                                app:progress_text_color="@color/colorBlack"
+                                app:draw_progress_text="false"
+                                app:progress_text_size="24dp"
+                                app:style="solid"
+                                android:progress="0"/>
+                        <TextView
+                                android:id="@+id/tv_availability_rate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="0%"
+                                android:textSize="27sp"
+                                android:textColor="#000"/>
+                    </RelativeLayout>
+
+                    <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/performance"
+                            android:textSize="15sp"
+                            android:textColor="@color/colorWhite2"
+                            android:background="#383838" />
+                    <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical">
+                        <com.dinuscxj.progressbar.CircleProgressBar
+                                android:id="@+id/performance_progress"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:layout_centerInParent="true"
+                                app:background_color="@color/colorWhite"
+                                app:progress_start_color="#ff0000"
+                                app:progress_end_color="#ff0000"
+                                app:progress_background_color="@color/colorWhite"
+                                app:progress_text_color="@color/colorBlack"
+                                app:draw_progress_text="false"
+                                app:progress_text_size="24dp"
+                                app:style="solid"
+                                android:progress="0"/>
+                        <TextView
+                                android:id="@+id/tv_performance_rate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="0%"
+                                android:textSize="27sp"
+                                android:textColor="#000"/>
+                    </RelativeLayout>
+
+                    <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/quality"
+                            android:textSize="15sp"
+                            android:textColor="@color/colorWhite2"
+                            android:background="#383838" />
+                    <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="5dp"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical">
+                        <com.dinuscxj.progressbar.CircleProgressBar
+                                android:id="@+id/quality_progress"
+                                android:layout_width="100dp"
+                                android:layout_height="100dp"
+                                android:layout_centerInParent="true"
+                                app:background_color="@color/colorReadonly2"
+                                app:progress_start_color="#ff0000"
+                                app:progress_end_color="#ff0000"
+                                app:progress_background_color="@color/colorWhite"
+                                app:progress_text_color="@color/colorBlack"
+                                app:draw_progress_text="false"
+                                app:progress_text_size="24dp"
+                                app:style="solid"
+                                android:progress="0"/>
+                        <TextView
+                                android:id="@+id/tv_quality_rate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerInParent="true"
+                                android:text="0%"
+                                android:textSize="27sp"
+                                android:textColor="#000"/>
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <!-- 콤포넌트 차트 -->
                 <LinearLayout
                         android:id="@+id/ll_charts"
                         android:layout_width="240dp"
@@ -344,8 +505,8 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:layout_marginTop="20dp"
-                        android:layout_marginLeft="80dp"
-                        android:layout_marginRight="80dp"
+                        android:layout_marginLeft="60dp"
+                        android:layout_marginRight="60dp"
                         android:orientation="vertical">
 
                     <LinearLayout
@@ -434,7 +595,7 @@
                                 android:id="@+id/tv_count_wos_name"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="4"
+                                android:layout_weight="3.4"
                                 android:gravity="center"
                                 android:text="@string/list_item_wos"
                                 android:textSize="24sp"
@@ -442,7 +603,7 @@
                         <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="4"
+                                android:layout_weight="4.2"
                                 android:gravity="center"
                                 android:text="@string/list_item_model"
                                 android:textSize="24sp"
@@ -450,7 +611,7 @@
                         <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="4"
+                                android:layout_weight="4.4"
                                 android:gravity="center"
                                 android:text="@string/list_item_component"
                                 android:textSize="24sp"

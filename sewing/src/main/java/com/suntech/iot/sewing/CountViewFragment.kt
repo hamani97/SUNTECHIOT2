@@ -15,6 +15,9 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import android.widget.Toast
+import com.suntech.iot.sewing.ComponentInfoActivity
+import com.suntech.iot.sewing.MainActivity
+import com.suntech.iot.sewing.R
 import com.suntech.iot.sewing.base.BaseFragment
 import com.suntech.iot.sewing.common.AppGlobal
 import com.suntech.iot.sewing.db.DBHelperForComponent

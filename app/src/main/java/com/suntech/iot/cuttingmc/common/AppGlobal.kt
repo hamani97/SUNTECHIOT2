@@ -9,6 +9,7 @@ import com.suntech.iot.cuttingmc.util.OEEUtil
 import com.suntech.iot.cuttingmc.util.UtilLocalStorage
 import org.joda.time.DateTime
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.FileReader
@@ -75,8 +76,20 @@ class AppGlobal private constructor() {
     fun set_sound_at_count(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_sound_count", state) }
     fun get_sound_at_count() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_sound_count") }
 
+    fun set_start_at_target(value: Int) { UtilLocalStorage.setInt(instance._context!!, "start_at_target", value) }
+    fun get_start_at_target() : Int { return UtilLocalStorage.getInt(instance._context!!, "start_at_target") }
+
+    fun set_planned_count_process(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "planned_count", state) }
+    fun get_planned_count_process() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "planned_count") }
+
+    fun set_target_stop_when_downtime(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "target_stop_downtime", state) }
+    fun get_target_stop_when_downtime() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "target_stop_downtime") }
+
     fun set_without_component(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_without_component", state) }
     fun get_without_component() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_without_component") }
+
+    fun set_view_with_component(state: Boolean) { UtilLocalStorage.setBoolean(instance._context!!, "current_view_with_component", state) }
+    fun get_view_with_component() : Boolean { return UtilLocalStorage.getBoolean(instance._context!!, "current_view_with_component") }
 
     fun set_wos_name(name: String) { UtilLocalStorage.setString(instance._context!!, "current_wos_name", name) }
     fun get_wos_name() : String {
@@ -164,19 +177,6 @@ class AppGlobal private constructor() {
     }
 
 
-    // 작업 프로덕트 고유값 설정
-//    fun reset_product_idx() {
-//        UtilLocalStorage.setString(instance._context!!, "work_idx", "")
-//    }
-//    fun set_product_idx() {
-//        var product_idx = get_product_idx()
-//        if (product_idx == "" ) product_idx = "1000"
-//        val new_product_idx = product_idx.toInt() + 1
-//        UtilLocalStorage.setString(instance._context!!, "work_idx", new_product_idx.toString())
-//    }
-//    fun get_product_idx() : String {
-//        return UtilLocalStorage.getString(instance._context!!, "work_idx")
-//    }
 
 
     // 디자인 정보 설정
@@ -192,6 +192,14 @@ class AppGlobal private constructor() {
     // 작업 워크 고유값 설정
     fun set_work_idx(idx: String) { UtilLocalStorage.setString(instance._context!!, "work_idx", idx) }
     fun get_work_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
+
+    fun set_product_idx() {
+        var product_idx = get_product_idx()
+        val new_product_idx = if (product_idx == "") 1000 else product_idx.toInt() + 1
+        UtilLocalStorage.setString(instance._context!!, "work_idx", new_product_idx.toString())
+    }
+    fun get_product_idx() : String { return UtilLocalStorage.getString(instance._context!!, "work_idx") }
+    fun reset_product_idx() { UtilLocalStorage.setString(instance._context!!, "work_idx", "") }
 
     // 작업시간 설정
     fun set_today_work_time(data: JSONArray) { UtilLocalStorage.setJSONArray(instance._context!!, "current_work_time", data) }      // 오늘의 shift 정보
@@ -293,21 +301,92 @@ class AppGlobal private constructor() {
     fun set_target_manual_shift(shift_no: String, value: String) { UtilLocalStorage.setString(instance._context!!, "current_target_shift_" + shift_no, value) }
     fun get_target_manual_shift(shift_no: String) : String { return UtilLocalStorage.getString(instance._context!!, "current_target_shift_" + shift_no) }
 
+    // 현 시프트의 토탈 타겟
+    // From Server 와 From Device 사용
+    fun get_current_shift_target() : Int {
+        val item = get_current_shift_time()
+        if (item != null) {
+            val shift_idx = item["shift_idx"].toString()
+            var target_type = get_target_type()
+            if (target_type.substring(0, 6) == "server") {
+                var target = "0"
+                try {
+                    target = item["target"].toString()
+                } catch (e: JSONException) {
+                    target = "0"
+//                    e.printStackTrace()
+                }
+//                var target2 = item!!["target"]?.toString() ?: "0"      // From server
+//                var target = item?.getString("target") ?: "0"
+                if (target == "") target = "0"
+                return target.trim().toInt()
+            } else if (target_type.substring(0, 6) == "device") {
+                return when (shift_idx) {
+                    "1" -> get_target_manual_shift("1").trim().toInt()
+                    "2" -> get_target_manual_shift("2").trim().toInt()
+                    "3" -> get_target_manual_shift("3").trim().toInt()
+                    else -> 0
+                }
+            }
+        }
+        return 0
+    }
+
+    // 현 시프트에서 한개 만드는데 걸리는 시간
+    // From Server 와 From Device 사용
+    fun get_current_maketime_per_piece() : Float {
+
+        val item = get_current_shift_time()
+        if (item != null) {
+            val target = get_current_shift_target()
+            if (target == 0) return 0F
+
+//            var shift_total_target = target
+
+            if (target > 0) {
+                // 시프트 기본 정보
+                val work_stime = item["work_stime"].toString()
+                val work_etime = item["work_etime"].toString()
+                val shift_stime = OEEUtil.parseDateTime(work_stime)
+                val shift_etime = OEEUtil.parseDateTime(work_etime)
+
+                // 휴식타임
+                val _planned1_stime = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString())
+                val _planned1_etime = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString())
+                val _planned2_stime = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString())
+                val _planned2_etime = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
+
+                // 휴식시간 계산
+                val d1 = compute_time(shift_stime, shift_etime, _planned1_stime, _planned1_etime)
+                val d2 = compute_time(shift_stime, shift_etime, _planned2_stime, _planned2_etime)
+
+                // 시프트 시작부터 종료까지 시간(초)
+                val work_time = ((shift_etime.millis - shift_stime.millis) / 1000) - d1 - d2
+
+                return (work_time.toFloat() / target)
+//                return (work_time.toFloat() / shift_total_target)
+            }
+        }
+        return 0F
+    }
+
     fun get_current_shift_target_cnt() : String {
         var total_target = ""
         var target_type = get_target_type()
         val shift_idx = get_current_shift_idx()
-        if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
-            when (shift_idx) {
-                "1" -> total_target = get_target_server_shift("1")
-                "2" -> total_target = get_target_server_shift("2")
-                "3" -> total_target = get_target_server_shift("3")
-            }
-        } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
-            when (shift_idx) {
-                "1" -> total_target = get_target_manual_shift("1")
-                "2" -> total_target = get_target_manual_shift("2")
-                "3" -> total_target = get_target_manual_shift("3")
+        if (target_type.length >= 6) {
+            if (target_type.substring(0, 6) == "server") {
+                when (shift_idx) {
+                    "1" -> total_target = get_target_server_shift("1")
+                    "2" -> total_target = get_target_server_shift("2")
+                    "3" -> total_target = get_target_server_shift("3")
+                }
+            } else if (target_type.substring(0, 6) == "device") {
+                when (shift_idx) {
+                    "1" -> total_target = get_target_manual_shift("1")
+                    "2" -> total_target = get_target_manual_shift("2")
+                    "3" -> total_target = get_target_manual_shift("3")
+                }
             }
         }
         return total_target
@@ -349,6 +428,19 @@ class AppGlobal private constructor() {
         return compute_work_time(shift_stime, shift_etime, false, false)
     }
 
+    // 두시간(기간)에서 겹치는 시간을 계산해서 초로 리턴
+    fun compute_time_millis(src_dt_s:Long, src_dt_e:Long, dst_dt_s:Long, dst_dt_e:Long) : Int {
+        var dst_dt_s_cpy = dst_dt_s
+        var dst_dt_e_cpy = dst_dt_e
+        if (src_dt_s > dst_dt_s_cpy ) dst_dt_s_cpy = src_dt_s
+        if (src_dt_e < dst_dt_e_cpy ) dst_dt_e_cpy = src_dt_e
+
+        if (dst_dt_s_cpy >= src_dt_s && dst_dt_s_cpy <= src_dt_e &&
+            dst_dt_e_cpy >= src_dt_s && dst_dt_e_cpy <= src_dt_e) {
+            return ((dst_dt_e_cpy-dst_dt_s_cpy) / 1000 ).toInt()
+        }
+        return 0
+    }
     // 두시간(기간)에서 겹치는 시간을 계산
     fun compute_time(src_dt_s:DateTime, src_dt_e:DateTime, dst_dt_s:DateTime, dst_dt_e:DateTime) : Int {
         var dst_dt_s_cpy = dst_dt_s

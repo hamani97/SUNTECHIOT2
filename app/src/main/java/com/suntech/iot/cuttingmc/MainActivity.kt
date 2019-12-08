@@ -1,6 +1,7 @@
 package com.suntech.iot.cuttingmc
 
 import android.content.*
+import android.graphics.Color
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
@@ -15,15 +16,13 @@ import android.util.Log
 import android.widget.Toast
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.base.BaseFragment
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.common.Constants
 import com.suntech.iot.cuttingmc.db.*
-import com.suntech.iot.cuttingmc.popup.ActualCountEditActivity
-import com.suntech.iot.cuttingmc.popup.DefectiveActivity
-import com.suntech.iot.cuttingmc.popup.DownTimeActivity
-import com.suntech.iot.cuttingmc.popup.PushActivity
+import com.suntech.iot.cuttingmc.popup.*
 import com.suntech.iot.cuttingmc.service.UsbService
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import kotlinx.android.synthetic.main.activity_main.*
@@ -40,6 +39,11 @@ class MainActivity : BaseActivity() {
 
     var countViewType = 1       // Count view 화면값 1=Total count, 2=Component count
 
+    var _availability_rate = 0F
+    var _quality_rate = 0F
+    var _performance_rate = 0F
+    var _oee_rate = 0F
+
 //    val _stitch_db = DBHelperForCount(this)     // Count 정보
     val _target_db = DBHelperForTarget(this)    // 날짜의 Shift별 정보, Target 수량 정보 저장
     val _report_db = DBHelperForReport(this)    // 날짜의 Shift별 한시간 간격의 Actual 수량 저장
@@ -48,6 +52,8 @@ class MainActivity : BaseActivity() {
     private var _last_count_received_time = DateTime()
 
     var _is_call = false
+
+    var watching_count = 0      // 디버깅 창용 변수
 
     // 부팅시 자동실행
 //    companion object {
@@ -83,6 +89,15 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         AppGlobal.instance.setContext(this)
 
+        // USB state
+        btn_usb_state?.isSelected = false
+
+        // 시작시 work_idx 값이 없으면 초기화 한다.
+        val work_idx = AppGlobal.instance.get_product_idx()
+        if (work_idx == "") {
+            endTodayWork()
+        }
+
         mHandler = MyHandler(this)
 
 //        AppGlobal.instance.set_last_received("")
@@ -94,7 +109,7 @@ class MainActivity : BaseActivity() {
             btn_actual_count_edit.setOnLongClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)); true }
             btn_downtime.setOnLongClickListener { startDowntimeActivity(); true }
 //            btn_downtime.setOnLongClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show(); true }
-            btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
+//            btn_defective_info.setOnLongClickListener { startActivity(Intent(this, DefectiveActivity::class.java)); true }
             btn_production_report.setOnLongClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)); true }
         } else {
             btn_home.setOnClickListener { changeFragment(0) }
@@ -102,8 +117,19 @@ class MainActivity : BaseActivity() {
             btn_actual_count_edit.setOnClickListener { startActivity(Intent(this, ActualCountEditActivity::class.java)) }
             btn_downtime.setOnClickListener { startDowntimeActivity() }
 //            btn_downtime.setOnClickListener { Toast.makeText(this, "Not yet supported.", Toast.LENGTH_SHORT).show() }
-            btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
+//            btn_defective_info.setOnClickListener { startActivity(Intent(this, DefectiveActivity::class.java)) }
             btn_production_report.setOnClickListener { startActivity(Intent(this, ProductionReportActivity::class.java)) }
+        }
+
+        // 디버깅용 창
+        top_logo.setOnClickListener {
+            if (watching_count >= 4) {
+                watching_count = 0
+                startActivity(Intent(this, WatchingActivity::class.java))
+            }
+            watching_count++
+//            Log.e("watching", "" + watching_count)
+            Handler().postDelayed({ watching_count = 0 }, 2000)
         }
 
         // fragment & swipe
@@ -124,6 +150,10 @@ class MainActivity : BaseActivity() {
 
         // 지난 DownTime이 있으면 삭제한다.
         RemoveDownTimeData()
+
+//        val db = DBHelperForDownTime(this)
+//        db.delete()
+//        AppGlobal.instance.set_last_received("")
 
         start_timer()
     }
@@ -149,7 +179,10 @@ class MainActivity : BaseActivity() {
         registerReceiver(_broadcastReceiver, IntentFilter(Constants.BR_ADD_COUNT))
 
         // Actual 값을 좌측에 표시
-        tv_report_count.text = "" + AppGlobal.instance.get_current_shift_actual_cnt()
+        tv_report_count?.text = "" + AppGlobal.instance.get_current_shift_actual_cnt()
+
+        // USB state
+        btn_usb_state?.isSelected = AppGlobal.instance._usb_state
 
         updateView()
         fetchRequiredData()
@@ -190,7 +223,7 @@ class MainActivity : BaseActivity() {
     // 서버에 작업시간, 다운타임 기본시간, 색상값을 호출
     private fun fetchRequiredData() {
         if (AppGlobal.instance.get_server_ip().trim() != "") {
-            fetchWorkData()         // 작업시간
+            fetchWorkData2()         // 작업시간
             fetchServerTarget()     // 목표수량
             fetchDownTimeType()
             fetchColorData()
@@ -325,6 +358,70 @@ class MainActivity : BaseActivity() {
      *  당일 작업시간 가져오기. 새벽이 지난 시간은 1일을 더한다.
      *  전일 작업이 끝나지 않았을수 있기 때문에 전일 데이터도 가져온다.
      */
+    private fun fetchWorkData2() {
+
+        var dt = DateTime()
+        val shift3: JSONObject? = fetchManualShift()      // manual 데이터가 있으면 가져온다.
+
+        val uri = "/getlist1.php"
+        var params = listOf(
+            "code" to "work_time2",
+            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
+            "factory_idx" to AppGlobal.instance.get_room_idx(),
+            "line_idx" to AppGlobal.instance.get_line_idx(),
+            "today" to dt.toString("yyyy-MM-dd"),
+            "yesterday" to dt.minusDays(1).toString("yyyy-MM-dd"))  // 전일 데이터
+
+//        OEEUtil.LogWrite(params.toString(), "Shift worktime Request params")
+
+        request(this, uri, false, params, { result ->
+            var code = result.getString("code")
+            if (code == "00") {
+                var list1 = result.getJSONArray("item1")
+                var list2 = result.getJSONArray("item2")
+                if (shift3 != null) {
+                    var today_shift = shift3
+                    if (list1.length()>0) {
+                        val item = list1.getJSONObject(0)
+                        today_shift.put("date", item["date"])
+                        today_shift.put("line_idx", item["line_idx"])
+                        today_shift.put("line_name", item["line_name"])
+                    } else {
+                        today_shift.put("date", dt.toString("yyyy-MM-dd"))
+                        today_shift.put("line_idx", "0")
+                        today_shift.put("line_name", "Manual")
+                    }
+                    list1.put(today_shift)
+
+                    var yester_shift = shift3
+                    if (list2.length()>0) {
+                        val item = list2.getJSONObject(0)
+                        yester_shift.put("date", item["date"])
+                        yester_shift.put("line_idx", item["line_idx"])
+                        yester_shift.put("line_name", item["line_name"])
+                    } else {
+                        yester_shift.put("date", dt.minusDays(1).toString("yyyy-MM-dd"))
+                        yester_shift.put("line_idx", "0")
+                        yester_shift.put("line_name", "Manual")
+                    }
+                    list2.put(yester_shift)
+                }
+                list1 = handleWorkData(list1)
+                list2 = handleWorkData(list2)
+                AppGlobal.instance.set_today_work_time(list1)
+                AppGlobal.instance.set_prev_work_time(list2)
+
+                // Log 확인
+//                OEEUtil.LogWrite(list1.toString(), "Today Shift info")
+//                OEEUtil.LogWrite(list2.toString(), "Yester Shift info")
+
+                compute_work_shift()
+
+            } else {
+                ToastOut(this, result.getString("msg"), true)
+            }
+        })
+    }
     private fun fetchWorkData() {
         // 당일과 전일 데이터를 모두 불러왔는지 체크하기 위한 변수 (2가 되면 모두 읽어옴)
         var _load_work_data_cnt = 0
@@ -367,7 +464,7 @@ Log.e("params", "" + params)
                 _load_work_data_cnt++
                 if (_load_work_data_cnt >= 2) compute_work_shift()
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, msg, true)
             }
         })
 
@@ -420,7 +517,6 @@ Log.e("params", "" + params)
     var _last_working = false                   // 금일 마지막 작업인지 확인용
 
     private fun compute_work_shift() {
-
         if (is_loop) return
         is_loop = true
 
@@ -434,13 +530,17 @@ Log.e("params", "" + params)
             // DB에 Shift 정보를 저장한다.
             // Production report 때문에 그날의 정보를 모두 저장해야 함.
             var target_type = AppGlobal.instance.get_target_type()
+
             for (i in 0..(list.length() - 1)) {
+
                 val item = list.getJSONObject(i)
-                var target = if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total")
-                        AppGlobal.instance.get_target_server_shift(item["shift_idx"].toString()) else AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
+                var target = if (target_type.indexOf("server") >= 0)
+                        AppGlobal.instance.get_target_server_shift(item["shift_idx"].toString())
+                    else AppGlobal.instance.get_target_manual_shift(item["shift_idx"].toString())
                 if (target == null || target == "") target = "0"
 
                 val row = _target_db.get(item["date"].toString(), item["shift_idx"].toString())
+
                 if (row == null) { // insert
 //                    Log.e("db info", "===> " + item["date"].toString() + " : " + item["shift_idx"].toString() + " : null")
                     _target_db.add(item["date"].toString(), item["shift_idx"].toString(), item["shift_name"].toString(), target, item["work_stime"].toString(), item["work_etime"].toString())
@@ -593,7 +693,7 @@ Log.e("params", "" + params)
 //                if (s > 0) {
 //                }
             } else {
-                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -608,12 +708,10 @@ Log.e("params", "" + params)
         var params = listOf("code" to "color")
         request(this, uri, false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if (code == "00") {
-                var list = result.getJSONArray("item")
-                AppGlobal.instance.set_color_code(list)
+                AppGlobal.instance.set_color_code(result.getJSONArray("item"))
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -657,13 +755,13 @@ Log.e("params", "" + params)
         if (item != null) {
             var _total_target = 0
             var target_type = AppGlobal.instance.get_target_type()
-            if (target_type=="server_per_hourly" || target_type=="server_per_accumulate" || target_type=="server_per_day_total") {
+            if (target_type.indexOf("server") >= 0) {
                 when (item["shift_idx"]) {
                     "1" -> _total_target = AppGlobal.instance.get_target_server_shift("1").toInt()
                     "2" -> _total_target = AppGlobal.instance.get_target_server_shift("2").toInt()
                     "3" -> _total_target = AppGlobal.instance.get_target_server_shift("3").toInt()
                 }
-            } else if (target_type=="device_per_hourly" || target_type=="device_per_accumulate" || target_type=="device_per_day_total") {
+            } else if (target_type.indexOf("device") >= 0) {
                 when (item["shift_idx"]) {
                     "1" -> _total_target = AppGlobal.instance.get_target_manual_shift("1").toInt()
                     "2" -> _total_target = AppGlobal.instance.get_target_manual_shift("2").toInt()
@@ -761,6 +859,11 @@ Log.e("params", "" + params)
 
 
     fun endTodayWork() {
+        tv_report_count?.text = "0"                              // 좌측 Report 버튼의 Actual 값도 0으로 초기화
+
+        AppGlobal.instance.set_last_received("")                // 다운타임 검사용 변수도 초기화
+        AppGlobal.instance.set_downtime_idx("")
+
         AppGlobal.instance.set_work_idx("")
         AppGlobal.instance.set_worker_no("")
         AppGlobal.instance.set_worker_name("")
@@ -796,15 +899,16 @@ Log.e("params", "" + params)
         if (_current_shift_etime_millis != 0L) {
             if (_current_shift_etime_millis <= DateTime().millis) {     // 현재 시간보다 작으면 Shift 끝난거임.
                 Log.e("checkCurrentShiftEnd", "end time . finish shift work =============================> need reload")
-                AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
-                AppGlobal.instance.set_last_received("")                // 다운타임 검사용 변수도 초기화
-                tv_report_count.text = "0"                              // 좌측 Report 버튼의 Actual 값도 0으로 초기화
+//                AppGlobal.instance.set_current_shift_actual_cnt(0)      // 토탈 Actual 초기화
+//                AppGlobal.instance.set_last_received("")                // 다운타임 검사용 변수도 초기화
+//                tv_report_count?.text = "0"                              // 좌측 Report 버튼의 Actual 값도 0으로 초기화
 
                 // 마지막 작업이 끝났으면 완전 초기화
-                if (_last_working == true) {
-                    endTodayWork()
-                    _last_working = false
-                }
+//                if (_last_working == true) {
+//                    endTodayWork()
+//                    _last_working = false
+//                }
+                endTodayWork()
                 compute_work_shift()
             }
 
@@ -838,7 +942,7 @@ Log.e("params", "" + params)
         }
         _downtime_timer.schedule(downtime_task, 500, 1000)
 
-        // 10초마다
+        // 30초마다
         val task1 = object : TimerTask() {
             override fun run() {
                 runOnUiThread {
@@ -848,7 +952,7 @@ Log.e("params", "" + params)
                 }
             }
         }
-        _timer_task1.schedule(task1, 2000, 10000)
+        _timer_task1.schedule(task1, 3000, 30000)
 
         // 10분마다
         val task2 = object : TimerTask() {
@@ -891,6 +995,19 @@ Log.e("params", "" + params)
                 -> ToastOut(context, "USB disconnected")
                 UsbService.ACTION_USB_NOT_SUPPORTED // USB NOT SUPPORTED
                 -> ToastOut(context, "USB device not supported")
+            }
+            when (intent.action) {
+                UsbService.ACTION_USB_PERMISSION_GRANTED // USB PERMISSION GRANTED
+                -> {
+                    btn_usb_state.isSelected = true
+                    AppGlobal.instance._usb_state = true
+                    tv_usb.setTextColor(Color.parseColor("#f8ad13"))
+                }
+                else -> {
+                    btn_usb_state.isSelected = false
+                    AppGlobal.instance._usb_state = false
+                    tv_usb.setTextColor(Color.parseColor("#EEEEEE"))
+                }
             }
         }
     }
@@ -949,15 +1066,19 @@ Log.e("params", "" + params)
         if (pos_end < 0) return
 
         if (isJSONValid(recvBuffer)) {
-            val parser = JsonParser()
-            val element = parser.parse(recvBuffer)
-            val cmd = element.asJsonObject.get("cmd").asString
-            val value = element.asJsonObject.get("value")
+            try {
+                val parser = JsonParser()
+                val element = parser.parse(recvBuffer)
+                val cmd = element.asJsonObject.get("cmd").asString
+                val value = element.asJsonObject.get("value")
 
-            ToastOut(this, element.toString())
-            Log.w("test", "usb = " + recvBuffer)
+                ToastOut(this, element.toString())
+                Log.w("test", "usb = " + recvBuffer)
 
-            saveRowData(cmd, value)
+                saveRowData(cmd, value)
+            } catch(e: JsonSyntaxException) {
+//                OEEUtil.LogWrite(e.toString(), "USB Input Error")
+            }
         } else {
             ToastOut(this, "usb parsing error! = " + recvBuffer)
             Log.e("test", "usb parsing error! = " + recvBuffer)
@@ -990,11 +1111,30 @@ Log.e("params", "" + params)
                 return
             }
 
+
+            // 휴식시간인지 확인. 휴식 시간이면 Actual Count 가능한지 체크
+            if (!AppGlobal.instance.get_planned_count_process()) {
+                // 설정되어 있는 휴식 시간
+                val planned1_stime = OEEUtil.parseDateTime(cur_shift["planned1_stime_dt"].toString())
+                val planned1_etime = OEEUtil.parseDateTime(cur_shift["planned1_etime_dt"].toString())
+                val planned2_stime = OEEUtil.parseDateTime(cur_shift["planned2_stime_dt"].toString())
+                val planned2_etime = OEEUtil.parseDateTime(cur_shift["planned2_etime_dt"].toString())
+                val now_millis = DateTime().millis
+
+                // 워크 타임안에 있으면서 휴식 시간 안에 있다면,
+                if ((planned1_stime.millis < now_millis && planned1_etime.millis > now_millis ) ||
+                    (planned2_stime.millis < now_millis && planned2_etime.millis > now_millis )) {
+                    ToastOut(this, R.string.msg_cannot_work_planned_time, true)
+                    return
+                }
+            }
+
+
             val shift_idx = cur_shift["shift_idx"]      // 현재 작업중인 Shift
             var inc_count = 1
 
             // 콤포넌트 선택되어야만 실행되는 경우
-            if (AppGlobal.instance.get_without_component() == false) {
+            if (AppGlobal.instance.get_view_with_component()) {
 
                 // 선택한 Component 제품이 있는지 확인
                 val work_idx = AppGlobal.instance.get_work_idx()
@@ -1041,6 +1181,8 @@ Log.e("params", "" + params)
             _last_count_received_time = DateTime()      // downtime 시간 초기화 (구버전용)
 
             AppGlobal.instance.set_last_received(DateTime().toString("yyyy-MM-dd HH:mm:ss"))
+
+            sendEndDownTimeForce()      // 처리안된 Downtime 강제 완료
 
             sendCountData(value.toString(), inc_count)  // 서버에 카운트 정보 전송
 
@@ -1124,7 +1266,7 @@ Log.e("params", "" + params)
     }
 
     // downtime 발생시 푸시 발송
-    private fun sendPush() {
+    fun sendPush(push_text: String, add_text: String = "", progress: Boolean=false) {
         val uri = "/pushcall.php"
         var params = listOf(
             "code" to "push_text_list",
@@ -1136,13 +1278,13 @@ Log.e("params", "" + params)
             "machine_no" to AppGlobal.instance.get_mc_no1(),
             "mc_model" to AppGlobal.instance.get_mc_model(),
             "seq" to "0",
-            "text" to "downtime occurrence")
+            "text" to push_text,
+            "add_text" to add_text)
 
-        request(this, uri, true, params, { result ->
+        request(this, uri, progress, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if(code != "00"){
-//                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+//                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
@@ -1151,9 +1293,11 @@ Log.e("params", "" + params)
 
         if (AppGlobal.instance.get_server_ip() == "") return
 
-        val work_idx = "" + AppGlobal.instance.get_work_idx()
+        val work_idx = "" + AppGlobal.instance.get_product_idx()
         if (work_idx=="") return
 
+        if (_is_call) return
+        _is_call = true
 /*
         var db = SimpleDatabaseHelper(this)
         val row = db.get(work_idx)
@@ -1162,9 +1306,6 @@ Log.e("params", "" + params)
         var down_db = DBHelperForDownTime(this)
         val count = down_db.counts_for_notcompleted()
         if (count > 0) return
-
-        if (_is_call) return
-        _is_call = true
 
         val list = down_db.gets()
 
@@ -1184,7 +1325,6 @@ Log.e("params", "" + params)
 
         request(this, uri, true,false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if (code == "00") {
                 var idx = result.getString("idx")
                 AppGlobal.instance.set_downtime_idx(idx)
@@ -1195,12 +1335,17 @@ Log.e("params", "" + params)
                 val shift_idx = work_info?.getString("shift_idx") ?: ""
                 val shift_name = work_info?.getString("shift_name") ?: ""
 
-                down_db.add(idx, work_idx, didx, shift_idx, shift_name, dt.toString("yyyy-MM-dd HH:mm:ss"))
+                val start_dt = dt.toString("yyyy-MM-dd HH:mm:ss")
+                down_db.add(idx, work_idx, didx, shift_idx, shift_name, start_dt)
 
-                sendPush()
+                startDowntimeInputActivity(idx, start_dt)
+
+                Log.e("checkDownTime", "idx=" + idx + ", start_dt=" + start_dt)
+
+                sendPush("SYS: DOWNTIME")
 
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
             _is_call = false
         },{
@@ -1211,6 +1356,36 @@ Log.e("params", "" + params)
     private fun sendEndDownTimeForce() {
         if (AppGlobal.instance.get_server_ip() == "") return
         if (AppGlobal.instance.get_downtime_idx() == "") return
+
+        var db = DBHelperForDownTime(this)
+
+        val idx = AppGlobal.instance.get_downtime_idx()
+        val item = db.get(idx)
+        if (item == null) return
+
+        val now = DateTime()
+        val now_millis = now.millis
+        val down_start_millis = OEEUtil.parseDateTime(item["start_dt"].toString()).millis
+
+        var planned1_time = 0
+        var planned2_time = 0
+
+        val shift_time = AppGlobal.instance.get_current_shift_time()
+
+        if (shift_time != null) {
+            val planned1_stime_millis = OEEUtil.parseDateTime(shift_time["planned1_stime_dt"].toString()).millis
+            val planned1_etime_millis = OEEUtil.parseDateTime(shift_time["planned1_etime_dt"].toString()).millis
+            val planned2_stime_millis = OEEUtil.parseDateTime(shift_time["planned2_stime_dt"].toString()).millis
+            val planned2_etime_millis = OEEUtil.parseDateTime(shift_time["planned2_etime_dt"].toString()).millis
+
+            planned1_time = AppGlobal.instance.compute_time_millis(down_start_millis, now_millis, planned1_stime_millis, planned1_etime_millis)
+            planned2_time = AppGlobal.instance.compute_time_millis(down_start_millis, now_millis, planned2_stime_millis, planned2_etime_millis)
+        }
+        val down_time = ((now_millis - down_start_millis) / 1000).toInt()
+        val real_down_time = down_time - planned1_time - planned2_time
+
+        val ct = AppGlobal.instance.get_cycle_time()
+        val target = if (ct > 0) real_down_time / ct else 0
 
         val downtime = "99"
         val uri = "/downtimedata.php"
@@ -1223,64 +1398,71 @@ Log.e("params", "" + params)
 
         request(this, uri, true,false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
             if (code == "00") {
                 val idx = AppGlobal.instance.get_downtime_idx()
                 AppGlobal.instance.set_downtime_idx("")
-                var db = DBHelperForDownTime(this)
-                db.updateEnd(idx, "ignored")
+
+//                db.updateEnd(idx, "ignored")
+                db.updateEnd(idx, "ignored", now.toString("yyyy-MM-dd HH:mm:ss"), down_time, real_down_time, target)
 
                 // 기존 다운타임 화면이 열려있으면 닫고
                 val br_intent = Intent("start.downtime")
                 this.sendBroadcast(br_intent)
 
                 // 카운트뷰로 이동
-                if (vp_fragments.currentItem != 1) changeFragment(1)
+//                if (vp_fragments.currentItem != 1) changeFragment(1)
 
             } else if (code == "99") {
                 // ?
             } else {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                ToastOut(this, result.getString("msg"), true)
             }
         })
     }
 
     // 작업 시간일때, 작업 시작 시간보다 작은 시간의 DownTime 을 삭제한다.(=지난 Shift의 DownTime)
     fun RemoveDownTimeData() {
-        val work_idx = AppGlobal.instance.get_work_idx()
-        if (work_idx != "") {
-            val item = AppGlobal.instance.get_current_shift_time()
-            if (item != null) {
-                val db = DBHelperForDownTime(this)
-                val work_stime = item["work_stime"].toString()
-//                var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-                db.deleteLastDate(work_stime)
-            }
+        val item = AppGlobal.instance.get_current_shift_time()
+        if (item != null) {
+            val db = DBHelperForDownTime(this)
+            db.deleteOldData(item["work_stime"].toString())
         }
     }
 
+    private var _is_down_loop: Boolean = false
+
     // 신버전
     private fun checkDownTime() {
+        if (_is_down_loop) return
+        _is_down_loop = true
+
         var db = DBHelperForDownTime(this)
         val count = db.counts_for_notcompleted()
-
         if (count > 0) {
             AppGlobal.instance.set_last_received(DateTime().toString("yyyy-MM-dd HH:mm:ss"))
+            _is_down_loop = false
             return
         }
 
-        val work_idx = AppGlobal.instance.get_work_idx()
-        if (work_idx == "") return
+        val work_idx = AppGlobal.instance.get_product_idx()
+        if (work_idx == "") {
+            _is_down_loop = false
+            return
+        }
 
         val downtime_time = AppGlobal.instance.get_downtime_sec()
         if (downtime_time == "") {
             ToastOut(this, R.string.msg_no_downtime)
+            _is_down_loop = false
             return
         }
         val downtime_time_sec = downtime_time.toInt()
 
         val item = AppGlobal.instance.get_current_shift_time()
-        if (item == null) return
+        if (item == null) {
+            _is_down_loop = false
+            return
+        }
 
         var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
         var work_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
@@ -1291,21 +1473,16 @@ Log.e("params", "" + params)
 
         val now = DateTime()
         val now_millis = now.millis
-        var last_count_received = work_stime    // downtime 값이 "" 이면 처음이므로 Shift 시작 시간으로 저장하기 위함
 
-        var downtime_chk = AppGlobal.instance.get_last_received()
+        var last_received_time = work_stime    // downtime 값이 "" 이면 처음이므로 Shift 시작 시간으로 저장
 
-//Log.e("Downtime", "last downtime = "+downtime_chk+", shift start = "+work_stime.toString("yyyy-MM-dd HH:mm:ss"))
-
-        // 저장된 downtime 시간이 현재 Shift의 시작 시간보다 작다면 초기화 시킨다.
-        if (OEEUtil.parseDateTime(downtime_chk).millis < work_stime.millis) {
-            downtime_chk = work_stime.toString("yyyy-MM-dd HH:mm:ss")
-            AppGlobal.instance.set_last_received(downtime_chk)
-        }
-
-        if (downtime_chk != "") {
-//            Log.e("DownTime value check", "time : "+downtime_chk)
-            last_count_received = OEEUtil.parseDateTime(downtime_chk)
+        var chk = AppGlobal.instance.get_last_received()
+        if (chk != "") {
+            if (OEEUtil.parseDateTime(chk).millis < work_stime.millis) {    // downtime 시작 시간이 Shift의 시작 시간보다 작다면 초기화
+                chk = item["work_stime"].toString()
+                AppGlobal.instance.set_last_received(chk)
+            }
+            last_received_time = OEEUtil.parseDateTime(chk)
         }
 
         // 워크 타임안에 있으면서 휴식 시간이 아니고,
@@ -1313,33 +1490,71 @@ Log.e("params", "" + params)
         if (work_stime.millis < now_millis && work_etime.millis > now_millis &&
             !(planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) &&
             !(planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis ) &&
-            downtime_time_sec > 0 && now_millis - last_count_received.millis > downtime_time_sec*1000) {
+            downtime_time_sec > 0 && now_millis - last_received_time.millis > downtime_time_sec * 1000) {
 //            Log.e("downtime chk", "over time")
 //            sendStartDownTime(OEEUtil.parseDateTime(downtime_chk))
-            sendStartDownTime(last_count_received)
-            startDowntimeActivity()
+            sendStartDownTime(last_received_time)
+//            startDowntimeActivity()
         }
 
         // 워크 타임이 아니면 downtime 시작 시간을 현재 시간으로 초기화
         if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
-            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다.
-            // 처음 Shift 시작시 지각인지 체크하기 위함.
+            AppGlobal.instance.set_last_received("")
+            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다. (Shift 시작시 지각인지 체크하기 위함)
             if (AppGlobal.instance.get_last_received() != "") {
-                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
-//            Log.e("downtime chk", "now work")
+                AppGlobal.instance.set_last_received("")
+//                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
             }
         }
 
+//        var last_count_received = work_stime    // downtime 값이 "" 이면 처음이므로 Shift 시작 시간으로 저장하기 위함
+
+//        var downtime_chk = AppGlobal.instance.get_last_received()
+//
+//        // 저장된 downtime 시간이 현재 Shift의 시작 시간보다 작다면 초기화 시킨다.
+//        if (OEEUtil.parseDateTime(downtime_chk).millis < work_stime.millis) {
+//            downtime_chk = work_stime.toString("yyyy-MM-dd HH:mm:ss")
+//            AppGlobal.instance.set_last_received(downtime_chk)
+//        }
+//
+//        if (downtime_chk != "") {
+////            Log.e("DownTime value check", "time : "+downtime_chk)
+//            last_count_received = OEEUtil.parseDateTime(downtime_chk)
+//        }
+
+        // 워크 타임안에 있으면서 휴식 시간이 아니고,
+        // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
+//        if (work_stime.millis < now_millis && work_etime.millis > now_millis &&
+//            !(planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) &&
+//            !(planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis ) &&
+//            downtime_time_sec > 0 && now_millis - last_count_received.millis > downtime_time_sec*1000) {
+////            Log.e("downtime chk", "over time")
+////            sendStartDownTime(OEEUtil.parseDateTime(downtime_chk))
+//            sendStartDownTime(last_count_received)
+//            startDowntimeActivity()
+//        }
+
+        // 워크 타임이 아니면 downtime 시작 시간을 현재 시간으로 초기화
+//        if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
+//            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다.
+//            // 처음 Shift 시작시 지각인지 체크하기 위함.
+//            if (AppGlobal.instance.get_last_received() != "") {
+//                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
+////            Log.e("downtime chk", "now work")
+//            }
+//        }
+
         // 휴식 시간이면 downtime 시작 시간을 현재 시간으로 초기화
-        if ((planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) ||
-            (planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis )) {
-            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다.
-            // 처음 Shift 시작시 지각인지 체크하기 위함.
-            if (AppGlobal.instance.get_last_received() != "") {
-                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
-//            Log.e("downtime chk", "planned time")
-            }
-        }
+//        if ((planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) ||
+//            (planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis )) {
+//            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다.
+//            // 처음 Shift 시작시 지각인지 체크하기 위함.
+//            if (AppGlobal.instance.get_last_received() != "") {
+//                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
+////            Log.e("downtime chk", "planned time")
+//            }
+//        }
+        _is_down_loop = false
     }
 
     // 구버전
@@ -1406,6 +1621,17 @@ Log.e("params", "" + params)
         val br_intent = Intent("start.downtime")
         this.sendBroadcast(br_intent)
         val intent = Intent(this, DownTimeActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun startDowntimeInputActivity(idx: String = "", start_dt: String = "") {
+//        val br_intent = Intent("start.downtime")
+//        this.sendBroadcast(br_intent)
+        if (idx == "" || start_dt == "") return
+
+        val intent = Intent(this, DownTimeInputActivity::class.java)
+        intent.putExtra("idx", idx)
+        intent.putExtra("start_dt", start_dt)
         startActivity(intent)
     }
 

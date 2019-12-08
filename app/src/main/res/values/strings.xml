@@ -15,6 +15,7 @@
     <string name="title_design_info">DESIGN INFO</string>
 
     <string name="title_push_info">PUSH INFO</string>
+    <string name="title_down_time">Down time</string>
 
     <!-- 카운트화면 -->
     <string name="bottom_label_pieces">Pieces : \u0020</string>
@@ -46,6 +47,9 @@
     <string name="label_shift1">1 Shift</string>
     <string name="label_shift2">2 Shift</string>
     <string name="label_shift3">3 Shift</string>
+    <string name="label_start_at_target_1">Start at target 1</string>
+    <string name="label_planned_count_process">Planned Time Actual Count</string>
+    <string name="label_target_stop_when_downtime">Target Q\'ty Stop When DownTime</string>
 
     <!-- COMPONENT 화면 -->
     <string name="label_wos">WOS</string>
@@ -107,6 +111,10 @@
     <string name="search">SEARCH</string>
     <string name="notice">Notice</string>
 
+    <string name="availability">Availability</string>
+    <string name="performance">Performance</string>
+    <string name="quality">Quality</string>
+
     <string name="list_item_wos">WOS</string>
     <string name="list_item_model">MODEL</string>
     <string name="list_item_component">COMPONENT</string>
@@ -117,6 +125,7 @@
 
     <string name="list_item_shift">SHIFT</string>
     <string name="list_item_work_time">WORK TIME</string>
+    <string name="list_item_planned_time">PLANNED TIME</string>
     <string name="list_item_planned_time1">PLANNED TIME1</string>
     <string name="list_item_planned_time2">PLANNED TIME2</string>
 
@@ -143,6 +152,7 @@
     <string name="msg_require_target_quantity">Please enter a target quantity</string>
     <string name="msg_layer_not_selected">Work info not selected</string>
     <string name="msg_no_setting">Setting not found</string>
+    <string name="msg_component_not_available">Component is not available.</string>
     <string name="msg_please_wait_for_loading" translatable="false">Please wait for loading</string>
     <string name="msg_data_not_found">Data not found</string>
     <string name="msg_connection_fail">The connection to the server failed.</string>
@@ -155,5 +165,7 @@
     <string name="msg_remain_out_of_range">Remaining value is out of range.</string>
 
     <string name="msg_exit_automatically">Workday ends automatically</string>
+    <string name="msg_no_target_value_from_server">No target value was sent from the server.</string>
+    <string name="msg_cannot_work_planned_time">You can not work during the Planned Time.</string>
 
 </resources>

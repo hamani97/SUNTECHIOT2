@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -214,11 +215,11 @@ class ComponentInfoActivity : BaseActivity() {
 
         // balance로 정렬
         if (AppGlobal.instance.get_compo_sort_key() == "BALANCE") {
-            var sortedList = _list_for_wos.sortedWith(compareBy({ it.get("balance").toString().toInt() }))
+            val sortedList = _list_for_wos.sortedWith(compareBy({ it.get("balance").toString().toInt() }))
             _list_for_wos.removeAll(_list_for_wos)
             _list_for_wos.addAll(sortedList)
         } else {
-            var sortedList = _list_for_wos.sortedWith(compareBy({ it.get("size").toString().toInt() }))
+            val sortedList = _list_for_wos.sortedWith(compareBy({ it.get("size").toString().toInt() }))
             _list_for_wos.removeAll(_list_for_wos)
             _list_for_wos.addAll(sortedList)
         }
@@ -323,6 +324,7 @@ class ComponentInfoActivity : BaseActivity() {
             if (code == "00") {
                 var arr: ArrayList<String> = arrayListOf<String>()
                 var list = result.getJSONArray("item")
+Log.e("wos_list", "wos_list : " + list.toString())
                 var lists : ArrayList<HashMap<String, String>> = arrayListOf()
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
@@ -373,6 +375,7 @@ class ComponentInfoActivity : BaseActivity() {
             if (code == "00") {
                 var arr: ArrayList<String> = arrayListOf<String>()
                 var list = result.getJSONArray("item")
+Log.e("wos_comp", "wos_comp : " + list.toString())
                 var lists : ArrayList<HashMap<String, String>> = arrayListOf()
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
@@ -416,6 +419,7 @@ class ComponentInfoActivity : BaseActivity() {
             if (code == "00") {
                 var arr: ArrayList<String> = arrayListOf<String>()
                 var list = result.getJSONArray("item")
+Log.e("wos_size", "wos_size : " + list.toString())
                 var lists : ArrayList<HashMap<String, String>> = arrayListOf()
                 for (i in 0..(list.length() - 1)) {
                     val item = list.getJSONObject(i)
