@@ -1464,12 +1464,13 @@ Log.e("params", "" + params)
             return
         }
 
-        var work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
-        var work_etime = OEEUtil.parseDateTime(item["work_etime"].toString())
-        var planned1_stime_dt = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString())
-        var planned1_etime_dt = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString())
-        var planned2_stime_dt = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString())
-        var planned2_etime_dt = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString())
+        val work_stime = OEEUtil.parseDateTime(item["work_stime"].toString())
+        val work_stime_millis = work_stime.millis
+        val work_etime_millis = OEEUtil.parseDateTime(item["work_etime"].toString()).millis
+        val planned1_stime_millis = OEEUtil.parseDateTime(item["planned1_stime_dt"].toString()).millis
+        val planned1_etime_millis = OEEUtil.parseDateTime(item["planned1_etime_dt"].toString()).millis
+        val planned2_stime_millis = OEEUtil.parseDateTime(item["planned2_stime_dt"].toString()).millis
+        val planned2_etime_millis = OEEUtil.parseDateTime(item["planned2_etime_dt"].toString()).millis
 
         val now = DateTime()
         val now_millis = now.millis
@@ -1478,34 +1479,62 @@ Log.e("params", "" + params)
 
         var chk = AppGlobal.instance.get_last_received()
         if (chk != "") {
-            if (OEEUtil.parseDateTime(chk).millis < work_stime.millis) {    // downtime 시작 시간이 Shift의 시작 시간보다 작다면 초기화
+            if (OEEUtil.parseDateTime(chk).millis < work_stime_millis) {    // downtime 시작 시간이 Shift의 시작 시간보다 작다면 초기화
                 chk = item["work_stime"].toString()
                 AppGlobal.instance.set_last_received(chk)
             }
             last_received_time = OEEUtil.parseDateTime(chk)
         }
 
-        // 워크 타임안에 있으면서 휴식 시간이 아니고,
-        // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
-        if (work_stime.millis < now_millis && work_etime.millis > now_millis &&
-            !(planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) &&
-            !(planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis ) &&
-            downtime_time_sec > 0 && now_millis - last_received_time.millis > downtime_time_sec * 1000) {
-//            Log.e("downtime chk", "over time")
-//            sendStartDownTime(OEEUtil.parseDateTime(downtime_chk))
-            sendStartDownTime(last_received_time)
-//            startDowntimeActivity()
+        val last_received_time_millis = last_received_time.millis
+
+        // 워크 타임안에 있는 경우
+        if (work_stime_millis < now_millis && work_etime_millis > now_millis) {
+
+            // 휴식 시간이 아닐때
+            if (!(planned1_stime_millis < now_millis && planned1_etime_millis > now_millis ) &&
+                !(planned2_stime_millis < now_millis && planned2_etime_millis > now_millis ) && downtime_time_sec > 0) {
+
+                // 다운타임 안의 휴식시간
+                val d1 = AppGlobal.instance.compute_time_millis(last_received_time_millis, now_millis, planned1_stime_millis, planned1_etime_millis)
+                val d2 = AppGlobal.instance.compute_time_millis(last_received_time_millis, now_millis, planned2_stime_millis, planned2_etime_millis)
+
+                val cur_down_time = ((now_millis - last_received_time_millis) / 1000) - d1 - d2     // 휴식시간을 뺀 실제 다운타임
+
+                // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
+                if (cur_down_time > downtime_time_sec) {
+                    sendStartDownTime(last_received_time)
+                }
+            }
+
+        } else {
+            // 워크 타임이 아니면 downtime 시작 시간 초기화
+            AppGlobal.instance.set_last_received("")
         }
 
+        // 위의 로직으로 변경됨 (다운타임 시간에서 휴식 시간을 빼고 계산)
+        // 워크 타임안에 있으면서 휴식 시간이 아니고,
+        // 지정된 downtime 이 지났으면 downtime을 발생시킨다.
+//        if (work_stime.millis < now_millis && work_etime.millis > now_millis &&
+//            !(planned1_stime_dt.millis < now_millis && planned1_etime_dt.millis > now_millis ) &&
+//            !(planned2_stime_dt.millis < now_millis && planned2_etime_dt.millis > now_millis ) &&
+//            downtime_time_sec > 0 && now_millis - last_received_time.millis > downtime_time_sec * 1000) {
+////            Log.e("downtime chk", "over time")
+////            sendStartDownTime(OEEUtil.parseDateTime(downtime_chk))
+//            sendStartDownTime(last_received_time)
+////            startDowntimeActivity()
+//        }
+
+        // 위의 로직으로 변경됨 (다운타임 시간에서 휴식 시간을 빼고 계산)
         // 워크 타임이 아니면 downtime 시작 시간을 현재 시간으로 초기화
-        if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
-            AppGlobal.instance.set_last_received("")
-            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다. (Shift 시작시 지각인지 체크하기 위함)
-            if (AppGlobal.instance.get_last_received() != "") {
-                AppGlobal.instance.set_last_received("")
-//                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
-            }
-        }
+//        if (work_stime.millis > now_millis || work_etime.millis < now_millis) {
+//            AppGlobal.instance.set_last_received("")
+//            // downtime 시간 초기화 하기 전에 "" 값이면 초기화를 하지 않는다. (Shift 시작시 지각인지 체크하기 위함)
+//            if (AppGlobal.instance.get_last_received() != "") {
+//                AppGlobal.instance.set_last_received("")
+////                AppGlobal.instance.set_last_received(now.toString("yyyy-MM-dd HH:mm:ss"))
+//            }
+//        }
 
 //        var last_count_received = work_stime    // downtime 값이 "" 이면 처음이므로 Shift 시작 시간으로 저장하기 위함
 
