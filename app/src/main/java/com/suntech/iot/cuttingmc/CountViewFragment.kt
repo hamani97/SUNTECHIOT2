@@ -1195,7 +1195,14 @@ class CountViewFragment : BaseFragment() {
 
             val balance = Integer.parseInt(_list[position]["target"]) - Integer.parseInt(_list[position]["actual"])
 
-            vh.tv_item_wosno.text = _list[position]["wosno"]
+            val cut = _list[position]["wosno"].toString().substringBeforeLast("-")
+            if (cut != null) {
+                vh.tv_item_wosno.text = cut
+            } else {
+                vh.tv_item_wosno.text = _list[position]["wosno"]
+            }
+
+//            vh.tv_item_wosno.text = _list[position]["wosno"]
             vh.tv_item_model.text = _list[position]["model"]
             vh.tv_item_component.text = _list[position]["component"]
             vh.tv_item_size.text = _list[position]["size"]
