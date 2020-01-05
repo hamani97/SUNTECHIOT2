@@ -255,6 +255,19 @@ class DBHelperForComponent
         return arr
     }
 
+    fun sum_defective_count(): Int {
+        val db = _openHelper.readableDatabase ?: return -1
+        val sql = "select sum(defective) as cnt from component "
+        val cur = db.rawQuery(sql, arrayOf())
+        var cnt = 0
+        if (cur.moveToNext()) {
+            cnt = cur.getInt(0)
+        }
+        cur.close()
+        db.close()
+        return cnt
+    }
+
     fun add(wosno: String, shift_id:String, shift_name:String, styleno: String, model:String, component:String, size:String, target: Int, actual: Int, defective: Int, seq: Int): Long {
         val db = _openHelper.writableDatabase ?: return 0
         val row = ContentValues()

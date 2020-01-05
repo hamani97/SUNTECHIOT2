@@ -151,6 +151,9 @@ class MainActivity : BaseActivity() {
         // 지난 DownTime이 있으면 삭제한다.
         RemoveDownTimeData()
 
+        // 30분마다 실행되기 때문에 처음 앱 실행시 한번 실행해 준다.
+        updateCurrentWorkTarget()
+
 //        val db = DBHelperForDownTime(this)
 //        db.delete()
 //        AppGlobal.instance.set_last_received("")
@@ -749,6 +752,7 @@ Log.e("params", "" + params)
     }
 
     // 10초마다 현재 target을 서버에 저장
+    // 30분 마다로 바뀜
     // 작업 시간이 아닐경우는 Pass
     private fun updateCurrentWorkTarget() {
         var item: JSONObject? = AppGlobal.instance.get_current_shift_time()
@@ -770,18 +774,35 @@ Log.e("params", "" + params)
             }
             Log.e("updateCurrentWorkTarget", "target_type=" + target_type + ", _total_target=" + _total_target)
             if (_total_target > 0) {
-                val uri = "/sendtarget.php"
+                // 구서버용
+//                val uri = "/sendtarget.php"
+//                var params = listOf(
+//                    "mac_addr" to AppGlobal.instance.getMACAddress(),
+//                    "date" to item["date"].toString(),
+//                    "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
+//                    "target_count" to _total_target)
+//                request(this, uri, true,false, params, { result ->
+//                    var code = result.getString("code")
+//                    var msg = result.getString("msg")
+//                    if(code != "00"){
+//                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+//                    }
+//                })
+
+                // 신서버용
+                val uri = "/Starget.php"
                 var params = listOf(
                     "mac_addr" to AppGlobal.instance.getMACAddress(),
-                    "date" to item["date"].toString(),
-                    "shift_idx" to  item["shift_idx"],     // AppGlobal.instance.get_current_shift_idx()
-                    "target_count" to _total_target)
+                    "target" to _total_target,
+                    "shift_idx" to  item["shift_idx"]
+                )
 
+                Log.e("Starget request", "= " + params.toString())
                 request(this, uri, true,false, params, { result ->
                     var code = result.getString("code")
-                    var msg = result.getString("msg")
+                    Log.e("Starget result", "= " + result.getString("msg").toString())
                     if(code != "00"){
-                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                        ToastOut(this, result.getString("msg"), true)
                     }
                 })
             }
@@ -1681,7 +1702,30 @@ Log.e("params", "" + params)
         val seq = row!!["seq"].toString().toInt()
 //        val seq = "1"
 
-        val uri = "/senddata1.php"
+        // 구서버용
+        // 패턴과 동일한 API 호출하도록 수정해 달라고 요청함. 2020-01-05.
+//        val uri = "/senddata1.php"
+//        var params = listOf(
+//            "mac_addr" to AppGlobal.instance.getMACAddress(),
+//            "didx" to "1001",
+//            "count" to inc_count.toString(),
+//            "total_count" to actual,
+//            "factory_parent_idx" to AppGlobal.instance.get_factory_idx(),
+//            "factory_idx" to AppGlobal.instance.get_room_idx(),
+//            "line_idx" to AppGlobal.instance.get_line_idx(),
+//            "shift_idx" to  shift_idx,
+//            "seq" to seq,
+//            "wos" to AppGlobal.instance.get_compo_wos(),
+//            "comp" to AppGlobal.instance.get_compo_component_idx(),
+//            "size" to AppGlobal.instance.get_compo_size(),
+//            "max_rpm" to "",
+//            "avr_rpm" to "")
+//Log.e("params", params.toString())
+
+        val count_defective = db.sum_defective_count()      // 현재 디펙티브 값
+
+        // 신서버용
+        val uri = "/Scount.php"
         var params = listOf(
             "mac_addr" to AppGlobal.instance.getMACAddress(),
             "didx" to "1001",
@@ -1696,13 +1740,18 @@ Log.e("params", "" + params)
             "comp" to AppGlobal.instance.get_compo_component_idx(),
             "size" to AppGlobal.instance.get_compo_size(),
             "max_rpm" to "",
-            "avr_rpm" to "")
-//Log.e("params", params.toString())
+            "avr_rpm" to "",
+            "runtime" to "1",
+            "actualO" to "1",
+            "ctO" to "1",
+            "defective" to count_defective.toString(),
+            "worker" to AppGlobal.instance.get_worker_no())
+
         request(this, uri, true,false, params, { result ->
             var code = result.getString("code")
-            var msg = result.getString("msg")
+            Log.e("Scount result", "= " + result.getString("msg").toString())
             if(code != "00") {
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, result.getString("msg"), Toast.LENGTH_SHORT).show()
             }
         })
     }
