@@ -20,13 +20,13 @@ import android.widget.Toast
 import com.suntech.iot.cuttingmc.base.BaseActivity
 import com.suntech.iot.cuttingmc.common.AppGlobal
 import com.suntech.iot.cuttingmc.db.DBHelperForComponent
+import com.suntech.iot.cuttingmc.popup.WosListActivity
 import com.suntech.iot.cuttingmc.util.OEEUtil
 import com.suntech.iot.cuttingmc.util.UtilString.addPairText
 import kotlinx.android.synthetic.main.activity_component_info.*
 import kotlinx.android.synthetic.main.layout_top_menu_2.*
 import org.json.JSONObject
 import java.util.*
-
 
 class ComponentInfoActivity : BaseActivity() {
 
@@ -42,8 +42,6 @@ class ComponentInfoActivity : BaseActivity() {
 
     private var _list_for_wos_adapter: ListWosAdapter? = null
     private var _list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()
-
-    private var _filtered_list_for_wos: ArrayList<HashMap<String, String>> = arrayListOf()  // Search 추가 2020-01-10
 
     var _selected_wos_index = -1
 
@@ -66,14 +64,6 @@ class ComponentInfoActivity : BaseActivity() {
         initView()
         filterWosData()
         start_timer()
-    }
-
-    fun parentSpaceClick(view: View) {
-        val view = this.currentFocus
-        if (view != null) {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(et_search.windowToken, 0)
-        }
     }
 
     public override fun onResume() {
@@ -123,7 +113,7 @@ class ComponentInfoActivity : BaseActivity() {
                     OEEUtil.parseDateTime(item["work_etime"].toString()).toString("HH:mm"))
         }
 
-        _list_for_wos_adapter = ListWosAdapter(this, _filtered_list_for_wos)
+        _list_for_wos_adapter = ListWosAdapter(this, _list_for_wos)
         lv_wos_info.adapter = _list_for_wos_adapter
 
         lv_wos_info.setOnItemClickListener { adapterView, view, i, l ->
@@ -177,7 +167,26 @@ class ComponentInfoActivity : BaseActivity() {
 //        }
 
         // button click
-        tv_compo_wos.setOnClickListener { fetchWosData() }
+//        tv_compo_wos.setOnClickListener { fetchWosData() }
+        tv_compo_wos.setOnClickListener {
+//            startActivity(Intent(this, WosListActivity::class.java)) }
+            val intent = Intent(this, WosListActivity::class.java)
+            startActivity(intent, { r, c, m, d ->
+                if (r && d!=null) {
+                    Log.e("HAMA", "response=" + d.toString())
+                    val idx = d!!["idx"]!!
+                    _selected_wos_idx = d["idx"]!!.toString()
+                    tv_compo_wos.text = d["wosno"]!!.toString()
+                    tv_compo_model.text = d["model"]!!.toString()
+                    tv_compo_style.text = d["styleno"]!!.toString()
+                    tv_compo_component.text = ""
+                    tv_compo_size.text = ""
+                    tv_compo_target.text = ""
+
+                    filterWosData()
+                }
+            })
+        }
         tv_compo_component.setOnClickListener { fetchComponentData() }
         tv_compo_size.setOnClickListener { fetchSizeData() }
         tv_compo_layer.setOnClickListener { fetchLayerData() }
@@ -194,25 +203,6 @@ class ComponentInfoActivity : BaseActivity() {
             tv_btn_balance.setTextColor(ContextCompat.getColor(this, R.color.colorButtonOrange))
             outputWosList()
         }
-
-//        et_search.isFocusableInTouchMode = true
-
-        // search
-        btn_search.setOnClickListener() {
-            et_search.requestFocus()
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(et_search, 0)
-        }
-
-        et_search.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                if (s != "") {
-                    filterData()
-                }
-            }
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-            override fun afterTextChanged(s: Editable) {}
-        })
     }
 
     private fun saveSettingData() {
@@ -286,40 +276,6 @@ class ComponentInfoActivity : BaseActivity() {
         _list_for_wos_adapter?.notifyDataSetChanged()
     }
 
-    // 검색 필터
-    private fun filterData() {
-        _filtered_list_for_wos.removeAll(_filtered_list_for_wos)
-
-        val cur_wos = tv_compo_wos.text.toString()
-        val cur_size = tv_compo_size.text.toString()
-        val cur_target = tv_compo_target.text.toString()
-        val cur_component = tv_compo_component.text.toString()
-
-        _selected_wos_index = -1
-        val filter_text = et_search.text.toString()
-
-        for (i in 0..(_list_for_wos.size-1)) {
-
-            val item = _list_for_wos[i]
-            val wosno = item["wosno"] ?: ""
-
-            val a = wosno.toUpperCase().contains(filter_text.toUpperCase())
-
-            if (filter_text=="" || a) {
-                _filtered_list_for_wos.add(item)
-
-                val size = item["size"] ?: ""
-                val target = item["target"] ?: ""
-                val component = item["component"] ?: ""
-
-                if (cur_wos == wosno && cur_size == size && cur_target == target && cur_component == component) {
-                    _selected_wos_index = i
-                }
-            }
-        }
-        outputWosList()
-    }
-
     // 선택한 WOS 로 다시 Fetch
     private fun filterWosData() {
         _list_for_wos.removeAll(_list_for_wos)
@@ -372,7 +328,7 @@ class ComponentInfoActivity : BaseActivity() {
 //                            tv_compo_actual.text = actual
 //                        }
                     }
-                    filterData()
+                    outputWosList()
 
                 } else {
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -410,6 +366,7 @@ Log.e("wos_list", "wos_list : " + list.toString())
                 intent.putStringArrayListExtra("list", arr)
                 startActivity(intent, { r, c, m, d ->
                     if (r) {
+                        Log.e("HAMA", "index=" + c + ", response=" + d.toString())
                         _selected_wos_idx = lists[c]["idx"] ?: ""
                         tv_compo_wos.text = lists[c]["wosno"] ?: ""
                         tv_compo_model.text = lists[c]["model"] ?: ""

@@ -8,6 +8,7 @@
     <string name="title_last_worker">LAST WORKER</string>
     <string name="title_setting">SETTING</string>
     <string name="title_counter_device_info">COUNTER DEVICE INFO</string>
+    <string name="title_version">VERSION</string>
     <string name="title_server_info">SERVER INFO</string>
     <string name="title_etc">ETC</string>
     <string name="title_count_info">COUNT INFO</string>
@@ -16,6 +17,7 @@
 
     <string name="title_push_info">PUSH INFO</string>
     <string name="title_down_time">Down time</string>
+    <string name="title_wos_select">SELECT WOS</string>
 
     <!-- 카운트화면 -->
     <string name="bottom_label_pieces">Pieces : \u0020</string>
@@ -31,6 +33,8 @@
 
 
     <!-- SETTING 화면 -->
+    <string name="label_app_version">App Version</string>
+    <string name="label_update_version">Last Update</string>
     <string name="label_wifi">WiFi</string>
     <string name="label_ip">IP</string>
     <string name="label_mac">MAC</string>
@@ -108,6 +112,7 @@
     <string name="exit">Exit</string>
     <string name="cancel">Cancel</string>
     <string name="check">Check</string>
+    <string name="update">Update</string>
     <string name="search">SEARCH</string>
     <string name="notice">Notice</string>
 
@@ -115,6 +120,7 @@
     <string name="performance">Performance</string>
     <string name="quality">Quality</string>
 
+    <string name="list_item_date">DATE</string>
     <string name="list_item_wos">WOS</string>
     <string name="list_item_model">MODEL</string>
     <string name="list_item_component">COMPONENT</string>

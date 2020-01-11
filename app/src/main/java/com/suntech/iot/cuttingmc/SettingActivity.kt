@@ -42,6 +42,9 @@ class SettingActivity : BaseActivity() {
 
     private var is_loop = true
 
+    private var cur_app_version = 0
+    private var cur_update_version = 0
+
     val _broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.getAction()
@@ -64,6 +67,7 @@ class SettingActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
         initView()
+        getUpdateVersion()  // update 확인
     }
 
     fun parentSpaceClick(view: View) {
@@ -191,11 +195,20 @@ class SettingActivity : BaseActivity() {
         tv_shift_3.setText(AppGlobal.instance.get_target_manual_shift("3"))
 
 
+        // Version
+        val version = packageManager.getPackageInfo(packageName, 0).versionName
+        val verArr = version.split(".")
+        tv_app_version?.text = verArr[verArr.size-3] + "." + verArr[verArr.size-2] + "." + verArr[verArr.size-1]
+
+        cur_app_version = verArr[verArr.size-3].toInt() * 1000000 + verArr[verArr.size-2].toInt() * 1000 + verArr[verArr.size-1].toInt()
+
+
         // click listener
         // Tab button
         btn_setting_system.setOnClickListener { tabChange(1) }
         btn_setting_count.setOnClickListener { tabChange(2) }
         btn_setting_target.setOnClickListener { tabChange(3) }
+        btn_setting_appinfo.setOnClickListener { tabChange(4) }
 
         // System setting button listener
         tv_setting_factory.setOnClickListener { fetchDataForFactory() }
@@ -251,6 +264,11 @@ class SettingActivity : BaseActivity() {
                 tv_setting_line.text = ""
                 tv_setting_mc_model.text = ""
             }
+        }
+
+        // Update Start click
+        btn_update_start.setOnClickListener {
+            startActivity(Intent(this, DownloadActivity::class.java))
         }
 
         // Save button click
@@ -394,13 +412,50 @@ class SettingActivity : BaseActivity() {
             "mc_serial" to et_setting_mc_serial.text.toString()
         )
         request(this, uri, false, params, { result ->
-            var code = result.getString("code")
+            val code = result.getString("code")
             if(code == "00") {
                 ToastOut(this, result.getString("msg"))
                 sendAppStartTime()      // 앱 시작을 알림. 결과에 상관없이 종료
                 finish()
             } else {
                 ToastOut(this, result.getString("msg"), true)
+            }
+        })
+    }
+
+    private fun getUpdateVersion() {
+        val url = "http://"+ et_setting_server_ip.text.toString()
+        val port = et_setting_port.text.toString()
+        val uri = "/version.php"
+        var params = listOf(
+            "code" to "version",
+            "mac_addr" to tv_setting_mac.text
+        )
+        request(this, url, port, uri, false, false,false, params, { result ->
+//        request(this, uri, false, params, { result ->
+            val code = result.getString("code")
+            if(code == "00") {
+                val version = result.getString("version")
+                val urlName = result.getString("url")       // http://115.68.227.31
+                val pathName = result.getString("path")     // /apk/cutting
+                val fileName = result.getString("file")     // cutting-debug_1.2.6.apk
+
+                val verArr = version.split(".")
+
+                if (verArr.count() == 3) {
+                    cur_update_version =
+                        verArr[verArr.size - 3].toInt() * 1000000 +
+                        verArr[verArr.size - 2].toInt() * 1000 +
+                        verArr[verArr.size - 1].toInt()
+                    tv_update_version?.text = version
+
+                    if (cur_app_version < cur_update_version) {
+                        btn_update_start.visibility = View.VISIBLE
+                    }
+
+                } else {
+                    tv_update_version?.text = "parsing error"
+                }
             }
         })
     }
@@ -640,9 +695,12 @@ class SettingActivity : BaseActivity() {
                 btn_setting_count.setBackgroundResource(R.color.colorButtonDefault)
                 btn_setting_target.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
                 btn_setting_target.setBackgroundResource(R.color.colorButtonDefault)
+                btn_setting_appinfo.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_appinfo.setBackgroundResource(R.color.colorButtonDefault)
                 layout_setting_system.visibility = View.VISIBLE
                 layout_setting_count.visibility = View.GONE
                 layout_setting_target.visibility = View.GONE
+                layout_setting_appinfo.visibility = View.GONE
             }
             2 -> {
                 btn_setting_system.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
@@ -651,9 +709,12 @@ class SettingActivity : BaseActivity() {
                 btn_setting_count.setBackgroundResource(R.color.colorButtonBlue)
                 btn_setting_target.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
                 btn_setting_target.setBackgroundResource(R.color.colorButtonDefault)
+                btn_setting_appinfo.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_appinfo.setBackgroundResource(R.color.colorButtonDefault)
                 layout_setting_system.visibility = View.GONE
                 layout_setting_count.visibility = View.VISIBLE
                 layout_setting_target.visibility = View.GONE
+                layout_setting_appinfo.visibility = View.GONE
             }
             3 -> {
                 btn_setting_system.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
@@ -662,9 +723,26 @@ class SettingActivity : BaseActivity() {
                 btn_setting_count.setBackgroundResource(R.color.colorButtonDefault)
                 btn_setting_target.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
                 btn_setting_target.setBackgroundResource(R.color.colorButtonBlue)
+                btn_setting_appinfo.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_appinfo.setBackgroundResource(R.color.colorButtonDefault)
                 layout_setting_system.visibility = View.GONE
                 layout_setting_count.visibility = View.GONE
                 layout_setting_target.visibility = View.VISIBLE
+                layout_setting_appinfo.visibility = View.GONE
+            }
+            4 -> {
+                btn_setting_system.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_system.setBackgroundResource(R.color.colorButtonDefault)
+                btn_setting_count.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_count.setBackgroundResource(R.color.colorButtonDefault)
+                btn_setting_target.setTextColor(ContextCompat.getColor(this, R.color.colorGray))
+                btn_setting_target.setBackgroundResource(R.color.colorButtonDefault)
+                btn_setting_appinfo.setTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+                btn_setting_appinfo.setBackgroundResource(R.color.colorButtonBlue)
+                layout_setting_system.visibility = View.GONE
+                layout_setting_count.visibility = View.GONE
+                layout_setting_target.visibility = View.GONE
+                layout_setting_appinfo.visibility = View.VISIBLE
             }
         }
     }

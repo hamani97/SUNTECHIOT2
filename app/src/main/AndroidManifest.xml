@@ -10,6 +10,11 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 
+<!--    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
 
     <uses-feature
@@ -60,10 +65,12 @@
         <activity android:name=".ComponentInfoActivity" android:screenOrientation="landscape" />
         <activity android:name=".WorkInfoActivity" android:screenOrientation="landscape" />
         <activity android:name=".SettingActivity" android:screenOrientation="landscape" />
+        <activity android:name=".DownloadActivity" android:screenOrientation="landscape" />
         <activity android:name=".ProductionReportActivity" android:screenOrientation="landscape" />
         <activity android:name=".PopupSelectList" android:theme="@style/AppTheme.PopupOverlay" />
         <activity android:name=".popup.WatchingActivity" android:theme="@style/AppTheme.PopupOverlay" />
         <activity android:name=".popup.PushActivity" android:theme="@style/AppTheme.PopupOverlay" />
+        <activity android:name=".popup.WosListActivity" android:theme="@style/AppTheme.PopupOverlay" />
         <activity android:name=".popup.ActualCountEditActivity" android:theme="@style/AppTheme.PopupOverlay" />
         <activity android:name=".popup.ActualCountEditInputActivity" android:theme="@style/AppTheme.PopupOverlay" />
         <activity android:name=".popup.DownTimeActivity" android:theme="@style/AppTheme.PopupOverlay" />
